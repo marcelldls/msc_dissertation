@@ -1,4 +1,4 @@
-file=proposal
+file=researchreport
 
 all:
 	pdflatex $(file).tex
