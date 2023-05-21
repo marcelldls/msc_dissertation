@@ -171,7 +171,7 @@ An object tracker can be understood using the general framework suggested by \ci
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=16cm]{images/Tracking_flowchart.jpeg}
+\includegraphics[width=14cm]{images/Tracking_flowchart.jpeg}
 \caption{Generalized tracker flowchart}
 \label{fig:tracker}
 \end{center}
@@ -269,9 +269,10 @@ With u and v representing the horizontal and vertical location of the center of 
 %
 %As an extension to the SORT algorithm, Deep SORT (Simple Online and Realtime Tracking With a Deep Association Metric) has been introduced by \cite{deepsort}. In this extension, appearance information is included into the observation model in an attempt to improve the performance for multiple objects. The addition is effective at reducing the number of identity switches, which permits longer periods of occlusions, however, it comes at a cost of real-time performance. Therefore in the case of real-time single object tracking, it does not provide sufficient benefits over SORT. \cite{sortrob} concludes: \textit{``Overall, based on the performed experiments, the SORT method was able to achieve higher results of accuracy and precision, while the Deep-SORT method obtained the best values of FN (false negatives), IDs (identity switches), and MT (mostly tracked)''}.
 
+\pagebreak
 \subsection{KalmanNet}
 
-The Kalman filter remains an effective and relavent tracking algorithm which finds itself in common use in robotics applications. A downside of such model based tracking is that the performance relies on accurate knowledge and modeling of the underlying dynamics -- which typically requires domain knowledge and valid model assumptions. Modern data driven approaches try to learn entirely from data however they require many parameters, require significant amounts of data and lose the intuition of the algorithm, which prevents their application in embedded systems \citep{kalmannet}.
+The Kalman filter remains an effective and relevant tracking algorithm which finds itself in common use in computer vision and robotics. A downside of model based tracking is that the performance relies on accurate knowledge and modeling of the underlying dynamics -- which typically requires domain knowledge and valid model assumptions. Modern data driven approaches try to learn entirely from data however they require many parameters, require significant amounts of data and lose the intuition of the algorithm, which prevents their application in embedded systems \citep{kalmannet}.
 
 \cite{kalmannet} propose a hybrid data-driven and model based approach to real-time Kalman filtering, where the underlying state space model is non-linear and accurate knowledge of it is unknown. In this approach a recurrent neural network (RNN) (more specifically a Gated Recurrent Unit (GRU) variant) can be trained on representative data in order to predict the appropriate Kalman gain at each time step. Compared to ``traditional'' feed-forward neural networks where fixed length input data simply flows through the network to compute an output, in an RNN the input as well as a hidden state (which represents the history) are fed back into the network -- which allows a series of temporal information to be processed. In this manner, KalmanNet removes the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model.
 
