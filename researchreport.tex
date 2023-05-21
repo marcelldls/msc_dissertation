@@ -171,7 +171,7 @@ An object tracker can be understood using the general framework suggested by \ci
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/Tracking_flowchart.jpeg}
+\includegraphics[width=13.5cm]{images/Tracking_flowchart.jpeg}
 \caption{Generalized tracker flowchart}
 \label{fig:tracker}
 \end{center}
@@ -181,10 +181,10 @@ An object tracker can be understood using the general framework suggested by \ci
 The components are described as follows:
 
 \begin{itemize}
-    \item Initialization -- An object to be tracked must be selected. This may be done manually or using an object detector.
+    \item Initialization -- An object to be tracked is selected manually or by detection.
     \item Motion model -- Generates candidates that may contain the tracked object.
     \item Feature extractor -- Acquires a representation of the objects in the image.
-    \item Observation model -- Classify if the candidate is the tracked object. Assigns detections to existing targets
+    \item Observation model -- Classify if is the tracked object. Assigns detection to target.
     \item Model Updater -- Adaptation of the observation model.
 \end{itemize}
 
@@ -192,7 +192,7 @@ It is reported that components do not have equal importance for performance, whi
 
 \subsection{SORT}
 
-SORT is a framework which is based on the Kalman filter \citep{kalman} and Hungarian method \citep{hungarian} for visual object tracking. The Kalman filter is a recursive state estimator which uses a model to predict the state of a linear system, followed by a correction step using current observations to update the object’s state \citep{trackbook}. 
+SORT is a visual object tracking technique which is based on the Kalman filter \citep{kalman} and Hungarian method \citep{hungarian}. A Kalman filter is a recursive state estimator which fuses a motion model and measurement to predict the motion state of a linear system \citep{trackbook}. 
 
 \subsubsection{Kalman filtering}
 
@@ -206,7 +206,7 @@ An observation model describes the relationship between the object state and the
 \begin{equation} 
 z_t=Hx_{t}+{\upsilon}_t
 \end{equation}
-Where $z_{t}$ is the object state at time $t$ of ($m \times 1$) shape, $H$ is the measurement matrix of ($m \times n$) shape which maps measurements to the object state. $\upsilon$ is the measurement noise vector which is normally distributed about a mean of zero with variance $R$ which accounts for measurement uncertainty.
+Where $z_{t}$ is the measurement vector at time $t$ of ($m \times 1$) shape, $H$ is the measurement matrix of ($m \times n$) shape which maps measurements to the object state. $\upsilon$ is the measurement noise vector which is normally distributed about a mean of zero with variance $R$ which accounts for measurement uncertainty.
 
 The Kalman filtering algorithm is then performed for state estimation as follows. The prediction step is computed as:
 \begin{equation}
