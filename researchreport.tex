@@ -119,7 +119,7 @@ This material has not been submitted to any other university, or for any other d
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \phantomsection
 \begin{acknowledgements}
-Thank you Prof. Richard Klein and Dr. Pravesh Ranchod for your constructive comments, feedback and support throughout my studies. I'm inspired by your unfailing willingness to go out of your way to help students. Your passion for computer science is contagious.
+Thank you Prof. Richard Klein and Dr. Pravesh Ranchod for your constructive comments, feedback and support throughout my studies. I'm inspired by your unfailing willingness to go out of your way to help students. Your enthusiasm for computer science is contagious.
 \end{acknowledgements}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -148,13 +148,15 @@ Object tracking is an important practical topic in the domain of robotics. The a
 
 Modern computer vision is dominated by deep learning approaches. Traditional computer vision utilizes pipelines with hand-crafted feature extractors and shallow machine learning algorithms to perform classification and regression tasks. The effectiveness of deep learning techniques over traditional techniques results from the ability to rather learn feature extraction from training data as well as introducing end-to-end learning which reduces the multi-staged pipeline and allows a more encompassing optimization \citep{tradvmod}. Traditional approaches are still useful in certain contexts, typically providing intuitive solutions and requiring less data, memory and training time.
 
-In a more formal definition, in visual object tracking, we are interested in using a sequence of image frames to robustly estimate the motion state of a target object \citep{track1}. Many different visual object tracking paradigms are possible, with some of the popular traditional approaches being tracking-by-detection, optical flow, silhouette tracking or discriminative correlation filters to name a few \citep{track0}. During initialization of any object tracker -- unless manually targeted -- objects must first be selected using an object detector \citep{tradtrack0}. One might question then, why not just use object detection on each frame to track an object? According to \cite{tradtrack5} \textit{``tracking is easier than detection, tracking algorithms can use fewer computational resources than running an object detector on every frame''}. Modern approaches to tracking include applying CNN feature extraction to traditional tracking frameworks and end-to-end deep learning where a variety of network architectures have been used including convolutional neural networks (CNN), siamese neural networks (SNN), recurrent neural networks (RNN) and generative adversial networks (GAN) as some examples \citep{deeptrack1}. With the advancement of modern object detection methods for real-time implementation, such as You Only Look Once (YOLO) by \cite{yolo} for example, it becomes interesting to apply these effective models to a tracking-by-detection framework. According to \cite{deepsort}, this approach has become the leading paradigm for object tracking.
+More formally, in visual object tracking, the aim is to use a sequence of image frames to robustly estimate the motion state of a target object \citep{track1}. Many different visual object tracking paradigms are possible, with some popular traditional approaches being tracking-by-detection, optical flow, silhouette tracking or discriminative correlation filters to name a few \citep{track0}. During initialization of any object tracker -- unless manually targeted -- objects must first be selected using an object detector \citep{tradtrack0}. One might question then, why not just use object detection on each frame to track an object? According to \cite{tradtrack5} \textit{``tracking is easier than detection, tracking algorithms can use fewer computational resources than running an object detector on every frame''}. Modern approaches to tracking include applying CNN feature extraction to traditional tracking frameworks and end-to-end deep learning where a variety of network architectures have been used including convolutional neural networks (CNN), siamese neural networks (SNN), recurrent neural networks (RNN) and generative adversial networks (GAN) as some examples \citep{deeptrack1}. With the advancement of modern object detection methods for real-time implementation, such as You Only Look Once (YOLO) by \cite{yolo} for example, it becomes interesting to apply these effective models to a tracking-by-detection framework. According to \cite{deepsort}, this approach has become the leading paradigm for object tracking.
 
-Object detection is a computer vision task where objects are identified (classification) and localised in an image (regression). From a single frame it is possible to determine position (and other states such as pose), however, without establishing correspondence within an image sequence time-dependent states such as velocity cannot be computed and the state estimate lacks robustness. Here robustness means that noise such as misclassification is attenuated as well as providing instance identification and resilience to occlusion. These can be achieved in a tracker by linking the frames of the image sequence (also known as data association). \cite{tradtrack0} states that \textit{``The simplest method to perform correspondence is to use the nearest neighbor approach. However, if the objects are close to each other, then there is always a chance that the correspondence is incorrect''}.
+Object detection is a computer vision task where objects are identified (classification) and localised in an image (regression). From a single frame it is possible to determine position (and other states such as pose), however, without establishing correspondence within an image sequence time-dependent states such as velocity cannot be computed and the state estimate lacks robustness. Here robustness means that noise such as misclassification is attenuated as well as providing instance identification and resilience to occlusion. These can be achieved by linking the frames of the image sequence (also known as data association). \cite{tradtrack0} states that \textit{``The simplest method to perform correspondence is to use the nearest neighbor approach. However, if the objects are close to each other, then there is always a chance that the correspondence is incorrect''}.
 
-A downside of deep learning approaches is that they demand a significant amount of training data in order to achieve useful results. Accurately labeled real world training images come at a labour cost, which makes the use of a simulated environment an efficient choice. This approach is still practical to application  in the real world, advances in domain adaptation have shown significant success in mapping a simulated environment to a physical environment \citep{domainadpt}. Additionally, photo realistic rendering can also be applied \citep{sim4cv}. These topics will however not be investigated in this study. In this study, visual ball tracking will be investigated in the context of 3D simulated RoboCup soccer, which is an international robotics competition  that has been entered by the Robotics, Autonomous Intelligence and Learning (RAIL) Lab from the School of Computer Science and Applied Mathematics at the University of the Witwatersrand \citep{witsfc}. Although the current focus of the team is the 3D simulation league, physical leagues are in consideration for the future. 
+A downside of deep learning approaches is that they demand a significant amount of training data in order to achieve useful results. Accurately labeled real world training images come at a labour cost, which makes the use of a simulated environment an efficient choice. This approach is still practical to application  in the real world, advances in domain adaptation have shown significant success in mapping a simulated environment to a physical environment \citep{domainadpt}. Additionally, photo realistic rendering can also be applied \citep{sim4cv}. These topics will however not be investigated in this research. In this research, visual ball tracking will be investigated in the context of 3D simulated RoboCup soccer, which is an international robotics competition  that has been entered by the Robotics, Autonomous Intelligence and Learning (RAIL) Lab from the School of Computer Science and Applied Mathematics at the University of the Witwatersrand \citep{witsfc}. Although the current focus of the team is the 3D simulation league, physical leagues are in consideration for the future. 
 
-The proposal continues as follows. Firstly, a background section is provided (Chapter 2) which gives relevant context with regards to the research problem and the chosen frameworks. This is followed by a related work section (Chapter 3) which presents a selection of published work, in a similar problem space, where some of the important methods and results that are considered in this proposal are summarized. Finally, the proposed research problem is outlined (Chapter 4) along with the methodology (Chapter 5) and a proposed work plan (Chapter 6).
+\section{Structure}
+
+The research report continues as follows. Firstly in the introductory chapters, a background section is presented (Chapter 2) which gives relevant context with regards to the research problem and the chosen techniques. This is followed by a related work section (Chapter 3) which presents a selection of published work, in a similar problem space, where some of the important methods and results that are considered in this work are summarized. Then, the research problem is outlined (Chapter 4) prior to presenting the research methodology (Chapter 5). Continuing to the central chapters, the investigations focusing on object detection (Chapter 6) and object tracking (Chapter 7) are presented respectively. Finally, a concluding chapter is given (Chapter 8).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Background}
@@ -490,7 +492,7 @@ The principle questions which arise are:
 The methods used to investigate the proposed research topic can be conveniently separated into two distinct phases where the former focuses on object detection (Section 5.1) and the latter on tracking-by-detection (Section 5.2) using the previous result. 
 %It is envisioned that the focus of the tracking will be (similar to the related work) focused on the trajectory of the kick investigated from the perspective of the kicker, and tested by against a set of randomized rolling and lofted kicks in a control RoboCup soccer environment. 
 
-\section{Phase one}
+\section{Phase one: Object detector investigation}
 
 In this phase, the training and performance of the Viola Jones, Yolov4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors will be evaluated on inference speed and memory utilization. The chosen object detectors are then fine-tuned on a representative data set, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
 
@@ -517,7 +519,7 @@ A possible risk exists in using pretrained weights, since they are typically tra
 \subsection{Evaluation}
 Models are all translated to a neutral ONNX format which serves two purposes here: Firstly, the runtime environment can be controlled with ONNX Runtime in order to limit the computational resources to single threaded execution. Secondly, it mimics practical model deployment as it is platform, device and training framework independent with support for multiple languages. 
 
-\section{Phase two}
+\section{Phase two: Object tracking investigation}
 
 In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection. An EKF with a simple RoboCup world model (similar to the related work) will be implemented as a baseline tracker. A tracking dataset will need to be generated using the RoboCup simulator which will be used to train and optimize the neural assisted Kalman tracking framework. The trackers performances will then be compared on a test dataset with RMSE as a performance measure. Prior knowledge of the kick in the form of the initial velocity state is assumed.
 
@@ -533,63 +535,36 @@ The use of this tracking framework introduces risk as the repository is still un
 \subsection{Evaluation}
 
 The tracking performance of the trackers will be evaluated and compared using the RMSE performance measure on the test dataset. The minimum real-time performance target will be to process images at atleast every 0.04 seconds (25 FPS).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Object detection investigation}
+
+\section{Detection dataset}
+
+\section{Baseline detection}
+
+\section{Proposed detection}
+
+\section{Evaluation of detection}
+
+\section{Optimization}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Work Plan}
-\vspace{-0.1cm}
-The following work schedule is proposed: (a full-time commitment is assumed where items include time for reviewing additional literature, troubleshooting and reporting)
+\chapter{Object tracking investigation}
 
-\newcounter{taskcount}
-\newcommand\taskcount{\addtocounter{taskcount}{1}\arabic{taskcount}}
+\section{Tracking dataset}
 
-\setdatenumber{2023}{5}{15}
+\section{Baseline tracking}
 
-\newcommand\specdays[1]
-{%
-\addtocounter{datenumber}{#1}
-\setdatebynumber{\thedatenumber}
-#1
-}
+\section{Proposed tracking}
 
-\begin{table*}[h!]
-\centering
-\begin{tabular}{c|llll}
-{\bf \#}		&{\bf Description}									&{\bf Start}	&{\bf Days}		\\\hline
-\taskcount		&Project kickoff						 			&June 23, 2022	&\hspace{8pt}- 	\\\hline      
-				&{\bf Phase 1:}																		\\\hline         
-				&Detection dataset																	\\\hline
-\taskcount		&Generate detection dataset				 			&\datedate		&\specdays{7} 	\\
-\taskcount		&Translate dataset to VJ format			 		&\datedate		&\specdays{3} 	\\
-\taskcount		&Translate dataset to COCO format			 		&\datedate		&\specdays{3} 	\\\hline
-				&Baseline detection																	\\\hline
-\taskcount		&Train and evaluate multi-scale VJ				 	&\datedate		&\specdays{4} 	\\    
-\taskcount		&Train and evaluate Yolov4 Tiny				 	&\datedate		&\specdays{4} 	\\\hline               
-				&CNN Object detection																\\\hline
-\taskcount		&Evaluate pretrained candidates					&\datedate		&\specdays{7}	\\                
-\taskcount		&Fine-tune object detectors							&\datedate		&\specdays{7}	\\         
-\taskcount		&Evaluate object detectors							&\datedate		&\specdays{7}	\\  
-\taskcount		&Optimize final model								&\datedate		&\specdays{7}	\\\hline
-				&{\bf Phase 2:}																		\\\hline       
-				&Tracking dataset																	\\\hline		\taskcount		&Generate detection dataset				 			&\datedate		&\specdays{7} 	\\\hline
-				&Baseline object tracking															\\\hline
-\taskcount		&Implement baseline tracking			           	&\datedate		&\specdays{7}	\\\hline
-				&Neural assisted object tracking													\\\hline
-\taskcount		&Train object tracker			         			&\datedate		&\specdays{14}	\\
-\taskcount		&Optimize tracker									&\datedate		&\specdays{4}	\\\hline
-				&Reporting																			\\\hline
-\taskcount		&Compare tracker performance						&\datedate		&\specdays{7}	\\
-\taskcount		&Finalize report									&\datedate		&\specdays{14}	\\
-\taskcount		&Submission											&\datedate		&\hspace{8pt}-	\\\hline											
-			                     
-\end{tabular}
-\caption{Project timeline}
-\label{tab:mags}
-\end{table*}
+\section{Evaluation of trackers}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
-The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object.
-Visual object tracking offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches in computer vision that have shown significant improvements in performance over traditional methods. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It is proposed to apply a neural assisted formulation of Kalman filtering, which strikes a balance between the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
+
+The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object.Visual object tracking offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches in computer vision that have shown significant improvements in performance over traditional methods. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It is proposed to apply a neural assisted formulation of Kalman filtering, which strikes a balance between the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
+
+\section{Future work}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\appendix
