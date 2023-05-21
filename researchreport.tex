@@ -188,26 +188,64 @@ The components are described as follows:
     \item Model Updater -- Adaptation of the observation model.
 \end{itemize}
 
-It turns out that components do not have equal importance for performance, which is relevant when efficient computation for real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Rather, it is found that feature extraction affects the performance most - which is a task that CNNs excel at. An object tracker which capitalises on the modern achievements of CNN based detection methods is a popular algorithm: ``Simple Online and Realtime tracking'' (SORT) \citep{sort}.
+It is reported that components do not have equal importance for performance, which is relevant when real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Feature extraction is found to affect the performance most - which is a task that CNNs excel at. An object tracker which utilities the progress of CNN detection methods is a popular algorithm: ``Simple Online and Realtime tracking'' (SORT) \citep{sort}.
 
 \subsection{SORT}
 
-SORT is a framework which is based on the Kalman filter \citep{kalman} and Hungarian method \citep{hungarian} for tracking. The Kalman filter is a recursive state estimator which uses a model to predict the state of a linear system, followed by a correction step using current observations to update the object’s state \citep{trackbook}. 
+SORT is a framework which is based on the Kalman filter \citep{kalman} and Hungarian method \citep{hungarian} for visual object tracking. The Kalman filter is a recursive state estimator which uses a model to predict the state of a linear system, followed by a correction step using current observations to update the object’s state \citep{trackbook}. 
 
-The prediction step is computed as:
-\begin{gather*} 
-X^{P}_{t} = A_{t}X_{t-1}  \\
-\Sigma^{P}_{t} = A_{t}\Sigma_{t-1}A_{t}^{T} + \Sigma^{\eta}_{t}
-\end{gather*}
-Where $X^{P}_{t}$ and $\Sigma^{P}_{t}$ are the state and the covariance predictions at  time $t$. $\Sigma^{\eta}$ is the process error covariance. $A_{t}$ is the state transition matrix (from a system dynamics model) which describes how the state evolves between time $t$ and $t-1$. 
+\subsubsection{Kalman filtering}
 
-The correction step is computed as:
-\begin{gather*} 
-G_{t} = \Sigma^{P}_{t}D^{T}_{t}[D_{t}\Sigma^{P}_{t}D^{T}_{t} + \Sigma^{\xi}_{t} ]^{-1} \\
-X_{t} = X^{P}_{t} + G_{t}[Y_{t}-D_{t}X^{P}_{t}] \\
-\Sigma_{t} = \Sigma^{P}_{t} - G_{t}D_{t}\Sigma^{P}_{t}
-\end{gather*}
-$\Sigma^{\xi}_{t}$ is the measurement error covariance. $G_{t}$ is known as the Kalman gain, which here is optimally computed for mean-square error (for linear systems with gaussian noise) to apply a correction based on the relative uncertainty between the process and measurement. $Y_{t}$ is the current observation and $D_{t}$ is the measurement matrix which maps observations to the state. Systems with nonlinear state transition or measurement mappings can be linearized using the Taylor series expansion to obtain the Extended Kalman Filter (EKF) \citep{trackbook}.
+In this model, object motion can be described as a discrete linear time invariant (LTI) state-space process which defines the evolution of the state from time $t-1$ to time $t$ as:
+\begin{equation} 
+x_t=Fx_{t-1}+Bu_{t}+w_{t}
+\end{equation}
+Where $x_{t}$ is the object state at time $t$ of ($n \times 1$) shape, $F$ is the state transition matrix (from a system dynamics model) of ($n \times n$) shape which describes how the state evolves between time $t$ and $t-1$. $B$ is the control-input matrix and $u$ the control vector which models the effect of control signals into the system. $w$ is the process noise vector which is normally distributed about a mean of zero with variance $Q$ which accounts for neglected and uncertain modeled behavior.
+
+An observation model describes the relationship between the object state and the measurement at the current time step:
+\begin{equation} 
+z_t=Hx_{t}+{\upsilon}_t
+\end{equation}
+Where $z_{t}$ is the object state at time $t$ of ($m \times 1$) shape, $H$ is the measurement matrix of ($m \times n$) shape which maps measurements to the object state. $\upsilon$ is the measurement noise vector which is normally distributed about a mean of zero with variance $R$ which accounts for measurement uncertainty.
+
+The Kalman filtering algorithm is then performed for state estimation as follows. The prediction step is computed as:
+\begin{equation}
+\hat{x}_{t|t-1}=F\hat{x}_{t-1|t-1}+Bu_{t|t}
+\end{equation}
+\begin{equation}
+\hat{P}_{t|t-1}=F\hat{P}_{t-1|t-1}F^T+Q 
+\end{equation}
+Where $\hat{x}_{t|t-1}$ and $\hat{P}_{t|t-1}$ are the state and the covariance predictions at  time $t$. $Q$ is the process error covariance.
+
+The correction step is then computed as:
+\begin{equation} 
+K = \hat{P}_{t|t-1}H^T(H\hat{P}_{t|t-1}H^T+R)^{-1}
+\end{equation}
+\begin{equation} 
+\hat{x}_{t|t} = \hat{x}_{t|t-1}+K(z_t-H\hat{x}_{t|t-1})
+\end{equation}
+\begin{equation} 
+\hat{P}_{t|t}=(I-KH)\hat{P}_{t|t-1}
+\end{equation}
+$K$ is known as the Kalman gain, which can be optimally computed for mean-square error (for linear systems with gaussian noise) to apply a correction based on the relative uncertainty between the process and measurement. This can be understood as a trade-off between the model predicted state and the measurement. In typical usage, $\hat{P}_0$ is initialized to a relatively high value which has the impact of the system largely ignoring the assigned value of $\hat{x}_{0}$ in favor of the first measured state.
+
+In the case of a nonlinear state transition or measurement mapping, object motion can be modeled more generally by:
+\begin{equation} 
+x_t=f(x_{t-1},u_{t})+w_{t}
+\end{equation}
+\begin{equation} 
+z_t=h(x_{t})+{\upsilon}_t
+\end{equation}
+Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and then used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}.
+\begin{equation}
+F_t = \frac{\partial f(\mu_{t-1}, u_{t})}{\partial x_{t-1}}
+\end{equation}
+\begin{equation} 
+H_t = \frac{\partial h(\mu_{t})}{\partial x_t} 
+\end{equation}
+The resulting matrices can each be described as the Jacobian respectively (first-order partial derivatives). $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
+
+\subsubsection{SORT algorithm}
 
 With real-time performance being a crucial component of online tracking, the light weight and minimalist nature of the SORT algorithm supports rapid update cycles. Despite its simplicity, it performs exceptionally well. \cite{sort} state, \textit{``This approach achieves an accuracy comparable to state-of-the-art online trackers.''} Furthermore, due to the computational simplicity of their method, the algorithm achieves a rapid update rate of 260 Hz which is quoted to be over 20x faster than other state-of-the-art trackers and certainly exceeding real-time requirements.
 
