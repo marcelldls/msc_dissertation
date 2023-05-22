@@ -188,7 +188,7 @@ The components are described as follows:
     \item Model Updater -- Adaptation of the observation model.
 \end{itemize}
 
-It is reported that components do not have equal importance for performance, which is relevant when real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Feature extraction is found to affect the performance most - which is a task that CNNs excel at. An object tracker which utilities the progress of CNN detection methods is a popular algorithm: ``Simple Online and Realtime tracking'' (SORT) \citep{sort}.
+It is reported that not all components have equal importance, which is useful insight when real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Feature extraction is found to affect the performance most - which is a task that CNNs excel at. An object tracker which utilities the progress of CNN detection methods is a popular algorithm: ``Simple Online and Realtime tracking'' (SORT) \citep{sort}.
 
 \subsection{SORT}
 
@@ -196,7 +196,7 @@ SORT is a visual object tracking technique which is based on the Kalman filter \
 
 \subsubsection{Kalman filtering}
 
-In this model, object motion can be described as a discrete linear time invariant (LTI) state-space process which defines the evolution of the state from time $t-1$ to time $t$ as:
+In this model, object motion is described by a discrete linear time invariant (LTI) state-space process which defines the evolution of the state from time $t-1$ to time $t$ as:
 \begin{equation} 
 x_t=Fx_{t-1}+Bu_{t}+w_{t}
 \end{equation}
@@ -208,7 +208,7 @@ z_t=Hx_{t}+{\upsilon}_t
 \end{equation}
 Where $z_{t}$ is the measurement vector at time $t$ of ($m \times 1$) shape, $H$ is the measurement matrix of ($m \times n$) shape which maps measurements to the object state. $\upsilon$ is the measurement noise vector which is normally distributed about a mean of zero with variance $R$ which accounts for measurement uncertainty.
 
-The Kalman filtering algorithm is then performed for state estimation as follows. The prediction step is computed as:
+The Kalman filtering algorithm is then performed for state estimation as follows. The ``prediction step'' is computed as:
 \begin{equation}
 \hat{x}_{t|t-1}=F\hat{x}_{t-1|t-1}+Bu_{t|t}
 \end{equation}
@@ -217,7 +217,7 @@ The Kalman filtering algorithm is then performed for state estimation as follows
 \end{equation}
 Where $\hat{x}_{t|t-1}$ and $\hat{P}_{t|t-1}$ are the state and the covariance predictions at  time $t$. $Q$ is the process error covariance.
 
-The correction step is then computed as:
+The ``correction step'' is then computed as:
 \begin{equation} 
 K = \hat{P}_{t|t-1}H^T(H\hat{P}_{t|t-1}H^T+R)^{-1}
 \end{equation}
@@ -227,7 +227,7 @@ K = \hat{P}_{t|t-1}H^T(H\hat{P}_{t|t-1}H^T+R)^{-1}
 \begin{equation} 
 \hat{P}_{t|t}=(I-KH)\hat{P}_{t|t-1}
 \end{equation}
-$K$ is known as the Kalman gain, which can be optimally computed for mean-square error (for linear systems with gaussian noise) to apply a correction based on the relative uncertainty between the process and measurement. This can be understood as a trade-off between the model predicted state and the measurement. In typical usage, $\hat{P}_0$ is initialized to a relatively high value which has the impact of the system largely ignoring the assigned value of $\hat{x}_{0}$ in favor of the first measured state.
+$K$ is known as the Kalman gain which, for linear systems with gaussian noise, can be optimally computed for mean-square error to apply a correction based on the relative uncertainty between the process and measurement. This can be understood as a trade-off between the model predicted state and the measurement. In typical usage, $\hat{P}_0$ is initialized to a relatively high value which has the impact of the system largely ignoring the assigned value of $\hat{x}_{0}$ in favor of the first measured state.
 
 In the case of a nonlinear state transition or measurement mapping, object motion can be modeled more generally by:
 \begin{equation} 
@@ -236,14 +236,14 @@ x_t=f(x_{t-1},u_{t})+w_{t}
 \begin{equation} 
 z_t=h(x_{t})+{\upsilon}_t
 \end{equation}
-Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and then used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}.
+Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}. The resulting matrices can each be described as Jacobians respectively (first-order partial derivatives):
 \begin{equation}
 F_t = \frac{\partial f(\mu_{t-1}, u_{t})}{\partial x_{t-1}}
 \end{equation}
 \begin{equation} 
 H_t = \frac{\partial h(\mu_{t})}{\partial x_t} 
 \end{equation}
-The resulting matrices can each be described as the Jacobian respectively (first-order partial derivatives). $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
+ $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
 
 \subsubsection{SORT algorithm}
 
@@ -265,16 +265,34 @@ With u and v representing the horizontal and vertical location of the center of 
 
 \cite{sort} reiterate the strong influence of object detector performance on overall tracking results. Further, the relevance of the Kalman filter is reaffirmed in modern tracking applications. More recent work by \cite{sort++} shows that a constant velocity model with a Kalman filter and Hungarian method is still a powerful tracking approach. For robotics applications, SORT trackers are still \textit{"achieving state-of-the-art results with a high frame rate"} \citep{sortrob}.
 
-%\subsection{Deep SORT}
-%
-%As an extension to the SORT algorithm, Deep SORT (Simple Online and Realtime Tracking With a Deep Association Metric) has been introduced by \cite{deepsort}. In this extension, appearance information is included into the observation model in an attempt to improve the performance for multiple objects. The addition is effective at reducing the number of identity switches, which permits longer periods of occlusions, however, it comes at a cost of real-time performance. Therefore in the case of real-time single object tracking, it does not provide sufficient benefits over SORT. \cite{sortrob} concludes: \textit{``Overall, based on the performed experiments, the SORT method was able to achieve higher results of accuracy and precision, while the Deep-SORT method obtained the best values of FN (false negatives), IDs (identity switches), and MT (mostly tracked)''}.
+\subsection{Deep SORT}
+
+As an extension to the SORT algorithm, Deep SORT (Simple Online and Realtime Tracking With a Deep Association Metric) has been introduced by \cite{deepsort}. In this extension, appearance information is included into the observation model in an attempt to improve the performance for multiple objects. The addition is effective at reducing the number of identity switches, which permits longer periods of occlusions, however, it comes at a cost of real-time performance. Therefore in the case of real-time single object tracking, it does not provide sufficient benefits over SORT. 
 
 \pagebreak
 \subsection{KalmanNet}
 
-The Kalman filter remains an effective and relevant tracking algorithm which finds itself in common use in computer vision and robotics. A downside of model based tracking is that the performance relies on accurate knowledge and modeling of the underlying dynamics -- which typically requires domain knowledge and valid model assumptions. Modern data driven approaches try to learn entirely from data however they require many parameters, require significant amounts of data and lose the intuition of the algorithm, which prevents their application in embedded systems \citep{kalmannet}.
+The Kalman filter remains an effective and relevant tracking algorithm which finds itself in common use in computer vision and robotics \citep{kalmanforever}. A downside of model based methods is that performance relies on accurate knowledge of the underlying dynamics -- which typically requires domain knowledge and valid assumptions. Modern data driven approaches try to learn entirely from data, however, they have many parameters, require significant amounts of data and lack intuition, which prevents their application in embedded systems \citep{kalmannet}.
 
-\cite{kalmannet} propose a hybrid data-driven and model based approach to real-time Kalman filtering, where the underlying state space model is non-linear and accurate knowledge of it is unknown. In this approach a recurrent neural network (RNN) (more specifically a Gated Recurrent Unit (GRU) variant) can be trained on representative data in order to predict the appropriate Kalman gain at each time step. Compared to ``traditional'' feed-forward neural networks where fixed length input data simply flows through the network to compute an output, in an RNN the input as well as a hidden state (which represents the history) are fed back into the network -- which allows a series of temporal information to be processed. In this manner, KalmanNet removes the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model.
+\cite{kalmannet} propose a hybrid data-driven and model based approach to real-time Kalman filtering, where the underlying state space model is non-linear and accurate knowledge of it is unknown. In this approach a recurrent neural network (RNN) (more specifically a Gated Recurrent Unit (GRU) variant) can be trained on representative data in order to predict the appropriate Kalman gain at each time step  (See figure \ref{fig:blockd}). Compared to ``traditional'' feed-forward neural networks where fixed length input data simply flows through the network to compute an output, in an RNN the input as well as a hidden state (which represents the history) are fed back into the network -- which allows a series of temporal information to be processed  (See figure \ref{fig:architecture}). 
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12.5cm]{images/kalmannet2.jpg}
+\caption{KalmanNet block diagram \citep{kalmannet}}
+\label{fig:blockd}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=8cm]{images/kalmannet1.jpg}
+\caption{KalmanNet RNN \citep{kalmannet}}
+\label{fig:architecture}
+\end{center}
+\end{figure}
+
+In this manner, KalmanNet removes the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model.
 
 The interpretability of the original algorithm is retained whilst implicitly learning complex dynamics, reducing the need for domain knowledge and model assumptions that are needed to accurately characterize a complex system as a tractable state space model. \cite{kalmannet} conclude, \textit{``KalmanNet is shown to converge much faster compared with purely DD (data driven) systems, while outperforming the MB (model based) EKF (extended Kalman filter), UKF (Unscented Kalman filter), and PF (particle filter), when facing model mismatch and dominant non-linearities''}. This data driven approach to Kalman filtering has recently found other robotics applications -- replacing the extended Kalman filter for online Simultaneous localization and mapping (SLAM) -- a crucial task for robotic systems where a map of an environment is simultaneously constructed while localizing the position of an agent \citep{slam}.
 
@@ -287,8 +305,7 @@ RMSE can be computed as follows:
 RMSE = \sqrt{\frac{1}{M}\sum^{M}_{i=1}\epsilon_{i}^{2}}
 \end{equation}
 
-Where $\epsilon_{i}$ is the error for the $i$th sample which is difference between the predicted and ground truth state. 
-%RMSE is often used as a statistical design criterion for noisy systems as it prescribes a soft bounds based on probability (for true Gaussian noise it is by definition that 99.7\% of samples will occur within three standard deviations).
+Where $\epsilon_{i}$ is the error for the $i$th sample which is difference between the predicted and ground truth state. RMSE is often used as a statistical design criterion for noisy systems as it prescribes a soft bounds based on probability (for true Gaussian noise it is by definition that 99.7\% of samples will occur within three standard deviations).
 
 \newpage
 \section{Object detection}
