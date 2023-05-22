@@ -312,6 +312,8 @@ Where $\epsilon_{i}$ is the error for the $i$th sample which is difference betwe
 
 Object detection is one of the oldest and well studied computer vision problems. Within the scope of this problem is facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various  datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
 
+\subsection{Traditional Object detection}
+
 With the most successful approaches being based on discriminative models -- a traditional object detector can be considered in general to have the following components:  Region selection, feature extraction and classification \citep{deepreview}:
 
 \begin{itemize}
@@ -320,12 +322,39 @@ With the most successful approaches being based on discriminative models -- a tr
     \item A classifier predicts the presence of an object class in the window given the extracted features. The decision boundary (which is an $n-1$ dimensional surface in an $n$ dimensional domain) is learnt using training examples. For a positive detection, the current window is returned as a bounding box. Since multiple windows will return positive for the same object, techniques such as non maximum suppression can be used to isolate a single prediction.
 \end{itemize}
 
-Some of the traditional object detectors that had relative success and some real-time application include the Viola Jones algorithm \citep{vjdet} as well as the HOG features and SVM classification based Dalal and Triggs (D\&T) detector \citep{hog}. \cite{whyDT} state, \textit{``Despite visual object detectors improving by leaps and bounds in the last decade, they still largely rely on the same underlying principles: linear Support Vector Machines (SVMs) trained on Histogram of Oriented Gradient (HOG) features''}.
+\noindent Some of the criticisms of traditional strategies are: 
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item Generating bounding boxes with a sliding window strategy is inefficient and inaccurate
+    \item Using hand crafted low level features it is difficult to adequately capture the semantics of the image 
+\end{itemize}
 
-Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} write this regarding the matter: \textit{"Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context"}.
+Traditional object detectors that had relative success and some real-time application include the Viola Jones algorithm \citep{vjdet} as well as the HOG features and SVM classification based D\&T detector \citep{hog}. 
+
+\subsubsection{Viola Jones detection}
+
+The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that is considered to be the first viable real time object detector whilst still maintaining state-of-the-art accuracy. Although it targets face detection, it can be equally applied to different object classes.
+
+Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. "Haar-like" features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - a base resolution of 24x24 for the window is used which gives approximately 180k features for each detection window. 
+
+\begin{figure}[h!]
+    \centering
+    \subfloat{{\includegraphics[height=5cm]{images/haarft.jpg}}\label{fig:haarft}}
+    \qquad
+    \subfloat{{\includegraphics[height=5cm]{images/vjtest.jpg}}}
+    \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
+\end{figure}
+
+\citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate "integral image" which allows the subsequent computation of a region in constant time. 
+
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a "feature selection" process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of "cascading classifiers" are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. 
+
+The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the detector window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. Faster speeds can be achieved by increasing the step sizes and scaling factor.
 
 \newpage
 \subsection{Modern Object detection}
+
+Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} write this regarding the matter: \textit{"Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context"}.
 
 Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the D\&T detector. Newer, more challenging benchmarks such as Microsoft COCO are developed to challenge the modern state-of-the-art. 
 
