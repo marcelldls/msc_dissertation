@@ -354,9 +354,9 @@ The VJ detector uses a sliding window detector with a fixed step size. A scaling
 \newpage
 \subsection{Modern Object detection}
 
-Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} write this regarding the matter: \textit{"Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context"}.
+Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} echo this sentiment: \textit{"Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context"}.
 
-Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the D\&T detector. Newer, more challenging benchmarks such as Microsoft COCO are developed to challenge the modern state-of-the-art. 
+Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the D\&T detector of \cite{hog}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -366,7 +366,20 @@ Deep learning approaches are considered to have become the state of the art sinc
 \end{center}
 \end{figure}
 
-Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure. The networks can be trained by minimizing a loss function that combines the regression and classification performances. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise remains similar to a traditional detector. Modern detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}. 
+Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the algorithm error for the considered task and the aim of training is to find a local minimum of this objective. 
+
+Categorical cross-entropy loss is a popular choice for classification tasks, when categorical variables are considered, as it differentiable for back-propagation:
+
+\begin{equation}
+L_{classification} = -\sum_{i=1}^{n}t_i log(p_i)
+\end{equation} 
+With $t_i$ being the ground-truth and $p_i$ being the softmax probability for the $i_{th}$ class.
+
+Least square error ($L_2$ loss) is a common choice for regression loss when considering continuous variables:
+\begin{equation}
+L_{regression} = \sum(y_i-\hat{y_i})^2 
+\end{equation} 
+Where $y_i$ is the ground truth.
 
 %\begin{figure}[h!]
 %\begin{center}
@@ -376,7 +389,11 @@ Modern object detectors utilize deep CNNs in order to learn feature extraction. 
 %\end{center}
 %\end{figure}
 
+\subsubsection{YOLO}
+
 A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+
+\subsubsection{NanoDet}
 
 More recent advancements include anchor box free detectors -- which reformulate the problem as a keypoint detection. This frees the detector from the anchor box hyperparameters such as size and aspect ratio as well as allowing for simpler architecture which allow for faster computation. Although CornerNet \citep{cornernet} was proposed as the first alternative to the anchor-based approaches, more recent state-of-the-art models such as CenterNet \citep{centernet}, YOLOX \citep{yolox} and NanoDet \citep{nanodet} have been proposed which achieve real-time speeds and a higher accuracy due to a simplified keypoint estimation. In a keypoint based approach, a convolutional neural network is used to predict heatmaps, with the intensity peaks representing corners or object centers. The dimensions of the  bounding boxes are then predicted. \cite{comprehensive} report: \textit{``The keypoint-based methods generally outperform the anchor-based and two-stage methods in terms of accuracy and speed''} 
 
