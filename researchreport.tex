@@ -333,7 +333,7 @@ Traditional object detectors that had relative success and some real-time applic
 
 \subsubsection{Viola Jones detection}
 
-The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that is considered to be the first viable real time object detector whilst still maintaining state-of-the-art accuracy. Although it targets face detection, it can be equally applied to different object classes.
+The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that was considered to be the first viable real time object detector still maintaining state-of-the-art accuracy. Although targeting face detection, it can be equally applied to different object classes. The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. 
 
 Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. "Haar-like" features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - a base resolution of 24x24 for the window is used which gives approximately 180k features for each detection window. 
 
@@ -347,9 +347,7 @@ Firstly considering feature extraction, an observation can be made that classes 
 
 \citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate "integral image" which allows the subsequent computation of a region in constant time. 
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a "feature selection" process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of "cascading classifiers" are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. 
-
-The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the detector window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. Faster speeds can be achieved by increasing the step sizes and scaling factor.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a "feature selection" process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of "cascading classifiers" are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
 \newpage
 \subsection{Modern Object detection}
@@ -368,7 +366,7 @@ Deep learning approaches are considered to have become the state of the art sinc
 
 Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the algorithm error for the considered task and the aim of training is to find a local minimum of this objective. 
 
-Categorical cross-entropy loss is a popular choice for classification tasks, when categorical variables are considered, as it differentiable for back-propagation:
+Categorical cross-entropy loss is a popular choice for classification tasks, when categorical variables are considered, as it is readily differentiable for back-propagation:
 
 \begin{equation}
 L_{classification} = -\sum_{i=1}^{n}t_i log(p_i)
@@ -383,7 +381,7 @@ Where $y_i$ is the ground truth.
 
 \subsubsection{YOLO}
 
-A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
 
 \subsubsection{NanoDet}
 
