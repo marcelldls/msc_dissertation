@@ -381,13 +381,64 @@ Where $y_i$ is the ground truth.
 
 \subsubsection{YOLO}
 
-A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated - which is known as an anchor based approach. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+
+Many variations of the YOLO algorithm exist, where most do not originate from or have any permissions from the original researchers. In the classic YOLO architecture, the image is divided into grid cells of $S\times S$ (typically $13\times 13$ is used) - which is achieved by down-sampling with the convolutional backbone. For each cell, predefined bounding boxes (with $B$ number of boxes per cell - 5 is typical) are used as initial guesses for object location and size - which drives the depth of the feature map. These box dimensions are learnt via using k-means clustering on the training data (thereafter referred to as dimensional priors). For each anchor box, we predict class and objectness (probability of an object in the given region). For localisation, offsets from the prior is then predicted. A small localisation improvement can be gained by including a lower level feature map with higher resolution using a pass-through layer, which is concatenated with the grid representation using a "reorganisation" layer. \citep{comprehensive}
+
+To train the network, a multipart loss is optimised. The function has the following high level form:
+\begin{equation}
+L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
+\end{equation} 
+With $\lambda$ as a balancing weight for training emphasis.
 
 \subsubsection{NanoDet}
 
-More recent advancements include anchor box free detectors -- which reformulate the problem as a keypoint detection. This frees the detector from the anchor box hyperparameters such as size and aspect ratio as well as allowing for simpler architecture which allow for faster computation. Although CornerNet \citep{cornernet} was proposed as the first alternative to the anchor-based approaches, more recent state-of-the-art models such as CenterNet \citep{centernet}, YOLOX \citep{yolox} and NanoDet \citep{nanodet} have been proposed which achieve real-time speeds and a higher accuracy due to a simplified keypoint estimation. In a keypoint based approach, a convolutional neural network is used to predict heatmaps, with the intensity peaks representing corners or object centers. The dimensions of the  bounding boxes are then predicted. \cite{comprehensive} report: \textit{``The keypoint-based methods generally outperform the anchor-based and two-stage methods in terms of accuracy and speed''} 
+Contemporary object detection advancements include anchor box free detectors -- which reformulate the problem as keypoint detection. This frees the detector from the anchor box hyperparameters such as size and aspect ratio as well as allowing for simpler architecture which allow for faster computation. Although CornerNet \citep{cornernet} was proposed as the first alternative to the single stage anchor-based approaches, more recent state-of-the-art models include Fully Convolutional One-stage Object Detection (FCOS) \citep{fcos} and the subsequent NanoDet \citep{nanodet} which has been shown to be the current state-of-the-art for real-time obejct detection as shown by the comprehensive study of \cite{comprehensive}. In a keypoint based approach, a convolutional neural network is used to predict heatmaps, with the intensity peaks representing corners or object centers. The dimensions of the  bounding boxes are then predicted. \cite{comprehensive} report: \textit{``The keypoint-based methods generally outperform the anchor-based and two-stage methods in terms of accuracy and speed''} 
 
-\cite{comprehensive} prepare a comprehensive benchmarking of modern object detectors for real-time application, which can be consulted to compare architectures.
+Anchor-free object detectors utilise key-points (such as centers and corners of objects) rather than anchors to perform regression from. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are particularly dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}  
+
+In the "FCOS-style" key-point approach which NanoDet is based on, each object is modelled as a single center point of a bounding box. The idea is that an input image is processed into a heat-map image where the highest activation values occur at the object center with a different channel for each class. Bounding box dimensions are then regressed from this point. 
+
+In the pipeline, after feature extraction, up-sampling is performed to create a higher-resolution output to incorporate more spacial detail - the resolution used is 4 times less (called output stride $R$) than the input image resolution.
+
+A single network is then used to predict key-point, size and offsets: 
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item \textbf{Classification} - This branch outputs a heat-map to estimate the center points of the objects. The number of heat-maps is equal to the number of classes. For multi-scale training, non-maxima suppression is performed to merge the results. The heat-map can be used directly by using 3x3 max pooling to check for peaks which avoids the use of non-maximum suppression. 
+    
+    \item \textbf{Embedding} - In this head, regression of parameters is performed - such as for the dimensions of the boxes or for other applications such as 3D pose estimation.
+    
+    \item \textbf{Offset} - To correct for the location error caused by the down-sampling, a local offset is predicted by this branch.
+\end{itemize}
+
+To train the network, a multipart loss is optimised. The function has the following high level form:
+\begin{equation}
+L_{CenterNet} =  L_{cls} + \lambda_1 L_{offset} + \lambda_2 L_{emb} 
+\end{equation} 
+With $\lambda$ as a balancing weight for training emphasis.
+
+In more detail:
+
+\begin{equation}
+L_{cls} =  \frac{1}{N} \sum_{xyc}
+    \begin{cases}
+      (1-\hat{Y}_{xyc})^{\alpha}log(\hat{Y}_{xyc}) & \text{if $Y_{xyc}=1$}\\
+      (1-Y_{xyc})^{\beta}(\hat{Y}_{xyc})^{\alpha} & \text{otherwise}\\
+      log(1-\hat{Y}_{xyc})\\
+    \end{cases} 
+\end{equation}
+
+This loss function is "penalty reduced pixel-wise logistic regression with Focal Loss". In focal loss, there is more emphasis placed on difficult examples. $N$ is the number of objects. $\alpha$ and $\beta$ are hyperparamters for focal loss. $xyc$ refer to each pixel in the output heatmap.
+
+\begin{equation}
+L_{off} =  \frac{1}{N} \sum_{P} |\hat{O}_{\tilde{P}}-(\frac{p}{R}-\tilde{p})|
+\end{equation}
+
+\begin{equation}
+L_{emb} =  \frac{1}{N} \sum_{k=1}^{N} |\hat{S}_{Pk}-s_k|
+\end{equation}
+
+Mean abolute error (L1) is used as the loss function for these regressions, where $\tilde{p}$ is a keypoint and $s$ is the size.
 
 \subsection{Performance Measures}
 
@@ -433,11 +484,12 @@ When detecting an object, a bounding box is placed around the target. It is poss
 
 A criticism of these commonly used metrics is that they do not consider run-time or memory usage -- which are required for real deployment. The real-time performance is difficult to compare between algorithms since most papers do not go into significant depth regarding the relationship between accuracy and speed \citep{speedacc} -- with most vision applications focusing on quality of prediction. A further challenge is that the actual real-time performance is also largely dependent on the hardware and software infrastructure on which the algorithm is executed. An approach to understanding the run-time performance (sometimes called latency) of different architectures is to consider relative comparisons that are bench-marked under the same conditions. A typical metric is frames per second (FPS).
 
+\newpage
 \subsection{Optimizing models for real-time performance}
 
 In practice, a trade off exists between the real-time performance and accuracy achieved by a model when performing inference. Intuitively, when less data is taken into consideration such as by the reduction of image resolution, inference can be faster as it requires less computation, however, the accuracy may decrease as the detail and structure of the data is lost. Therefore the performance of a computer vision algorithm should not be evaluated in isolation of latency for real time application. According to \cite{speedacc}, many computer vision architectures tend to focus on accuracy and therefore may use model ensembling and multicrop methods which are too slow for practical implementation.
 
-Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of typical volume and power constrained embedded robotics computers. \citep{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce memory consumption and computational costs of a model which can result in improved real-time performance -- if the appropriate operations are supported by software and hardware.
+Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of typically spatially and power constrained embedded robotics computers. \cite{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce memory consumption and computational costs of a model which can result in improved real-time performance -- if the appropriate operations are supported by software and hardware.
 
 The aim of quantization is to represent the weights and activations of the model with reduced precision without a significant impact on accuracy. A theoretical reduction in consumed memory of 75\% can be achieved by changing from a typical float32 representation down to an int8 representation. Further, integer arithmetic is less computationally expensive than floating point arithmetic. However, as in the case of float16 representation, both software and hardware support are required to realize the potential speed up improvements. Quantization can be performed post-training, where a dynamic approach can be used to perform online quantitation at runtime, whereas the static approach performs quantization offline in advance. In this method a mapping from the high resolution to low resolution representation is adjusted in a ``calibration'' step by passing representative data through the network. In case of a significant loss of accuracy, quantization aware training can be performed by performing pseudo quantization during the forward pass of the network whilst  still retaining the precision for the learning step. A significant disadvantage of quantization aware training is that retraining of the network is required. \citep{quantization}
 
@@ -453,9 +505,9 @@ With $\alpha$ and $\beta$ refer to the input range of $r$ and $b$ is the quantiz
 
 \subsection{Neural Network development and deployment}
 
-A variety of software tools have been developed in order to abstract the low level implementation details of neural networks from high level model architecture for the convenience of the data scientist. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} utilised for the development of R-CNN \citep{rcnn} as well as DarkNet used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow (Google) \citep{tensorflow} and Pytorch (Facebook) \citep{pytorch} facilitate the development of a variety of deep learning model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are meticulously maintained, continuously developed in an open source community and have the vast resources behind ``big-tech'' which is essential to support the current rapid growth of machine learning technologies.
+A variety of software tools have been developed in order to abstract the low level implementation details of neural networks from high level model architecture for the convenience of the user. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} utilised for the development of R-CNN \citep{rcnn} as well as DarkNet used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow (Google) \citep{tensorflow} and Pytorch (Facebook) \citep{pytorch} facilitate the development of a variety of deep learning model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are meticulously maintained, continuously developed in an open source community and have the vast resources behind ``big-tech'' which is essential to support the current rapid growth of machine learning technologies.
 
-Researchers implement model architectures using the functionality of a particular framework and therefore models are often not easily interchangeable between frameworks. Further, the libraries and tooling provided by development frameworks can be memory intensive, are optimized for ease of development and training, are not portable between  architecture and platform and are therefore not suitable environments for practical model deployment. In the context of a real world multidisciplinary development environment, such as in Robotics, one needs to consider the how inference can be executed at run-time in order to achieve maximum performance as well as avoiding framework dependency and supporting a structured modular design approach. 
+Researchers implement model architectures using the functionality of a particular framework and therefore models are often not easily interchangeable between frameworks. Further, the libraries and tooling provided by development frameworks can be memory intensive, are optimized for ease of development and training, are not portable between  architecture and platform and are therefore not suitable environments for practical model deployment where only the forward pass is desired. In the context of a real world multidisciplinary development environment, such as in Robotics, one needs to consider the how inference can be executed at run-time in order to achieve maximum performance as well as avoiding framework dependency and supporting a structured modular design approach. 
 
 Although some popular computer vision packages such as OpenCV do have an interface to load models from a limited set of frameworks -- not all operations are supported, each framework has different configurations and run-time optimization is not possible, Empirically, the real-time performance is poor. Open Neural Network Exchange (ONNX) is a well accepted standard \citep{onnx} for machine learning interoperability that provides a neutral format which can be executed in the ONNX Runtime environment (Microsoft). This inference engine supports different neural network types, multiple platforms, hardware architectures, operations as well as execution and model optimizations such as quantitation. Models compiled to be run on ONNX Runtime have shown to receive significant real-time performance improvements \citep{inference}.
 
