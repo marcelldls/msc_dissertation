@@ -679,6 +679,30 @@ The tracking performance of the trackers will be evaluated and compared using th
 \chapter{Object detection investigation}
 
 \section{Detection dataset}
+The detection dataset is generated in the RoboCup ecosystem of tools. Approximately half the images are acquired using an 11 vs. 11 match. The remainder are collected in a training pitch environment.
+
+\subsection{Software environment}
+The detection dataset is generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable vision to be appended to the server messages sent to each agent.  
+
+The agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/Vision_Perception.png}
+\caption{RoboCup agent visual perception \citep{perceptors}}
+\label{fig:onnxplot}
+\end{center}
+\end{figure}
+
+Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the addition of vision messages.
+
+\subsection{Preprocessing}
+Image transform
+
+Dataloaders are made for the VJ and coco datasets.
+
+\subsection{Data Exploration}
+Stats
 
 \section{Baseline detection}
 
@@ -692,6 +716,7 @@ The tracking performance of the trackers will be evaluated and compared using th
 \chapter{Object tracking investigation}
 
 \section{Tracking dataset}
+, ground truth perceptors are enabled 
 
 \section{Baseline tracking}
 
