@@ -263,7 +263,7 @@ With u and v representing the horizontal and vertical location of the center of 
 	\item To assign detections, each object's new bounding box is predicted. The IoU score (see object detection) is then computed between each detection and all predicted bounding boxes and the association problem is then solved optimally using the Hungarian algorithm.
 \end{itemize}
 
-\cite{sort} reiterate the strong influence of object detector performance on overall tracking results. Further, the relevance of the Kalman filter is reaffirmed in modern tracking applications. More recent work by \cite{sort++} shows that a constant velocity model with a Kalman filter and Hungarian method is still a powerful tracking approach. For robotics applications, SORT trackers are still \textit{"achieving state-of-the-art results with a high frame rate"} \citep{sortrob}.
+\cite{sort} reiterate the strong influence of object detector performance on overall tracking results. Further, the relevance of the Kalman filter is reaffirmed in modern tracking applications. More recent work by \cite{sort++} shows that a constant velocity model with a Kalman filter and Hungarian method is still a powerful tracking approach. For robotics applications, SORT trackers are still \textit{``achieving state-of-the-art results with a high frame rate''} \citep{sortrob}.
 
 \subsection{Deep SORT}
 
@@ -335,7 +335,7 @@ Traditional object detectors that had relative success and some real-time applic
 
 The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that was considered to be the first viable real time object detector still maintaining state-of-the-art accuracy. Although targeting face detection, it can be equally applied to different object classes. The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. 
 
-Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. "Haar-like" features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - a base resolution of 24x24 for the window is used which gives approximately 180k features for each detection window. 
+Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. ``Haar-like'' features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - a base resolution of 24x24 for the window is used which gives approximately 180k features for each detection window. 
 
 \begin{figure}[h!]
     \centering
@@ -345,14 +345,14 @@ Firstly considering feature extraction, an observation can be made that classes 
     \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
 \end{figure}
 
-\citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate "integral image" which allows the subsequent computation of a region in constant time. 
+\citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time. 
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a "feature selection" process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of "cascading classifiers" are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
 \newpage
 \subsection{Modern Object detection}
 
-Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} echo this sentiment: \textit{"Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context"}.
+Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} echo this sentiment: \textit{``Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context''}.
 
 Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the D\&T detector of \cite{hog}.
 
@@ -397,7 +397,7 @@ Contemporary object detection advancements include anchor box free detectors -- 
 
 Anchor-free object detectors utilise key-points (such as centers and corners of objects) rather than anchors to perform regression from. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are particularly dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}  
 
-In the "FCOS-style" key-point approach which NanoDet is based on, each object is modelled as a single center point of a bounding box. The idea is that an input image is processed into a heat-map image where the highest activation values occur at the object center with a different channel for each class. Bounding box dimensions are then regressed from this point. 
+In the ``FCOS-style'' key-point approach which NanoDet is based on, each object is modelled as a single center point of a bounding box. The idea is that an input image is processed into a heat-map image where the highest activation values occur at the object center with a different channel for each class. Bounding box dimensions are then regressed from this point. 
 
 In the pipeline, after feature extraction, up-sampling is performed to create a higher-resolution output to incorporate more spacial detail - the resolution used is 4 times less (called output stride $R$) than the input image resolution.
 
@@ -428,7 +428,7 @@ L_{cls} =  \frac{1}{N} \sum_{xyc}
     \end{cases} 
 \end{equation}
 
-This loss function is "penalty reduced pixel-wise logistic regression with Focal Loss". In focal loss, there is more emphasis placed on difficult examples. $N$ is the number of objects. $\alpha$ and $\beta$ are hyperparamters for focal loss. $xyc$ refer to each pixel in the output heatmap.
+This loss function is ``penalty reduced pixel-wise logistic regression with Focal Loss''. In focal loss, there is more emphasis placed on difficult examples. $N$ is the number of objects. $\alpha$ and $\beta$ are hyperparamters for focal loss. $xyc$ refer to each pixel in the output heatmap.
 
 \begin{equation}
 L_{off} =  \frac{1}{N} \sum_{P} |\hat{O}_{\tilde{P}}-(\frac{p}{R}-\tilde{p})|
