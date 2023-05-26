@@ -718,14 +718,14 @@ Stats
 \chapter{Object tracking investigation}
 
 \section{Tracking dataset}
-Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is captured in a practice environment with images at 25hz and the ground truth at 50Hz.
+Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is captured in a practice environment with a sequence of images at 25hz and the ground truth at 50Hz.
 
 \subsection{Software environment}
-The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages.
 
-The Wits agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
+Along side producing .json files for image with metadata as before, the Wits agent stores a csv file for each kick which captures ground positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized using the server time.
 
-Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
+Control of the agent is also abstracted by using magmaFatProxy-1.2.2, but need to be extended to include the handling of vision messages.
 
 \section{Tracking dataset}
 , ground truth perceptors are enabled 
