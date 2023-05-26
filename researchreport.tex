@@ -513,7 +513,7 @@ Although some popular computer vision packages such as OpenCV do have an interfa
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/onnx.jpg}
+\includegraphics[width=10.5cm]{images/onnx.jpg}
 \caption{ONNX Model environments \citep{onnx}}
 \label{fig:onnxplot}
 \end{center}
@@ -679,12 +679,12 @@ The tracking performance of the trackers will be evaluated and compared using th
 \chapter{Object detection investigation}
 
 \section{Detection dataset}
-The detection dataset is generated in the RoboCup ecosystem of tools. Approximately half the images are acquired using an 11 vs. 11 match. The remainder are collected in a training pitch environment.
+The dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Half the images are acquired in a simulated match, the remainder are collected in a practice environment.
 
 \subsection{Software environment}
-The detection dataset is generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable vision to be appended to the server messages sent to each agent.  
+The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
 
-The agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
+The Wits agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
 
 \begin{figure}[h!]
 \begin{center}
@@ -694,12 +694,14 @@ The agent message parser is extended to include the vision messages which are re
 \end{center}
 \end{figure}
 
-Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the addition of vision messages.
+Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
 
 \subsection{Preprocessing}
 Image transform
 
 Dataloaders are made for the VJ and coco datasets.
+
+classified as occluded or not
 
 \subsection{Data Exploration}
 Stats
@@ -714,6 +716,16 @@ Stats
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
+
+\section{Tracking dataset}
+Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is captured in a practice environment with images at 25hz and the ground truth at 50Hz.
+
+\subsection{Software environment}
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
+
+The Wits agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
+
+Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
 
 \section{Tracking dataset}
 , ground truth perceptors are enabled 
