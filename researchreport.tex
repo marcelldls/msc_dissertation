@@ -684,24 +684,35 @@ The dataset is generated using various open source programs in the RoboCup socce
 \subsection{Software environment}
 The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
 
-The Wits agent message parser is extended to include the vision messages which are received in a base64 encoded format. Each image is stored as a .json file, since it is human readable, which includes the image metadata such as the spherical coordinates of the ball (vertical angle, horizontal angle, distance) and the image size.
+The Wits agent message parser is extended to include the vision messages which are received in a base64 string encoded format. Each image is stored as a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}) (vertical angle, horizontal angle, distance) and the image size. 
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/Vision_Perception.png}
 \caption{RoboCup agent visual perception \citep{perceptors}}
-\label{fig:onnxplot}
+\label{fig:spherical}
 \end{center}
 \end{figure}
 
 Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
 
 \subsection{Preprocessing}
-Image transform
 
-Dataloaders are made for the VJ and coco datasets.
+The images are decoded into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Occluded ball images must be manually separated.
 
-classified as occluded or not
+From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, it is possible to transform them to the position of the camera by converting the coordinates to a Cartesian axis, performing a translation and then returning the coordinate system to spherical. From the spherical coordinates at the camera position, with the known field of view of the lens being 58\textdegree, it is possible to use an ideal wide angle lens transformation to determine the bounding box center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:blockd}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball which has a known diameter of 8.4cm.
+
+ \begin{figure}[h!]
+\begin{center}
+\includegraphics[width=7cm]{images/FOVmodel.jpg}
+\caption{Ideal wide angle lens transformation \citep{wideangle} }
+\label{fig:onnxplot}
+\end{center}
+\end{figure}
+
+Although the descibed transformations can be automatically computed, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps. In these cases the data must be dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not obvious. 
+
+Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset}. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used for allocating data for the various downstream tasks.
 
 \subsection{Data Exploration}
 Stats
@@ -721,11 +732,15 @@ Stats
 Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is captured in a practice environment with a sequence of images at 25hz and the ground truth at 50Hz.
 
 \subsection{Software environment}
-The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages.
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beamable area of the agent into the opposition half.
 
-Along side producing .json files for image with metadata as before, the Wits agent stores a csv file for each kick which captures ground positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized using the server time.
+Along side producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized through the server time. 
 
-Control of the agent is also abstracted by using magmaFatProxy-1.2.2, but need to be extended to include the handling of vision messages.
+Control of the agent is again abstracted by using magmaFatProxy-1.2.2, but needs to be extended to include the handling of vision messages. The agent beams to random
+
+\subsection{preprocessing}
+Outside field area
+Instability
 
 \section{Tracking dataset}
 , ground truth perceptors are enabled 
