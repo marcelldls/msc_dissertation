@@ -717,6 +717,20 @@ Each object detector expects the data-set to be presented in a certain structure
 \subsection{Data Exploration}
 Stats
 
+\begin{table*}[h!]
+\fontsize{9.5pt}{12pt}\selectfont
+\centering
+\begin{tabular}{c|llllllllll}
+{\bf Dataset}	&{\bf Count}	&{\bf Split}	&{\bf Visible}	&{\bf Hidden}	&{\bf Occlu.}	&{\bf Match}	&{\bf Drill}	&{\bf Small}	&{\bf Med.}	&{\bf Large}	\\\hline
+Total			&2563			&100\%			&70.6\%			&2563			&100\%			&70.6\%			&70.6\%			&2563			&100\%			&70.6\%			\\\hline   
+Train			&2563			&100\%			&70.6\%			&2563			&100\%			&70.6\%			&70.6\%			&2563			&100\%			&70.6\%			\\\hline  
+Validation		&2563			&100\%			&70.6\%			&2563			&100\%			&70.6\%			&70.6\%			&2563			&100\%			&70.6\%			\\\hline  
+Test			&2563			&100\%			&70.6\%			&2563			&100\%			&70.6\%			&70.6\%			&2563			&100\%			&70.6\%			\\\hline                        
+\end{tabular}
+\caption{Project timeline}
+\label{tab:mags}
+\end{table*}
+
 \section{Baseline detection}
 
 \section{Proposed detection}
@@ -754,7 +768,9 @@ Instability
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 
-The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It is proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
+The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It was proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
+
+The findings of the research showed that
 
 \section{Future work}
 
