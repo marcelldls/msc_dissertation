@@ -251,7 +251,7 @@ With real-time performance being a crucial component of online tracking, the lig
 
 SORT comprises of the following components:
 \begin{itemize}
-	\item A linear constant velocity model which is used to model the states of a tracked object. Without a detection associated to the object, its state is simply predicted without correction using the linear velocity model. With an associated detection, the predicted bounding box can be used to update the object states using the Kalman filtering algorithm.
+	\item A linear constant velocity model which is used to model the states of a tracked object. Without a detection associated to the object, its state is simply predicted without correction using the linear velocity model. With an associated detection, the predicted bounding box (BB) can be used to update the object states using the Kalman filtering algorithm.
 
 	The state of each object is modelled as:
 \begin{equation}
@@ -682,35 +682,35 @@ The tracking performance of the trackers will be evaluated and compared using th
 This dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Half the images are acquired in a simulated match, the remainder are collected in a practice environment.
 
 \subsection{Software environment}
-The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution despite additional rendering and file-writing. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
+The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution despite additional rendering and file-writing. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages \citep{perceptors} sent to each agent.  
 
-The Wits agent message parser is extended to include the vision messages which are received in a base64 string encoded format. Each image is stored as a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}) (vertical angle, horizontal angle, distance) and the image size. 
+The Wits agent message parser is extended to include the image messages which are received in a base64 string encoded format. Each image is stored as a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}), if its inside the agent vision cone and the image size. 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/Vision_Perception.png}
+\includegraphics[width=10cm]{images/Vision_Perception.png}
 \caption{RoboCup agent visual perception \citep{perceptors}}
 \label{fig:spherical}
 \end{center}
 \end{figure}
 
-Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
+Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of image messages.
 
 \subsection{Preprocessing}
 
-The images are decoded into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Occluded ball images must be manually separated.
+The images are decoded into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Hidden and occluded ball images must be manually separated, since the server vision messages do not include the breakage of line-of-sight (all objects are transparent to the agent).
 
-From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, it is possible to transform them to the position of the camera by converting the coordinates to a Cartesian axis, performing a translation and then returning the coordinate system to spherical. From the spherical coordinates at the camera position, with the known field of view of the lens being 58\textdegree, it is possible to use an ideal wide angle lens transformation to determine the bounding box center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:blockd}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball which has a known diameter of 8.4cm.
+From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, one can transform them to the camera position by converting the coordinates to a Cartesian axis, performing a translation (given 6.5cm head radius) and then returning the coordinate system to spherical. From the spherical coordinates at the camera, with the known 58\textdegree\ field of view of the camera, it is possible to use an ideal wide angle lens transformation to determine the BB center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:blockd}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball -- of known 8.4cm diameter -- and the expected size on the optical projection plane.
 
- \begin{figure}[h!]
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=7cm]{images/FOVmodel.jpg}
+\includegraphics[width=6.5cm]{images/FOVmodel.jpg}
 \caption{Ideal wide angle lens transformation \citep{wideangle} }
 \label{fig:onnxplot}
 \end{center}
 \end{figure}
 
-Although the described transformations can be automatically computed, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps. In these cases the data must be dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not obvious. 
+Although the transformations can be computed in order to provide BB for all ball containing images without labor, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the misalignment obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
 
 Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset}. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used for allocating data for the various downstream tasks.
 
