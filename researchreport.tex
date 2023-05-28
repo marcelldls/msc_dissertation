@@ -782,7 +782,7 @@ In order to conserve memory, the tracking sequence images are taken from their .
 
 \subsection{Data exploration}
 
-The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a break down of various sequence properties. 
+The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a break down of various sequence properties. Kicks that have a peak height above the height of the diameter of the ball are deemed to be lofted. As seen in figure \ref{fig:plotkicks}, lofted kicks have a trajectory that is dominated by bouncing behavior compared to ground kicks which roll.
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -798,6 +798,16 @@ Test			&74				&20\%			&297.9			&20.0\%			&80.0\%			\\\hline
 \label{tab:tracking}
 \end{table*}
 
+It can be seen in table \ref{tab:tracking} that the properties of the tracking data are consistent between the data-sets. A bias towards lofted kicks is evident.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12.5cm]{images/plotkicks.png}
+\caption{Tracking dataset ground-truths}
+\label{fig:plotkicks}
+\end{center}
+\end{figure}
+
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=14cm]{images/trackingplot.png}
@@ -805,17 +815,6 @@ Test			&74				&20\%			&297.9			&20.0\%			&80.0\%			\\\hline
 \label{fig:trackplot}
 \end{center}
 \end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=14cm]{images/plotkicks.png}
-\caption{Tracking dataset ground-truths}
-\label{fig:trackplot}
-\end{center}
-\end{figure}
-
-\section{Tracking dataset}
-Ground truth perceptors are enabled 
 
 \section{Baseline tracking}
 
@@ -828,7 +827,9 @@ Ground truth perceptors are enabled
 
 The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It was proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
 
-The findings of the research showed that
+For the object detection task, the findings of the research showed that
+
+For the tracking task, the findings of the research showed that
 
 \section{Future work}
 
