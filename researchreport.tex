@@ -679,10 +679,10 @@ The tracking performance of the trackers will be evaluated and compared using th
 \chapter{Object detection investigation}
 
 \section{Detection dataset}
-The dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Half the images are acquired in a simulated match, the remainder are collected in a practice environment.
+This dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Half the images are acquired in a simulated match, the remainder are collected in a practice environment.
 
 \subsection{Software environment}
-The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
+The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution despite additional rendering and file-writing. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages sent to each agent.  
 
 The Wits agent message parser is extended to include the vision messages which are received in a base64 string encoded format. Each image is stored as a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}) (vertical angle, horizontal angle, distance) and the image size. 
 
@@ -694,7 +694,7 @@ The Wits agent message parser is extended to include the vision messages which a
 \end{center}
 \end{figure}
 
-Control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
+Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of vision messages.
 
 \subsection{Preprocessing}
 
@@ -743,14 +743,14 @@ Test			&2563			&100\%			&70.6\%			&2563			&100\%			&70.6\%			&70.6\%			&2563			&
 \chapter{Object tracking investigation}
 
 \section{Tracking dataset}
-Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is captured in a practice environment with a sequence of images at 25hz and the ground truth at 50Hz.
+Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is randomized and then captured in a practice environment, as a sequence of images with metadata, at 25hz and ground-truth positions at 50Hz.
 
 \subsection{Software environment}
-The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beamable area of the agent into the opposition half.
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half.
 
-Along side producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized through the server time. 
+Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized by the server time. 
 
-Control of the agent is again abstracted by using magmaFatProxy-1.2.2, but needs to be extended to include the handling of vision messages. The agent beams to random
+Low level control of the agent is again abstracted by using magmaFatProxy-1.2.2, but needs to be further extended to handle ground truth ball and agent positions. 
 
 \subsection{preprocessing}
 Outside field area
