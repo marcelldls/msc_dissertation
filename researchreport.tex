@@ -347,7 +347,9 @@ Firstly considering feature extraction, an observation can be made that classes 
 
 \citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time as it only has to be evaluated once per image and can then be used for each feature.
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions. Multiple stages can be built, which are progressively more "difficult" to pass.
+
+The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
 \newpage
 \subsection{Modern Object detection}
@@ -782,7 +784,23 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 \subsubsection{Model training}
 
-The following approach is taken to fit the model.
+The training of the detector is done as descibed by \cite{vjdet}. Rather than trying to find an optimum number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate for each stage of the classifier and the maximal desired false alarm rate for each stage of the classifier
+
+random guessing
+
+the minimum reduction in false positives and the maximum decrease in detection.
+
+
+a simple approach is used to produce
+an effective classifier which is highly efficient. Each stage
+in the cascade reduces the false positive rate and decreases
+the detection rate.  Each stage is trained by adding features until the
+target detection and false positivesrates are met ( these rates
+are determined by testing the detector on a validation set).
+Stages are added until the overall target for false positive
+and detection rate is met.
+
+$minHitRate = 0.999$ and $maxFalseAlarmRate = 0.5$
 
 \subsubsection{Model tuning}
 
