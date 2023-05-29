@@ -784,7 +784,17 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 \subsubsection{Model training}
 
-The training of the detector is done as descibed by \cite{vjdet}. Rather than trying to find an optimum number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate for each stage of the classifier and the maximal desired false alarm rate for each stage of the classifier
+The training of the detector is done as described by \cite{vjdet}. Rather than trying to find an optimum number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate for each stage of the classifier and the maximal desired false alarm rate for each stage of the classifier. The hit rate defines how much positive object training data can be misclassified. 
+
+Each stage
+in the cascade increases the false positive rate and decreases
+the detection rate.
+
+The false alarm rate sets the rate at which false positives occur and therefore dictates how many features are included in each stage. 0.5 would be equivalent to a random classifier. Lower values results in larger weak classifiers 
+
+ Each stage
+in the cascade reduces the false positive rate and decreases
+the detection rate.
 
 random guessing
 
@@ -800,7 +810,7 @@ are determined by testing the detector on a validation set).
 Stages are added until the overall target for false positive
 and detection rate is met.
 
-$minHitRate = 0.999$ and $maxFalseAlarmRate = 0.5$
+In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier.
 
 \subsubsection{Model tuning}
 
