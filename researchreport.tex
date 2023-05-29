@@ -521,9 +521,9 @@ Although some popular computer vision packages such as OpenCV do have an interfa
 
 \newpage
 \section{RoboCup Soccer}
-RoboCup is an internationally coordinated robotics competition with a focus on advancing artificial intelligence and robotics research. The ultimate goal of the soccer competition is to support the development of a team of fully autonomous humanoid robot soccer players that are capable of winning against the winner of the most recent soccer world cup, by the year 2050. Some of the characteristics of the RoboCup challenge is that it features a dynamic environment and distributed control performed in real time \citep{RoboCupObj}.\
+RoboCup is an internationally coordinated robotics competition with a focus on advancing artificial intelligence and robotics research. The ultimate goal of the soccer competition is to support the development of a team of fully autonomous humanoid robot soccer players that are capable of winning against the winner of the most recent soccer world cup, by the year 2050. The RoboCup challenge features a dynamic environment and distributed control performed in real time \citep{RoboCupObj}.\
 
-There are various leagues which each emphasize different challenges that need to be addressed to achieve the ultimate RoboCup objective. Of particular interest is the RoboCup 3D Soccer Simulation League (3DSSL) as well as the Standard Platform League (SPL), which focuses on the software programming aspects of Nao robots.
+There are various leagues which each emphasize different challenges that need to be addressed to achieve the ultimate RoboCup objective. Of particular interest is the RoboCup 3D Soccer Simulation League (3DSSL) as well as the Standard Platform League (SPL), which focuses on the software programming aspects of Nao robots. The Nao v5 features an Intel Atom Z530 CPU with 1GB RAM \citep{naov5}.
 
 \begin{figure}[h!]
     \centering
@@ -657,7 +657,7 @@ Although it is possible in most cases to use pretrained model weights to signifi
 A possible risk exists in using pretrained weights, since they are typically trained on real image datasets -- therefore domain transfer to a synthetic domain may fail to produce acceptable results. Further, most datasets used for pretraining feature few small scale object examples which may also be problematic for this application.
 
 \subsection{Evaluation}
-Models are all translated to a neutral ONNX format which serves two purposes here: Firstly, the runtime environment can be controlled with ONNX Runtime in order to limit the computational resources to single threaded execution. Secondly, it mimics practical model deployment as it is platform, device and training framework independent with support for multiple languages. 
+Models are all translated to a neutral ONNX format which serves two purposes here: Firstly, the runtime environment can be controlled with ONNX Runtime in order to limit the computational resources to single threaded execution. Secondly, it mimics practical model deployment as it is platform, device and training framework independent with support for multiple languages. The available CPU is an AMD Ryzen 5 4600H which is a common entry level gaming laptop processor, released in 2020. 
 
 \section{Phase two: Object tracking investigation}
 
@@ -755,9 +755,63 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \section{Baseline detection}
 
+\subsection{Viola Jones}
+
+\subsubsection{Software environment}
+
+It is found that OpenCv no longer supports the training of Viola Jones style detectors after v3 (although, inference is still supported). Therefore it is chosen to roll back to the vx.x.x release. 
+
+\subsubsection{Model tuning}
+
+The VJ detector does not provide a measure of confidence for each bounding box. Therefore, for evaluation, a confidence of 100\% is used for the BB.  
+
+\subsection{Yolo-Tiny v4}
+
+\subsubsection{Software environment}
+
+\subsubsection{Hyper parameter selection}
+
+\newpage
 \section{Proposed detection}
 
+Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Following on, the detector is trained and fine tuned in order to find the most suitable configuration for the task.
+
+\subsection{Naive latency evaluation}
+In order to justify the selection of a modern real-time object detection architecture, a simplistic approach is taken to simply evaluate pretrained models on the target device. In this approach, the latency of the forward pass is considered and the accuracy of the detentions is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
+
+The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. 
+
+In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/modelspeedsize.png}
+\caption{Pretrained model performance vs. size}
+\label{fig:modelspeedsize}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/modelspeed.png}
+\caption{Pretrained model performance}
+\label{fig:modelspeed}
+\end{center}
+\end{figure}
+
+The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models smaller than 50mb are readily accommodated and similarly sized to the ONNXruntime linux binary ($\approx13mb$).
+
+It is found that most of the detectors do not execute in realtime. Although, this does not definitively mean that they cannot but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in realtime for many of its configurations and therefore is a good choice to investigate further. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real time to avoid latency issues. 
+
+\subsection{NanoDet}
+
+\subsubsection{Software environment}
+
+\subsubsection{Hyper parameter selection}
+
 \section{Evaluation of detection}
+
+The trained models are now compared relative to each other
 
 \section{Optimization}
 
@@ -819,6 +873,8 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 \section{Baseline tracking}
 
 \section{Proposed tracking}
+
+sadasdsas
 
 \section{Evaluation of trackers}
 
