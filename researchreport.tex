@@ -897,11 +897,13 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12.5cm]{images/plotkicks.png}
+\includegraphics[width=16cm]{images/plotkicks.png}
 \caption{Tracking dataset ground-truths}
 \label{fig:plotkicks}
 \end{center}
 \end{figure}
+
+Two peculiar behaviors of the simulator handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified visually and indeed seems to be the case but is not understood why the simulation allows this. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position - possibly caused by the server which does not execute a true kick, but rather beams the ball to the feet of the agent and applies a velocity rather than performing a realistic kick as described by \cite{fatproxy}. This behavior only effect a minority of time-steps and is therefore accepted.
 
 \begin{figure}[h!]
 \begin{center}
@@ -910,6 +912,8 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 \label{fig:trackplot}
 \end{center}
 \end{figure}
+
+A variety of kicks are produced, which reflects the various trajectories that are possible. 
 
 \section{Baseline tracking}
 
