@@ -335,7 +335,7 @@ Traditional object detectors that had relative success and some real-time applic
 
 The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that was considered to be the first viable real time object detector still maintaining state-of-the-art accuracy. Although targeting face detection, it can be equally applied to different object classes. The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. 
 
-Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. ``Haar-like'' features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - a base resolution of 24x24 for the window is used which gives approximately 180k features for each detection window. 
+Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. ``Haar-like'' features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - in the case of a 24x24 window approximately 180k features exist each detection window. 
 
 \begin{figure}[h!]
     \centering
@@ -345,9 +345,9 @@ Firstly considering feature extraction, an observation can be made that classes 
     \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
 \end{figure}
 
-\citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time. 
+\citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time as it only has to be evaluated once per image and can then be used for each feature.
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image. Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. False classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions. The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
 \newpage
 \subsection{Modern Object detection}
@@ -747,7 +747,7 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/plotdetections.png}
+\includegraphics[width=15cm]{images/plotdetections.png}
 \caption{Detection dataset ball statistics}
 \label{fig:detectplot}
 \end{center}
@@ -759,14 +759,30 @@ The baseline detectors, which are chosen based on the results of the related wor
 
 \subsection{Viola Jones}
 
-The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today.
+The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today. A multi-scale implementation is utilized which, applies scaling factor ($scaleFactor$) to the image to evaluate different object sizes  
 
 \subsubsection{Software environment}
 
-It is found that OpenCV no longer supports the training of Viola Jones style detectors after v3 (although, inference is still supported). Therefore it is chosen to roll back to the vx.x.x release. 
+It is found that OpenCV no longer supports the training of Viola Jones style detectors beyond v3 (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation \cite{vjdataset} is used.
+
+\subsubsection{Sample preparation}
+
+In the spirit of the related works of \cite{robovj}, for ball detection, a pipeline is created where the camera image is edge filtered and a hand crafted threshold applied to create a crisp binary image as an input feature. 
+
+With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (vec-file). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation after rescaling).
+
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=2cm]{images/edge32.png}
+\caption{Detection dataset ball statistics}
+\label{fig:edgeball}
+\end{center}
+\end{figure}
 
 \subsubsection{Model training}
-With the detection data prepared accordingly.
+
+The following approach is taken to fit the model.
 
 \subsubsection{Model tuning}
 
