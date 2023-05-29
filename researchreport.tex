@@ -755,11 +755,18 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \section{Baseline detection}
 
+The baseline detectors, which are chosen based on the results of the related works, are now investigated.
+
 \subsection{Viola Jones}
+
+The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today.
 
 \subsubsection{Software environment}
 
-It is found that OpenCv no longer supports the training of Viola Jones style detectors after v3 (although, inference is still supported). Therefore it is chosen to roll back to the vx.x.x release. 
+It is found that OpenCV no longer supports the training of Viola Jones style detectors after v3 (although, inference is still supported). Therefore it is chosen to roll back to the vx.x.x release. 
+
+\subsubsection{Model training}
+With the detection data prepared accordingly.
 
 \subsubsection{Model tuning}
 
@@ -779,13 +786,13 @@ Initially, a simple naive study is performed to justify the selection of the Nan
 \subsection{Naive latency evaluation}
 In order to justify the selection of a modern real-time object detection architecture, a simplistic approach is taken to simply evaluate pretrained models on the target device. In this approach, the latency of the forward pass is considered and the accuracy of the detentions is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
 
-The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. 
+The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is accessible in the pytorch library and is included due to its ease of access. 
 
 In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/modelspeedsize.png}
+\includegraphics[width=11cm]{images/modelspeedsize.png}
 \caption{Pretrained model performance vs. size}
 \label{fig:modelspeedsize}
 \end{center}
@@ -793,7 +800,7 @@ In this experiment, a 15 second perspective sequence (375 frames at 25hz) of Rob
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/modelspeed.png}
+\includegraphics[width=11cm]{images/modelspeed.png}
 \caption{Pretrained model performance}
 \label{fig:modelspeed}
 \end{center}
@@ -871,6 +878,8 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 \end{figure}
 
 \section{Baseline tracking}
+
+\subsection{Exploration}
 
 \section{Proposed tracking}
 
