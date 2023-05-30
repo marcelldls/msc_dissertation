@@ -773,7 +773,6 @@ In the spirit of the related works of \cite{robovj}, for ball detection, a pipel
 
 With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (vec-file). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation after rescaling).
 
-
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=2cm]{images/edge32.png}
@@ -784,33 +783,21 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 \subsubsection{Model training}
 
-The training of the detector is done as described by \cite{vjdet}. Rather than trying to find an optimum number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate for each stage of the classifier and the maximal desired false alarm rate for each stage of the classifier. The hit rate defines how much positive object training data can be misclassified. 
+The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimisation of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate and the maximal desired false alarm rate for each stage of the classifier. 
 
-Each stage
-in the cascade increases the false positive rate and decreases
-the detection rate.
+The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
+\begin{equation}
+Overall\_hitRate = hitRate^{numStages}
+\end{equation}
+False alarm rate sets the rate at which false positives may occur. A lower number requires more weak classifiers to reject negatives correctly which therefore dictates how many features (also known as layers) are included in each stage. 
+\begin{equation}
+Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
+\end{equation}
+The number of features used is then increased until the target rates are met for this stage. The number of stages to be trained is a hyperparameter. Training may be stopped early if $acceptanceRatio$ is reached, which prevents over-fitting of training data. According to \citep{vjdataset}, $acceptanceRatioBreakValue=10^{-5}$ has empirically been found to be a good value. Values smaller than this may indicate an over-fit.
 
-The false alarm rate sets the rate at which false positives occur and therefore dictates how many features are included in each stage. 0.5 would be equivalent to a random classifier. Lower values results in larger weak classifiers 
+In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$.
 
- Each stage
-in the cascade reduces the false positive rate and decreases
-the detection rate.
-
-random guessing
-
-the minimum reduction in false positives and the maximum decrease in detection.
-
-
-a simple approach is used to produce
-an effective classifier which is highly efficient. Each stage
-in the cascade reduces the false positive rate and decreases
-the detection rate.  Each stage is trained by adding features until the
-target detection and false positivesrates are met ( these rates
-are determined by testing the detector on a validation set).
-Stages are added until the overall target for false positive
-and detection rate is met.
-
-In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier.
+Grid search, stages, threshold. 
 
 \subsubsection{Model tuning}
 
