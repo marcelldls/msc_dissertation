@@ -347,7 +347,7 @@ Firstly considering feature extraction, an observation can be made that classes 
 
 \citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time as it only has to be evaluated once per image and can then be used for each feature.
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. Negative classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions. Multiple stages can be built, which are progressively more "difficult" to pass.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. Negative classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions.  Multiple stages may be used, which are progressively more ``difficult'' to pass.
 
 The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
@@ -761,13 +761,15 @@ The baseline detectors, which are chosen based on the results of the related wor
 
 \subsection{Viola Jones}
 
-The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today. A multi-scale implementation is utilized which, applies scaling factor ($scaleFactor$) to the image to evaluate different object sizes  
+The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today. A multi-scale implementation is utilized which, applies a scaling factor ($scaleFactor$) that reduces the image size to create a "scale pyramid" to evaluate different object sizes with the same detector. 
+
+In the following section, the steps taken to prepare the software environment and data are described. Following this the training process, which aims to maximize the quality of the inference is discussed. Finally, an ablation study is performed to maximize real-time performance of the detector.
 
 \subsubsection{Software environment}
 
-It is found that OpenCV no longer supports the training of Viola Jones style detectors beyond v3 (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation \cite{vjdataset} is used.
+It is found that OpenCV no longer supports the training of Viola Jones style detectors from version 4 onwards due to dropping support of the legacy C API (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation \cite{vjdataset} is used.
 
-\subsubsection{Sample preparation}
+\subsubsection{Data preparation}
 
 In the spirit of the related works of \cite{robovj}, for ball detection, a pipeline is created where the camera image is edge filtered and a hand crafted threshold applied to create a crisp binary image as an input feature. 
 
@@ -783,7 +785,7 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 \subsubsection{Model training}
 
-The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimisation of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the minimal desired hit rate and the maximal desired false alarm rate for each stage of the classifier. 
+The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimisation of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. 
 
 The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
 \begin{equation}
@@ -801,7 +803,9 @@ Grid search, stages, threshold.
 
 \subsubsection{Model tuning}
 
-The VJ detector does not provide a measure of confidence for each bounding box. Therefore, for evaluation, a confidence of 100\% is used for the BB.  
+The VJ detector does not provide a measure of confidence for each bounding box. Therefore, for evaluation, a confidence of 100\% is used for the BB.
+
+An abalation study is now performed in order to achevie a real time detector
 
 \subsection{Yolo-Tiny v4}
 
