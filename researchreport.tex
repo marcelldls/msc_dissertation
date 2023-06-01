@@ -347,7 +347,8 @@ Firstly considering feature extraction, an observation can be made that classes 
 
 \citeauthor{vjdet} (\citeyear{vjdet}) introduce an elegant approach to evaluate these features rapidly by precomputing an intermediate ``integral image'' which allows the subsequent computation of a region in constant time as it only has to be evaluated once per image and can then be used for each feature.
 
-In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. Negative classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions.  Multiple stages may be used, which are progressively more ``difficult'' to pass.
+In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. Negative classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions.  Multiple stages may be used, which are progressively more ``difficult'' to pass - candidates which pass all stages in the
+cascade are classified as the target object.
 
 The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
 
@@ -773,19 +774,19 @@ It is found that OpenCV no longer supports the training of Viola Jones style det
 
 In the spirit of the related works of \cite{robovj}, for ball detection, a pipeline is created where the camera image is edge filtered and a hand crafted threshold applied to create a crisp binary image as an input feature. 
 
-With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (vec-file). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation after rescaling).
+With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (vec-file). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation during rescaling).
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=2cm]{images/edge32.png}
-\caption{Detection dataset ball statistics}
+\caption{Thresholded edge image}
 \label{fig:edgeball}
 \end{center}
 \end{figure}
 
 \subsubsection{Model training}
 
-The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimisation of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. 
+The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimization of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. Each additional layer reduces the false alarm rate but also the hit rate, layers of features are added until the goal is met.
 
 The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
 \begin{equation}
@@ -795,17 +796,38 @@ False alarm rate sets the rate at which false positives may occur. A lower numbe
 \begin{equation}
 Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
 \end{equation}
-The number of features used is then increased until the target rates are met for this stage. The number of stages to be trained is a hyperparameter. Training may be stopped early if $acceptanceRatio$ is reached, which prevents over-fitting of training data. According to \citep{vjdataset}, $acceptanceRatioBreakValue=10^{-5}$ has empirically been found to be a good value. Values smaller than this may indicate an over-fit.
+The number of features used is then increased until the target rates are met for this stage. The number of stages to be trained is a hyperparameter. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. According to \citep{vjdataset}, $acceptanceRatioBreakValue=10^{-5}$ has empirically been found to be a good value. Smaller values may indicate an over-fit.
 
-In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$.
+In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$. $NumStages$ is found by increasing the number of stages and evaluating the AP score for convergence. $minNeighbors$ is then fine tuned to maximize the AP. The remaining parameters are recommended values by \cite{vjdataset} or default.  
 
-Grid search, stages, threshold. 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=15cm]{images/plotdetections.png}
+\caption{AP vs $numStages$}
+\label{fig:vjstages}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=15cm]{images/plotdetections.png}
+\caption{AP vs $minNeighbours$}
+\label{fig:vjneighbors}
+\end{center}
+\end{figure}
 
 \subsubsection{Model tuning}
 
-The VJ detector does not provide a measure of confidence for each bounding box. Therefore, for evaluation, a confidence of 100\% is used for the BB.
+An ablation study is now performed in order to achieve a real time detector. A search is performed to optimize the $scaleFactor$.
 
-An abalation study is now performed in order to achevie a real time detector
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=15cm]{images/plotdetections.png}
+\caption{AP vs $minNeighbours$}
+\label{fig:vjspeeds}
+\end{center}
+\end{figure}
 
 \subsection{Yolo-Tiny v4}
 
