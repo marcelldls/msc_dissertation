@@ -350,7 +350,7 @@ Firstly considering feature extraction, an observation can be made that classes 
 In order to classify each window, there are a significant number of Haar-like features possible at each possible detection. An efficient approach to classification, based on the adaBoost machine learning algorithm, is used as a ``feature selection'' process by training and selecting a subset of weak classifiers that can be combined into a strong classifier. The set of ``cascading classifiers'' are arranged as a degenerate decision tree, where each node is a stage of increasing complexity. Negative classifications cause an early exit from the cascade, therefore background regions are usually rejected quickly and more computation is spent on distinguishing complex regions.  Multiple stages may be used, which are progressively more ``difficult'' to pass - candidates which pass all stages in the
 cascade are classified as the target object.
 
-The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor.
+The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using less stages and features can result in faster compute times. Faster speeds can also be achieved by increasing the step sizes and scaling factor. Models which are under-trained tend to focus on background areas which can lead to impracticable inference times. 
 
 \newpage
 \subsection{Modern Object detection}
@@ -768,7 +768,7 @@ In the following section, the steps taken to prepare the software environment an
 
 \subsubsection{Software environment}
 
-It is found that OpenCV no longer supports the training of Viola Jones style detectors from version 4 onwards due to dropping support of the legacy C API (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation \cite{vjdataset} is used.
+It is found that OpenCV no longer supports the training of Viola Jones style detectors from version 4 onwards due to dropping support of the legacy C API (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation by \cite{vjdataset} is used.
 
 \subsubsection{Data preparation}
 
@@ -788,7 +788,7 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimization of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. Each additional layer reduces the false alarm rate but also the hit rate, layers of features are added until the goal is met.
 
-The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
+The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. A  The overall hit rate is computed as:
 \begin{equation}
 Overall\_hitRate = hitRate^{numStages}
 \end{equation}
@@ -796,17 +796,21 @@ False alarm rate sets the rate at which false positives may occur. A lower numbe
 \begin{equation}
 Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
 \end{equation}
-The number of features used is then increased until the target rates are met for this stage. The number of stages to be trained is a hyperparameter. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. According to \citep{vjdataset}, $acceptanceRatioBreakValue=10^{-5}$ has empirically been found to be a good value. Smaller values may indicate an over-fit.
+The number of features used is then increased until the target rates are met for this stage. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. In this study, a search is performed over $numStages$, and evaluated for the AP score against tested and validation sets, in order to ensure that the model is both sufficiently trained but also not over-fitting, for the actual targeted detection task.  
 
-In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999$. $maxFalseAlarmRate=0.5$. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$. $NumStages$ is found by increasing the number of stages and evaluating the AP score for convergence. $minNeighbors$ is then fine tuned to maximize the AP. The remaining parameters are recommended values by \cite{vjdataset} or default.  
+In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset} or default. 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=15cm]{images/plotdetections.png}
+\includegraphics[width=10cm]{images/vjtraining.png}
 \caption{AP vs $numStages$}
 \label{fig:vjstages}
 \end{center}
 \end{figure}
+
+A higher number of stages coincided with an increased training time. The longest training time for 12 stages was 5 hours and 45 minutes. In general, it can be seen that the addition of stages allows the model to better fit the data, which eventually leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in performance. The best performer on the validation set is chosen.
+
+During inference, $minNeighbors$ provides a measure of confidence. It is the number of neighboring candidates a window should have to retain. It is now fine tuned to maximize the AP.
 
 \begin{figure}[h!]
 \begin{center}
@@ -818,13 +822,13 @@ In line with \cite{robovj} the following parameters are set: $minHitRate = 0.999
 
 \subsubsection{Model tuning}
 
-An ablation study is now performed in order to achieve a real time detector. A search is performed to optimize the $scaleFactor$.
+An ablation study is now performed in order to optimize a real time performance. A search is performed to optimize the $scaleFactor$.
 
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=15cm]{images/plotdetections.png}
-\caption{AP vs $minNeighbours$}
+\caption{AP, latency vs $scaleFactor$}
 \label{fig:vjspeeds}
 \end{center}
 \end{figure}
