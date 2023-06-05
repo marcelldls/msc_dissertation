@@ -746,7 +746,7 @@ The ground truth BBs are plotted with some examples of the dataset in figure \re
 \end{center}
 \end{figure}
 
-The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball bends to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait.
+The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball bends to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait, where architectures may capture this.
 
 \begin{figure}[h!]
 \begin{center}
@@ -798,36 +798,47 @@ Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
 \end{equation}
 The number of features used is then increased until the target rates are met for this stage. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. In this study, a search is performed over $numStages$, and evaluated for the AP score against tested and validation sets, in order to ensure that the model is both sufficiently trained but also not over-fitting, for the actual targeted detection task.  
 
-In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, which is a conservative figure that provides a buffer of images to compensate for the positive cases falsely not detected anymore by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset} or default. 
+In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, providing a conservative buffer of images to compensate for the cases falsely not detected by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset}. 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/vjtraining.png}
+\includegraphics[width=11cm]{images/vj_training.png}
 \caption{AP vs $numStages$}
 \label{fig:vjstages}
 \end{center}
 \end{figure}
 
-A higher number of stages coincided with an increased training time. The longest training time for 12 stages was 5 hours and 45 minutes. In general, it can be seen that the addition of stages allows the model to better fit the data, which eventually leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in performance. The best performer on the validation set is chosen.
+A additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in performance. The best performer on the validation set is chosen for further optimization.
 
-During inference, $minNeighbors$ provides a measure of confidence. It is the number of neighboring candidates a window should have to retain. It is now fine tuned to maximize the AP.
+The first layers of the final stage can be visualized in figure \ref{fig:vjstages}:
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=15cm]{images/plotdetections.png}
-\caption{AP vs $minNeighbours$}
+\includegraphics[width=11cm]{images/vj_result.jpg}
+\caption{Cascade classifier 4 layers of final stage}
+\label{fig:vjstages}
+\end{center}
+\end{figure}
+
+In the layers investigated, it can be observed that the model seems to learn: the outer boundary of the ball as well as the internal edges of the patches of the ball. These make intuitive sense and provide a level of confidence in the results that have been obtained.
+
+During inference, $minNeighbors$ provides a measure of confidence to retain the candidate, which is fine-tuned on the validation set to maximize the AP score.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=11cm]{images/vj_tune.png}
+\caption{AP vs $minNeigbours$}
 \label{fig:vjneighbors}
 \end{center}
 \end{figure}
 
 \subsubsection{Model tuning}
 
-An ablation study is now performed in order to optimize a real time performance. A search is performed to optimize the $scaleFactor$.
-
+An ablation study is now performed in order to optimize accuracy in the context of a real time performance. A search is performed to optimize the $scaleFactor$.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=15cm]{images/plotdetections.png}
+\includegraphics[width=11cm]{images/vj_ablation.png}
 \caption{AP, latency vs $scaleFactor$}
 \label{fig:vjspeeds}
 \end{center}
