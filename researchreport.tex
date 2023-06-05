@@ -894,13 +894,36 @@ It is found that most of the detectors do not execute in realtime. Although, thi
 
 \subsubsection{Software environment}
 
-\subsubsection{Hyper parameter selection}
+\subsubsection{Data preparation}
 
+\subsubsection{Model training}
+
+In order to prove the hypothesis, it is found that the default parameters for the ... model is sufficient. 
+
+\subsubsection{Model preparation}
+
+The repo tools are used to produce ONNX format
+
+\newpage
 \section{Evaluation of detection}
 
-The trained models are now compared relative to each other
+The selected trained and fine-tuned models are now compared relative to each other using the unseen test dataset. The results are deconstructed and evaluated by the relative size of the objects, which helps to provide an indication into the performance of the detector against distant target objects. Models that are pretrained on the Coco dataset are also included as they provide insight for how well the model generalizes to the synthetic dataset.
+
+Further, the data is evaluated in three parts. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking task. Then, a dataset that does feature match image but not occluded images is used. It is thought that such a set would expose the model performance among a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. 
+
+The results are plotted in figure \ref{fig:evaldetect}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=15.5cm]{images/eval_detect.png}
+\caption{Evaluation of detectors}
+\label{fig:evaldetect}
+\end{center}
+\end{figure}
 
 \section{Optimization}
+
+The effect of quantization is now evaluated
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
