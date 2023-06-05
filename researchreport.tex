@@ -382,13 +382,15 @@ L_{regression} = \sum(y_i-\hat{y_i})^2
 \end{equation} 
 Where $y_i$ is the ground truth.
 
+Generalized Focal Loss \citep{focalloss}
+
 \subsubsection{YOLO}
 
-A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated - which is known as an anchor based approach. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated for candidate objects - which is known as an anchor based approach. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
 
-Many variations of the YOLO algorithm exist, where most do not originate from or have any permissions from the original researchers. In the classic YOLO architecture, the image is divided into grid cells of $S\times S$ (typically $13\times 13$ is used) - which is achieved by down-sampling with the convolutional backbone. For each cell, predefined bounding boxes (with $B$ number of boxes per cell - 5 is typical) are used as initial guesses for object location and size - which drives the depth of the feature map. These box dimensions are learnt via using k-means clustering on the training data (thereafter referred to as dimensional priors). For each anchor box, we predict class and objectness (probability of an object in the given region). For localisation, offsets from the prior is then predicted. A small localisation improvement can be gained by including a lower level feature map with higher resolution using a pass-through layer, which is concatenated with the grid representation using a "reorganisation" layer. \citep{comprehensive}
+Many variations of the YOLO algorithm exist, where most do not originate from the original researchers. In the classic YOLO architecture, the image is divided into grid cells of $S\times S$ (typically $13\times 13$ is used) - which is achieved by down-sampling with a CNN backbone. For each cell, predefined bounding boxes (with $B$ number of boxes per cell - 5 is typical) are used as initial guesses for object location and size - which drives the depth of the feature map. These box dimensions (AKA dimensional priors) are learnt via using k-means clustering on the training data. For each anchor box, we predict class and objectness (probability of an object in the given region). For localisation, offsets from the prior is then predicted. \citep{comprehensive}
 
-Generalized Focal Loss \citep{focalloss}
+\cite{yolocomprehensive}
 
 To train the network, a multipart loss is optimised. The function has the following high level form:
 \begin{equation}
@@ -847,6 +849,10 @@ An ablation study is now performed in order to optimize accuracy in the context 
 \end{figure}
 
 \subsection{Yolo-Tiny v4}
+
+Yolo v4 \citep{yolov4}
+Tiny \citep{scaledyolov4}
+
 
 \subsubsection{Software environment}
 
