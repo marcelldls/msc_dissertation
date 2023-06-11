@@ -892,41 +892,45 @@ It is found that most of the detectors do not execute in realtime on this hardwa
 
 \subsection{NanoDet}
 
+The NanoDet classifier is open source and hosted on github. It can be trained, stored and loaded for performing inference using the PyTorch deep learning framework using the Python programming language. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. 
 
+In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The deep-learning frame work, Pytorch, is used, however only versions < 2.0.0 are supported, which must be manually installed before installing the required packages to get a suitable environment.
-
-\subsubsection{Data preparation}
-
-The NanoDet model expects data to be presented in a COCO style format. 
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the instructions found on the repository, before installing the required packages to get a suitable environment.
 
 \subsubsection{Model training}
 
-During an initial study, using the pretrained model, it is found that the model achieves a useful performance on the target dataset - even though it is synthetic. This supports the approach of fine-tuning the pretrained model 
+During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format. 
 
-In order to prove the hypothesis, it is found that the default parameters for the ... model is sufficient. It is chosen to train each of the default models 
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=10cm]{images/nanodet_train.png}
-\caption{AP, latency vs $scaleFactor$}
-\label{fig:vjspeeds}
-\end{center}
-\end{figure}
-
-An interesting result is obtained with the pretrained Nanodet model, which is seen to have some level of performance. This supports the decision the apporach used
+In order to train the model, a variety of the popular NanoDet architectures are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation losses.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=8cm]{images/nanodet_compare.png}
-\caption{AP, latency vs $scaleFactor$}
-\label{fig:vjspeeds}
+\includegraphics[width=13cm]{images/nanodet_train.png}
+\caption{NanoDet training curves}
+\label{fig:nanodet_train}
 \end{center}
 \end{figure}
 
-As a post training step, the repository tools are used to produce the model in an ONNX format. A crucial step which is not documented by \cite{nanodet} is to post-process the ONNX model using the the ONNX runtime $remove\_initializer\_from\_input$ function. Without this step, a significant (almost half) reduction in inference speed occurs which impact the ability of the detector to run in realtime.
+In general, it can be seen that the validation losses of each of the models reaches a minimum before increasing as further epochs are performed. This indicates that sufficient training iterations have been performed and that further training will lead to over-fitting. The training and validation losses are of a similar magnitude, which can be interpreted as sufficient training examples being provided and that the datasets are representative. The best iteration of each model is chosen based on the AP scores. 
+
+As a post training step, the repository tools are used to produce the model in an ONNX format. A crucial step which is not documented by \cite{nanodet} is to post-process the ONNX model using the the ONNX runtime $remove\_initializer\_from\_input$ function. Without this step, a significant degradation in inference speed occurs which impacts the ability of the detector to run in realtime.
+
+The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=10cm]{images/nanodet_compare.png}
+\caption{NanoDet variations compared}
+\label{fig:nanodet_compare}
+\end{center}
+\end{figure}
+
+The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, a search is not performed beyond the architecture variations as the results are satisfactory and sufficient to prove the respective hypothesis. 
+
+It is seen in general, that the lower resolution architectures perform inference at a higher rate, however, at a cost of inference quality. The $1.5\times$ models which have a deeper backbone perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters. The $NanoDet-plus-m\_416$ instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
 \newpage
 \section{Evaluation of detection}
@@ -944,6 +948,20 @@ The results are plotted in figure \ref{fig:evaldetect}
 \label{fig:evaldetect}
 \end{center}
 \end{figure}
+
+Various conclusions can be drawn from these results, which are now discussed.
+
+\subsubsection{Datasets}
+saadsasd
+
+\subsubsection{Obejct size}
+saadsasd
+
+\subsubsection{Sythnetic}
+saadsasd
+
+\subsubsection{Best Performer}
+saadsasd
 
 \section{Optimization}
 
