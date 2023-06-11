@@ -806,19 +806,19 @@ In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAl
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/vj_training.png}
+\includegraphics[width=10cm]{images/vj_training.png}
 \caption{AP vs $numStages$}
 \label{fig:vjstages}
 \end{center}
 \end{figure}
 
-A additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in performance. The best performer on the validation set is chosen for further optimization.
+A additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
 
 The first layers of the final stage can be visualized in figure \ref{fig:vjstages}:
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/vj_result.jpg}
+\includegraphics[width=10cm]{images/vj_result.jpg}
 \caption{Cascade classifier 4 layers of final stage}
 \label{fig:vjstages}
 \end{center}
@@ -830,7 +830,7 @@ During inference, $minNeighbors$ provides a measure of confidence to retain the 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/vj_tune.png}
+\includegraphics[width=10cm]{images/vj_tune.png}
 \caption{AP vs $minNeigbours$}
 \label{fig:vjneighbors}
 \end{center}
@@ -838,7 +838,7 @@ During inference, $minNeighbors$ provides a measure of confidence to retain the 
 
 \subsubsection{Model tuning}
 
-An ablation study is now performed in order to optimize accuracy in the context of a real time performance. A search is performed to optimize the $scaleFactor$.
+An ablation study is now performed in order to optimize accuracy in the context of a real-time performance. A search is performed to optimize the $scaleFactor$.
 
 \begin{figure}[h!]
 \begin{center}
@@ -888,21 +888,45 @@ In this experiment, a 15 second perspective sequence (375 frames at 25hz) of Rob
 
 The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models smaller than 50mb are readily accommodated and similarly sized to the ONNXruntime linux binary ($\approx13mb$).
 
-It is found that most of the detectors do not execute in realtime. Although, this does not definitively mean that they cannot but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in realtime for many of its configurations and therefore is a good choice to investigate further. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real time to avoid latency issues. 
+It is found that most of the detectors do not execute in realtime on this hardware. Although, this does not definitively mean that they cannot (after model tuning) but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in realtime for many of its configurations and therefore is a good choice to investigate further. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real time to avoid latency issues. 
 
 \subsection{NanoDet}
 
+
+
 \subsubsection{Software environment}
+
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The deep-learning frame work, Pytorch, is used, however only versions < 2.0.0 are supported, which must be manually installed before installing the required packages to get a suitable environment.
 
 \subsubsection{Data preparation}
 
+The NanoDet model expects data to be presented in a COCO style format. 
+
 \subsubsection{Model training}
 
-In order to prove the hypothesis, it is found that the default parameters for the ... model is sufficient. 
+During an initial study, using the pretrained model, it is found that the model achieves a useful performance on the target dataset - even though it is synthetic. This supports the approach of fine-tuning the pretrained model 
 
-\subsubsection{Model preparation}
+In order to prove the hypothesis, it is found that the default parameters for the ... model is sufficient. It is chosen to train each of the default models 
 
-The repo tools are used to produce ONNX format
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=10cm]{images/nanodet_train.png}
+\caption{AP, latency vs $scaleFactor$}
+\label{fig:vjspeeds}
+\end{center}
+\end{figure}
+
+An interesting result is obtained with the pretrained Nanodet model, which is seen to have some level of performance. This supports the decision the apporach used
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=8cm]{images/nanodet_compare.png}
+\caption{AP, latency vs $scaleFactor$}
+\label{fig:vjspeeds}
+\end{center}
+\end{figure}
+
+As a post training step, the repository tools are used to produce the model in an ONNX format. A crucial step which is not documented by \cite{nanodet} is to post-process the ONNX model using the the ONNX runtime $remove\_initializer\_from\_input$ function. Without this step, a significant (almost half) reduction in inference speed occurs which impact the ability of the detector to run in realtime.
 
 \newpage
 \section{Evaluation of detection}
