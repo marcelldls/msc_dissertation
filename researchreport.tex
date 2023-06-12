@@ -930,7 +930,7 @@ The different NanoDet variations are evaluated for their inference speeds and th
 
 The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, a search is not performed beyond the architecture variations as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-It is seen in general, that the lower resolution architectures perform inference at a higher rate, however, at a cost of inference quality. The $1.5\times$ models which have a deeper backbone perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters. The $NanoDet-plus-m\_416$ instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+It is seen in general, that the lower resolution architectures perform inference at a higher rate, however, at a cost of inference quality. The $1.5\times$ models which have a deeper backbone perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters as models of greater complexity have a greater tendancy to overfit on a dataset. The $NanoDet-plus-m\_416$ instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
 \newpage
 \section{Evaluation of detection}
