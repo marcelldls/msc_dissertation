@@ -935,7 +935,7 @@ It is seen in general, that the higher resolution architectures (416 vs. 320) pe
 \newpage
 \section{Evaluation of detection}
 
-The selected trained and fine-tuned models are now compared relative to each other using the unseen test dataset. The results are deconstructed and evaluated by the relative size of the objects, which helps to provide an indication into the performance of the detector against distant target objects. Models that are pretrained on the Coco dataset are also included as they provide insight for how well the model generalizes to the synthetic dataset.
+The selected pretrained, trained and fine-tuned models are now compared relative to each other using the unseen test dataset. The results are deconstructed and evaluated by the relative size of the objects, which helps to provide an indication into the performance of the detector against distant target objects. Models that are pretrained on the Coco dataset are also included as they provide insight for how well the model generalizes to the synthetic dataset.
 
 Further, the data is evaluated in three parts. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking task. Then, a dataset that does feature match image but not occluded images is used. It is thought that such a set would expose the model performance among a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. 
 
@@ -949,25 +949,25 @@ The results are plotted in figure \ref{fig:evaldetect}
 \end{center}
 \end{figure}
 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=15.5cm]{images/eval_detect.png}
+\caption{Detector model sizes (mb)}
+\label{fig:evalsize}
+\end{center}
+\end{figure}
+
 Various conclusions can be drawn from these results, which are now discussed.
 
 As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance and occluded images cause even further performance decline. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to detect. 
 
-Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, a pre trained detector can provide better inference quality at a fraction of the effort and complexity 
+One of the interesting results that can be seen, is that the pretrained detectors chosen actually perform well on the synthetic RoboCup ball tracking dataset. This is not a generlaisation that one can nesacerily rely on, however, it is a useful result for the domain adaptation properties of the models. The results supports the chosen approach of finetuning the detector to the dataset.
 
-For the easiest examples, NanoDet scores a near perfect result. 
+Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality at a fraction of the training effort and framework complexity. With the ease of the modern deeplearning frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. Since the VJ model relies on the OpenCV framework the size of the model is not comparable to the other models which are evaluated on a common inference engine.
 
-\subsubsection{Datasets}
-saadsasd
+The YOLOv4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. However, a real-time implementation was not able to be acheived. This result corresponds to the results seen in the related works, where it was found that the YOLOv4 Tiny model does perform well, however, not quite in real-time.
 
-\subsubsection{Obejct size}
-saadsasd
-
-\subsubsection{Sythnetic}
-saadsasd
-
-\subsubsection{Best Performer}
-saadsasd
+The Nanodet model out performs all other architectures. Although a margin training effort is applied, the model achives the highest quality inference at realtime speeds. This is true accross each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model is also smaller than that of YOLOv4 by a significant margin, which means that it has a lower footprint on limited capacity machines and therefore allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
 
 \section{Optimization}
 
