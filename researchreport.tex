@@ -928,15 +928,9 @@ The different NanoDet variations are evaluated for their inference speeds and th
 \end{center}
 \end{figure}
 
-The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, a search is not performed beyond the architecture variations as the results are satisfactory and sufficient to prove the respective hypothesis. 
+The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-It is seen in general, that the lower resolution architectures perform inference at a higher rate, however, at a cost of inference quality. The $1.5\times$ models which have a deeper backbone perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters as models of greater complexity have a greater tendancy to overfit on a dataset. The $NanoDet-plus-m\_416$ instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
-
-As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance and occluded images cause even further performance decline. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to detect. 
-
-Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, a pre trained detector can provide better inference quality at a fraction of the effort and complexity 
-
-For the easiest examples, NanoDet scores a near perfect result. 
+It is seen in general, that the higher resolution architectures (416 vs. 320) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models which have a deeper backbone also perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for a different dataset. The $NanoDet-plus-m\_416$ instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
 \newpage
 \section{Evaluation of detection}
@@ -956,6 +950,12 @@ The results are plotted in figure \ref{fig:evaldetect}
 \end{figure}
 
 Various conclusions can be drawn from these results, which are now discussed.
+
+As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance and occluded images cause even further performance decline. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to detect. 
+
+Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, a pre trained detector can provide better inference quality at a fraction of the effort and complexity 
+
+For the easiest examples, NanoDet scores a near perfect result. 
 
 \subsubsection{Datasets}
 saadsasd
