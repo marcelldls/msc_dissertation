@@ -830,7 +830,7 @@ During inference, $minNeighbors$ provides a measure of confidence to retain the 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/vj_tune.png}
+\includegraphics[width=11cm]{images/vj_tune.png}
 \caption{AP vs $minNeigbours$}
 \label{fig:vjneighbors}
 \end{center}
@@ -930,7 +930,9 @@ The different NanoDet variations are evaluated for their inference speeds and th
 
 The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-It is seen in general, that the higher resolution architectures (416 vs. 320) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models which have a deeper backbone also perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not searching for optimum parameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for a different dataset. The NanoDet-plus-m\_416 instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+It is seen in general, that the higher resolution architectures (416 vs. 320) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models which have a deeper backbone also perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not applying optimum parameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for a different dataset. The NanoDet-plus-m\_416 instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+
+The chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this is that float32 computation is more popular as most models are implemented to maximise accuracy and therefore the operations in this representation are better optimized for the used hardware. Since the model is already of acceptable size, the quantized model is not utilized and further quantization is not investigated.
 
 \newpage
 \section{Evaluation of detection}
@@ -960,18 +962,6 @@ Relatively, the VJ detector performs the worst of the detectors across the data.
 The YOLOv4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. However, a real-time implementation was not able to be . This result corresponds to the results seen in the related works, where it was found that the YOLOv4 Tiny model does perform well, however, not quite in real-time.
 
 The Nanodet model out performs all other architectures. Although a margin training effort is applied, the model achieves the highest quality inference at realtime speeds. This is true across each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model is also smaller than that of YOLOv4 by a significant margin, which means that it has a lower footprint on limited capacity machines and therefore allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
-
-\section{Optimization}
-
-Quantization can potentially reduce the memory footprint of a model. The effect of quantization on the inference performance is now evaluated.
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=10cm]{images/nanodet_compare.png}
-\caption{Effect of model quantization}
-\label{fig:evalquant}
-\end{center}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
