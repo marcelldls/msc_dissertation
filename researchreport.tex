@@ -762,7 +762,7 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \section{Baseline detection}
 
-The baseline detectors, which are chosen based on the results of the related works, are now investigated.
+The baseline detectors, which are chosen based on the reported results of the related works, are now investigated.
 
 \subsection{Viola Jones}
 
@@ -848,29 +848,29 @@ An ablation study is now performed in order to optimize accuracy in the context 
 \end{center}
 \end{figure}
 
-\subsection{Yolo-Tiny v4}
+\subsection{YOLO v4 Tiny}
 
-Yolo v4 \citep{yolov4}
-Tiny \citep{scaledyolov4}
-
+YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into an ONNX format. 
 
 \subsubsection{Software environment}
 
-asdads
+ The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. CUDA 11.8 is linked to the makefile - in order to benefit from GPU acceleration - and then the framework is complied. The training dataset needs to be prepared in a ``DarkNet style'' format. The service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data.
 
 \subsubsection{Model training}
 
-yolov4tiny train
+The original configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. Various resolutions are evaluated in order to investigate the speed/accuracy trade off and make a sensible selection. It should be noted that model image resolutions need to be in multiples of 32. 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=13cm]{images/yolov4tiny_train.png}
-\caption{NanoDet training curves}
-\label{fig:nanodet_train}
+\includegraphics[width=10cm]{images/yolov4tiny_train.png}
+\caption{YOLO v4 Tiny training curves}
+\label{fig:yolov4tiny_train}
 \end{center}
 \end{figure}
 
-yolov4tiny train
+Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to acheive completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing, and by a further order of magnitude if CUDA was included for GPU acceleration. This resulted in a model training time of approximately 2 hours which is a significantly more manageable duration. 
+
+The recommended duration for training is 2000 epochs per class but no less than 6000. In figure \ref{fig:yolov4tiny_train} it is seen that 
 
 \begin{figure}[h!]
 \begin{center}
