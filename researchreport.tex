@@ -382,7 +382,7 @@ L_{regression} = \sum(y_i-\hat{y_i})^2
 \end{equation} 
 Where $y_i$ is the ground truth.
 
-Generalized Focal Loss \citep{focalloss}
+Generalized Focal Loss \citep{focalloss}  \# Revise content \#
 
 \subsubsection{YOLO}
 
@@ -396,7 +396,7 @@ To train the network, a multipart loss is optimised. The function has the follow
 \begin{equation}
 L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
 \end{equation} 
-With $\lambda$ as a balancing weight for training emphasis.
+With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \#
 
 \subsubsection{NanoDet}
 
@@ -422,7 +422,7 @@ To train the network, a multipart loss is optimised. The function has the follow
 \begin{equation}
 L_{CenterNet} =  L_{cls} + \lambda_1 L_{offset} + \lambda_2 L_{emb} 
 \end{equation} 
-With $\lambda$ as a balancing weight for training emphasis.
+With $\lambda$ as a balancing weight for training emphasis. 
 
 In more detail:
 
@@ -445,7 +445,7 @@ L_{off} =  \frac{1}{N} \sum_{P} |\hat{O}_{\tilde{P}}-(\frac{p}{R}-\tilde{p})|
 L_{emb} =  \frac{1}{N} \sum_{k=1}^{N} |\hat{S}_{Pk}-s_k|
 \end{equation}
 
-Mean abolute error (L1) is used as the loss function for these regressions, where $\tilde{p}$ is a keypoint and $s$ is the size.
+Mean abolute error (L1) is used as the loss function for these regressions, where $\tilde{p}$ is a keypoint and $s$ is the size. \# Revise content \#
 
 \subsection{Performance Measures}
 
@@ -512,7 +512,7 @@ With $\alpha$ and $\beta$ refer to the input range of $r$ and $b$ is the quantiz
 
 \subsection{Neural Network development and deployment}
 
-A variety of software tools have been developed in order to abstract the low level implementation details of neural networks from high level model architecture for the convenience of the user. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} utilised for the development of R-CNN \citep{rcnn} as well as DarkNet used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow (Google) \citep{tensorflow} and Pytorch (Facebook) \citep{pytorch} facilitate the development of a variety of deep learning model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are meticulously maintained, continuously developed in an open source community and have the vast resources behind ``big-tech'' which is essential to support the current rapid growth of machine learning technologies.
+A variety of software tools have been developed in order to abstract the low level implementation details of neural networks from high level model architecture for the convenience of the user. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} utilised for the development of R-CNN \citep{rcnn} as well as Darknet used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow (Google) \citep{tensorflow} and Pytorch (Facebook) \citep{pytorch} facilitate the development of a variety of deep learning model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are meticulously maintained, continuously developed in an open source community and have the vast resources behind ``big-tech'' which is essential to support the current rapid growth of machine learning technologies.
 
 Researchers implement model architectures using the functionality of a particular framework and therefore models are often not easily interchangeable between frameworks. Further, the libraries and tooling provided by development frameworks can be memory intensive, are optimized for ease of development and training, are not portable between  architecture and platform and are therefore not suitable environments for practical model deployment where only the forward pass is desired. In the context of a real world multidisciplinary development environment, such as in Robotics, one needs to consider the how inference can be executed at run-time in order to achieve maximum performance as well as avoiding framework dependency and supporting a structured modular design approach. 
 
@@ -581,7 +581,7 @@ The object detection space has significantly changed over time, with the most su
 
 Attempting to apply more modern deep learning techniques to improve real-time ball localization, \cite{selfcnn} propose a novel CNN to localize multicolored, patterned balls for Robocup by formulating their approach as a regression problem. They develop an architecture that can process an entire image at once to avoid a sliding window approach by predicting Gaussians that correspond to probabilities of the ball location. They find their proposed model to be too large for their robot (over 2GB) but also find that reducing their model size leads to a poor performance. \cite{selfcnn} conclude, \textit{``Thus, either faster processors for robots are necessary (to run the bigger nets) or low classification rates at medium to high distances have to be accepted''}. Although the design was not successful, the single shot strategy is for real-time is widely adopted by state-of-the-art detectors such as YOLO.
 
-Basing their work on the state-of-the-art single shot architecture, Tiny YOLO v3, \cite{robo} propose a real-time object detector which is fine tuned for RoboCup ball detection for the Nao v5 platform. The maximum reported speed is only 13 FPS. Synthetic transfer learning is successfully applied, which involves pretraining the network on a fully synthetic dataset. \cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLOv4 Tiny performs the best in terms of AP@75 as well as for the small and medium images which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture which does compute at real-time.
+Basing their work on the state-of-the-art single shot architecture, YOLO v3 Tiny, \cite{robo} propose a real-time object detector which is fine tuned for RoboCup ball detection for the Nao v5 platform. The maximum reported speed is only 13 FPS. Synthetic transfer learning is successfully applied, which involves pretraining the network on a fully synthetic dataset. \cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLO v4 Tiny performs the best in terms of AP@75 as well as for the small and medium images which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture which does compute at real-time.
 
 \section{Ball tracking}
 
@@ -603,17 +603,17 @@ In RoboCup soccer most of the decision-making involves the position of the ball 
 
 Hybrid approaches to state estimation which fuse intuitive model based approaches with measured data are a promising technique for state estimation. It is hypothesized that a neural network assisted approach to Kalman filtering can outperform the traditional EKF method at tracking the trajectories of a kicked RoboCup soccer ball as measured by RMSE and speed, using a tracking-by-detection framework.
 
-Modern object detection has significantly improved upon traditional approaches and various models promise reliable localization with real-time performance. Tracking-by-detection is a paradigm which takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be to used to outperform popular anchor based method (Yolov4 Tiny) as well as the traditional Viola Jones detector for color-independent ball detection as measured by quality of inference using AP scores, at a realtime speed. 
+Modern object detection has significantly improved upon traditional approaches and various models promise reliable localization with real-time performance. Tracking-by-detection is a paradigm which takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be to used to outperform popular anchor based method (Yolo v4 Tiny) as well as the traditional Viola Jones detector for color-independent ball detection as measured by quality of inference using AP scores, at a realtime speed. 
 
 \section{Research Aims and Questions}
 
-The first aim of the research project will be to prepare a suitable real-time object detector trained on localizing the ball in a simulated Robocup soccer environment. A traditional architecture (Viola Jones detector) alongside a more modern anchor based detector (YOLOv4 Tiny) serve as a benchmark against a recent keypoint based approach (NanoDet). To motivate the selection of NanoDet, a selection of different pretrained CNN detector models which use different strategies such as single stage, anchor-based and key-point based approaches will be compared on inference speed and memory usage. Inference speed is evaluated on a laptop CPU as a compute constrained device. 
+The first aim of the research project will be to prepare a suitable real-time object detector trained on localizing the ball in a simulated Robocup soccer environment. A traditional architecture (Viola Jones detector) alongside a more modern anchor based detector (YOLO v4 Tiny) serve as a benchmark against a recent keypoint based approach (NanoDet). To motivate the selection of NanoDet, a selection of different pretrained CNN detector models which use different strategies such as single stage, anchor-based and key-point based approaches will be compared on inference speed and memory usage. Inference speed is evaluated on a laptop CPU as a compute constrained device. 
 
 A significant challenge for object detection is the size of the ball which at distance is small in the image (as defined by COCO metrics). The ball used in RoboCup is also significantly white in colour and may be difficult to distinguish against the field markings, goals and Nao robots. The algorithm further needs to act in real-time since slow responses due to heavy computational load can result in delayed agent responses or leading to control inaccuracies and instability. The memory footprint of the architecture should also be considered in the context of embedded computing capacities, which can be improved using model quantization.
 
 The principle questions which arise are:
 \begin{itemize}
-    \item Does the more recent keypoint based NanoDet detector outperform the proven anchor based Yolov4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
+    \item Does the more recent keypoint based NanoDet detector outperform the proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
     \item Can a CNN object detector run at real-time on a modern mobile laptop CPU?
     \item Can pretraining on real images transfer to a simulated RoboCup environment?
     \item Does model quantization cause a noticeable performance degradation? 
@@ -641,7 +641,7 @@ The methods used to investigate the proposed research topic can be conveniently 
 
 \section{Phase one: Object detector investigation}
 
-In this phase, the training and performance of the Viola Jones, Yolov4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors will be evaluated on inference speed and memory utilization. The chosen object detectors are then fine-tuned on a representative data set, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
+In this phase, the training and performance of the Viola Jones, Yolo v4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors will be evaluated on inference speed and memory utilization. The chosen object detectors are then fine-tuned on a representative data set, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
 
 \subsection{Dataset Generation}
 
@@ -653,7 +653,7 @@ Although the empty test environment is proposed for the kick tracking, including
 
 \subsection{Model selection}
 
-The selection of the baseline Viola Jones and Yolov4 Tiny detectors follows on from the related works. NanoDet is proposed since it is a recent key-point based architecture with promising capabilities. To justify this choice, a set of various popular detectors will be evaluated on inference speed and memory utilization. The following pretrained models are selected from the ONNX model zoo \citep{modelzoo} as well as the investigation by \cite{comprehensive}: Faster-RCNN, YOLOv3, Tiny YOLOv3, SSD, Mobilenet SSD, YOLOX and NanoDet. The three investigated models are then fine-tuned to the RoboCup dataset and are evaluated and compared using AP, model size and latency (as measured in a single threaded application on a modern mobile laptop CPU).
+The selection of the baseline Viola Jones and Yolo v4 Tiny detectors follows on from the related works. NanoDet is proposed since it is a recent key-point based architecture with promising capabilities. To justify this choice, a set of various popular detectors will be evaluated on inference speed and memory utilization. The following pretrained models are selected from the ONNX model zoo \citep{modelzoo} as well as the investigation by \cite{comprehensive}: Faster-RCNN, YOLO v3, YOLOv3 Tiny, SSD, Mobilenet SSD, YOLOX and NanoDet. The three investigated models are then fine-tuned to the RoboCup dataset and are evaluated and compared using AP, model size and latency (as measured in a single threaded application on a modern mobile laptop CPU).
 
 The small scale of the ball (less than 32×32 pixels) at long range introduces a risk since it may cause difficulties in training and detection. Beyond network architecture and optimizations, the use of prior knowledge of the ball position to focus a window on the ball (as found in the related work) may boost the performance without large overhead. If this is unsuccessful, the kicking distance may be reduced to the maximum reliable range of the detector.
 
@@ -719,7 +719,7 @@ From the spherical coordinates of the ball that are given by the match server re
 
 Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the misalignment obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
 
-Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset}. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used for allocating data for the various downstream tasks.
+Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
 
 \subsection{Data Exploration}
 The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any which are partially covered.
@@ -850,13 +850,13 @@ An ablation study is now performed in order to optimize accuracy in the context 
 
 \subsection{YOLO v4 Tiny}
 
-YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 model from the author is made available, which has been trained on the Coco dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the Coco dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as performance gain that is achieved at the cost of additional training.
+YOLO object detection is based on the Darknet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 model from the author is made available, which has been trained on the Coco dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the Coco dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as getting a feel for the performance gain that can be achieved at the cost of additional training.
 
 In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into the desired ONNX format. 
 
 \subsubsection{Software environment}
 
- The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. CUDA 11.8 is linked to the makefile - in order to benefit from GPU acceleration - and then the framework is compiled. The training dataset needs to be prepared in a ``DarkNet style'' format. The online deep-learning service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
+ The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. CUDA 11.8 is linked in the makefile - in order to benefit from GPU acceleration - and then the framework is compiled. The training dataset needs to be prepared in a ``Darknet style'' format. The online deep-learning service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
 \subsubsection{Model training}
 
@@ -884,7 +884,7 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 
 It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the Coco dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, which is shown in figure \ref{fig:yolov4tiny_compare}. In order to achieve a real time inference speed, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality.
 
-The additional data point of the pretrained model is also included. Although this model evaluates $80$ Coco classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without design consequence.
+The additional data point of the pretrained model is also included. Although this model evaluates 80 Coco classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without design consequence.
 
 
 \section{Proposed detection}
@@ -985,9 +985,9 @@ One of the interesting results that can be seen, is that the pretrained detector
 
 Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality at a fraction of the training effort and framework complexity. With the ease of the modern  frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. Since the VJ model relies on the OpenCV framework the size of the model is not comparable to the other models which are evaluated on a common inference engine.
 
-The YOLOv4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. However, a real-time implementation was not able to be . This result corresponds to the results seen in the related works, where it was found that the YOLOv4 Tiny model does perform well, however, not quite in real-time.
+The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. However, a real-time implementation was not able to be . This result corresponds to the results seen in the related works, where it was found that the YOLO v4 Tiny model does perform well, however, not quite in real-time.
 
-The Nanodet model out performs all other architectures. Although a margin training effort is applied, the model achieves the highest quality inference at realtime speeds. This is true across each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model is also smaller than that of YOLOv4 by a significant margin, which means that it has a lower footprint on limited capacity machines and therefore allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
+The Nanodet model out performs all other architectures. Although a margin training effort is applied, the model achieves the highest quality inference at realtime speeds. This is true across each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model is also smaller than that of YOLO v4 by a significant margin, which means that it has a lower footprint on limited capacity machines and therefore allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
