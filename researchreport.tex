@@ -850,7 +850,7 @@ An ablation study is now performed in order to optimize accuracy in the context 
 
 \subsection{YOLO v4 Tiny}
 
-YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. A pretrained YOLO v4 model is made available by the author, which has been trained on the Coco dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the Coco dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as performance gain that is achieved at the cost of additional training.
+YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 model from the author is made available, which has been trained on the Coco dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the Coco dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as performance gain that is achieved at the cost of additional training.
 
 In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into the desired ONNX format. 
 
@@ -864,8 +864,6 @@ The original configuration for YOLO v4 Tiny was utilized for model training alon
 
 Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. This resulted in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
 
-In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the number of training epochs is increased the loss score decreases. This corresponds to the model learning the structure of the training data-set and performing better inference on each training example. Initially a very high rate of learning is achieved which reduces over time, however, it does not yet plateau. Too much training can lead to the model over-fitting the training data-set which can harm the ability of the model to generalize to the task it is training for. The model is also evaluated against the validation data-set every 10 epochs, which provides a measure of how well the model captures the general relationships in the data. After 5000 Epochs, it is clear that a plateau in the performance has occured
-
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=13cm]{images/yolov4tiny_train.png}
@@ -874,31 +872,35 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 \end{center}
 \end{figure}
 
-It can be noted that the $AP_{@[IoU=0.5]}$ score of the 480 x 480 resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the Coco dataset, it is capable of capturing the patterns within the data.
+In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the number of training epochs is increased the loss score decreases. This corresponds to the model learning the structure of the training data-set and performing better inference on each training example. Initially a very high rate of learning is achieved which reduces over time, however, it does not yet plateau. Too much training can lead to the model over-fitting the training data-set which can harm the ability of the model to generalize to the task it is training for. The model is also evaluated against the validation data-set every 10 epochs, which provides a measure of how well the model captures the general relationships in the data. After 5000 Epochs, it is clear that a plateau in the validation performance has occurred which is a good indicator that enough training has been performed. 
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=10cm]{images/yolov4tiny_compare.png}
-\caption{NanoDet variations compared}
-\label{fig:nanodet_compare}
+\caption{YOLO v4 Tiny variations compared}
+\label{fig:yolov4tiny_compare}
 \end{center}
 \end{figure}
 
-\newpage
+It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the Coco dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, which is shown in figure \ref{fig:yolov4tiny_compare}. In order to achieve a real time inference speed, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality.
+
+The additional data point of the pretrained model is also included. Although this model evaluates $80$ Coco classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without design consequence.
+
+
 \section{Proposed detection}
 
-Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Following on, the detector is trained and fine tuned in order to find the most suitable configuration for the task.
+Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
 
 \subsection{Naive latency evaluation}
 In order to justify the selection of a modern real-time object detection architecture, a simplistic approach is taken to simply evaluate pretrained models on the target device. In this approach, the latency of the forward pass is considered and the accuracy of the detentions is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
 
 The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is accessible in the pytorch library and is included due to its ease of access. 
 
-In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}.
+In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models smaller than 50mb are readily accommodated and similarly sized to the ONNXruntime linux binary ($\approx13mb$).
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/modelspeedsize.png}
+\includegraphics[width=10cm]{images/modelspeedsize.png}
 \caption{Pretrained model performance vs. size}
 \label{fig:modelspeedsize}
 \end{center}
@@ -906,13 +908,11 @@ In this experiment, a 15 second perspective sequence (375 frames at 25hz) of Rob
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/modelspeed.png}
+\includegraphics[width=10cm]{images/modelspeed.png}
 \caption{Pretrained model performance}
 \label{fig:modelspeed}
 \end{center}
 \end{figure}
-
-The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models smaller than 50mb are readily accommodated and similarly sized to the ONNXruntime linux binary ($\approx13mb$).
 
 It is found that most of the detectors do not execute in realtime on this hardware. Although, this does not definitively mean that they cannot (after model tuning) but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in realtime for many of its configurations and therefore is a good choice to investigate further. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real time to avoid latency issues. 
 
