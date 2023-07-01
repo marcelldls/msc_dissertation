@@ -850,27 +850,31 @@ An ablation study is now performed in order to optimize accuracy in the context 
 
 \subsection{YOLO v4 Tiny}
 
-YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into an ONNX format. 
+YOLO object detection is based on the DarkNet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. A pretrained YOLO v4 model is made available by the author, which has been trained on the Coco dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the Coco dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as performance gain that is achieved at the cost of additional training.
+
+In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into the desired ONNX format. 
 
 \subsubsection{Software environment}
 
- The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. CUDA 11.8 is linked to the makefile - in order to benefit from GPU acceleration - and then the framework is complied. The training dataset needs to be prepared in a ``DarkNet style'' format. The service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data.
+ The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. CUDA 11.8 is linked to the makefile - in order to benefit from GPU acceleration - and then the framework is compiled. The training dataset needs to be prepared in a ``DarkNet style'' format. The online deep-learning service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
 \subsubsection{Model training}
 
-The original configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. Various resolutions are evaluated in order to investigate the speed/accuracy trade off and make a sensible selection. It should be noted that model image resolutions need to be in multiples of 32. 
+The original configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. The models are trainined across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture, which is a common requirement.
+
+Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. This resulted in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
+
+In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the number of training epochs is increased the loss score decreases. This corresponds to the model learning the structure of the training data-set and performing better inference on each training example. Initially a very high rate of learning is achieved which reduces over time, however, it does not yet plateau. Too much training can lead to the model over-fitting the training data-set which can harm the ability of the model to generalize to the task it is training for. The model is also evaluated against the validation data-set every 10 epochs, which provides a measure of how well the model captures the general relationships in the data. After 5000 Epochs, it is clear that a plateau in the performance has occured
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/yolov4tiny_train.png}
+\includegraphics[width=13cm]{images/yolov4tiny_train.png}
 \caption{YOLO v4 Tiny training curves}
 \label{fig:yolov4tiny_train}
 \end{center}
 \end{figure}
 
-Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to acheive completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing, and by a further order of magnitude if CUDA was included for GPU acceleration. This resulted in a model training time of approximately 2 hours which is a significantly more manageable duration. 
-
-The recommended duration for training is 2000 epochs per class but no less than 6000. In figure \ref{fig:yolov4tiny_train} it is seen that 
+It can be noted that the $AP_{@[IoU=0.5]}$ score of the 480 x 480 resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the Coco dataset, it is capable of capturing the patterns within the data.
 
 \begin{figure}[h!]
 \begin{center}
@@ -914,13 +918,13 @@ It is found that most of the detectors do not execute in realtime on this hardwa
 
 \subsection{NanoDet}
 
-The NanoDet classifier is open source and hosted on github. It can be trained, stored and loaded for performing inference using the PyTorch deep learning framework using the Python programming language. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. 
+The NanoDet classifier is open source and hosted on github. It can be trained, stored and loaded for performing inference using the PyTorch deep learning framework using the Python programming language. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
 
 In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the instructions found on the repository, before installing the required packages to get a suitable environment.
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
 
 \subsubsection{Model training}
 
