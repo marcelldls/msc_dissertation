@@ -717,12 +717,12 @@ From the spherical coordinates of the ball that are given by the match server re
 \end{center}
 \end{figure}
 
-Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the misalignment obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
+Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the temporal misalignment visually obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
 
 Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
 
 \subsection{Data Exploration}
-The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any which are partially covered.
+The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any which are partially covered.
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -738,7 +738,7 @@ Test			&513			&20\%			&68.8\%			&20.9\%			&10.3\%			&70.6\%			&50.9\%			&54.2\%	
 \label{tab:detection}
 \end{table*}
 
-Since the data is acquired using simulation, it is expected that the dataset is representative. It is seen that the properties are consistent through each split. Although the majority of the images have a visible ball (since the agent constantly looks for the ball), there are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. This is to be expected.
+With the data acquired using the target environment, it is expected that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. This is to be expected.
 
 The ground truth BBs are plotted with some examples of the dataset in figure \ref{fig:detectimages}:
 
@@ -750,7 +750,7 @@ The ground truth BBs are plotted with some examples of the dataset in figure \re
 \end{center}
 \end{figure}
 
-The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball bends to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait, where architectures may capture this.
+The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball is bias to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait, as some architectures may capture this.
 
 \begin{figure}[h!]
 \begin{center}
