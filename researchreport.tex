@@ -762,7 +762,7 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \section{Baseline detection}
 
-The baseline detectors, which are chosen based on the reported results of the related works, are now investigated.
+The baseline detectors, which have been chosen based on the reported results of the related works, are now investigated.
 
 \subsection{Viola Jones}
 
@@ -792,7 +792,7 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimization of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. Each additional layer reduces the false alarm rate but also the hit rate, layers of features are added until the goal is met.
 
-The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. A  The overall hit rate is computed as:
+The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
 \begin{equation}
 Overall\_hitRate = hitRate^{numStages}
 \end{equation}
@@ -812,7 +812,7 @@ In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAl
 \end{center}
 \end{figure}
 
-A additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
+Adding additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
 
 The first layers of the final stage can be visualized in figure \ref{fig:vjstages}:
 
