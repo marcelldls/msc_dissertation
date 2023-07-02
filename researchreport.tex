@@ -917,19 +917,19 @@ It is found that most of the detectors do not execute in real-time on this hardw
 
 \subsection{NanoDet}
 
-The NanoDet classifier is open source and hosted on github. It can be trained, stored and loaded for performing inference using the PyTorch deep learning framework using the Python programming language. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
+The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference using the Python programming language. The architecture can be found on github along with tested pretrained models, which target the COCO dataset, are also shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
 
 In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
 
 \subsubsection{Model training}
 
 During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format. 
 
-In order to train the model, a variety of the popular NanoDet architectures are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation losses.
+In order to train the model, a variety of the popular NanoDet architectures are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation results.
 
 \begin{figure}[h!]
 \begin{center}
