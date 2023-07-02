@@ -929,7 +929,7 @@ NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest
 
 During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format. 
 
-In order to train the model, a variety of the popular NanoDet architectures are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation results.
+In order to train the model, a variety of the popular NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation results.
 
 \begin{figure}[h!]
 \begin{center}
@@ -939,11 +939,9 @@ In order to train the model, a variety of the popular NanoDet architectures are 
 \end{center}
 \end{figure}
 
-In general, it can be seen that the validation losses of each of the models reaches a minimum before increasing as further epochs are performed. This indicates that sufficient training iterations have been performed and that further training will lead to over-fitting. The training and validation losses are of a similar magnitude, which can be interpreted as sufficient training examples being provided and that the datasets are representative. The best iteration of each model is chosen based on the AP scores. 
+In general, it can be seen that as more epochs are performed, the loss scores are reduced. This indicates that the model is learning the training data and improving its ability to perform object detection. Further, it can be seen that as training epochs are performed the validation scores of each of the models increases. This indicates that the model is indeed learning the general structure of the data. After a number of epochs have been performed, the validation scores reaches a pleateu. This indicates that sufficient training iterations have been performed and that further training may lead to over-fitting of the training data. The best iteration of each model is chosen based on the validation AP scores. 
 
-As a post training step, the repository tools are used to produce the model in an ONNX format. A crucial step which is not documented by \cite{nanodet} is to post-process the ONNX model using the the ONNX runtime $remove\_initializer\_from\_input$ function. Without this step, a significant degradation in inference speed occurs which impacts the ability of the detector to run in real-time.
-
-The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
+Post training, provided tools are used to produce the model in an ONNX format. A crucial step not documented by \cite{nanodet} is to post-process the ONNX model with the ONNX runtime $remove\_initializer\_from\_input$ function. Without this, a significant degradation in inference speed occurs, preventing the detector to run in real-time. The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
 
 \begin{figure}[h!]
 \begin{center}
