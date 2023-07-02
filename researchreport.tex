@@ -390,13 +390,13 @@ A breakthrough for object detection was achieved with the introduction of the on
 
 Many variations of the YOLO algorithm exist, where most do not originate from the original researchers. In the classic YOLO architecture, the image is divided into grid cells of $S\times S$ (typically $13\times 13$ is used) - which is achieved by down-sampling with a CNN backbone. For each cell, predefined bounding boxes (with $B$ number of boxes per cell - 5 is typical) are used as initial guesses for object location and size - which drives the depth of the feature map. These box dimensions (AKA dimensional priors) are learnt via using k-means clustering on the training data. For each anchor box, we predict class and objectness (probability of an object in the given region). For localisation, offsets from the prior is then predicted. \citep{comprehensive}
 
-\cite{yolocomprehensive}
+\cite{yolocomprehensive}, \citep{yolov4}
 
 To train the network, a multipart loss is optimised. The function has the following high level form:
 \begin{equation}
 L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
 \end{equation} 
-With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \#
+With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \# 
 
 \subsubsection{NanoDet}
 
@@ -850,7 +850,7 @@ An ablation study is now performed in order to optimize accuracy in the context 
 
 \subsection{YOLO v4 Tiny}
 
-YOLO object detection is based on the Darknet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 model from the author is made available, which has been trained on the COCO dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the COCO dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as getting a feel for the performance gain that can be achieved at the cost of additional training.
+YOLO object detection is based on the Darknet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 \citep{yolov4tiny} model from the author is made available, which has been trained on the COCO dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the COCO dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as getting a feel for the performance gain that can be achieved at the cost of additional training.
 
 In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into the desired ONNX format. 
 
@@ -885,7 +885,6 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the COCO dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, which is shown in figure \ref{fig:yolov4tiny_compare}. In order to achieve a real time inference speed, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality.
 
 The additional data point of the pretrained model is also included. Although this model evaluates 80 COCO classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without design consequence.
-
 
 \section{Proposed detection}
 
