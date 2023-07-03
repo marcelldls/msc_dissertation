@@ -738,7 +738,7 @@ Test			&513			&20\%			&68.8\%			&20.9\%			&10.3\%			&70.6\%			&50.9\%			&54.2\%	
 \label{tab:detection}
 \end{table*}
 
-With the data acquired using the target environment, it is expected that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. This is to be expected.
+With the data acquired using the target environment, it is expected that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. This is to be expected.
 
 The ground truth BBs are plotted with some examples of the dataset in figure \ref{fig:detectimages}:
 
@@ -917,13 +917,13 @@ It is found that most of the detectors do not execute in real-time on this hardw
 
 \subsection{NanoDet}
 
-The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference using the Python programming language. The architecture can be found on github along with tested pretrained models, which target the COCO dataset, are also shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
+The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference using the Python programming language. The NanoDet repository can be found on github along with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
 
 In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported, which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
 
 \subsubsection{Model training}
 
@@ -951,18 +951,18 @@ Post training, provided tools are used to produce the model in an ONNX format. A
 \end{center}
 \end{figure}
 
-The scores are the highest of any of the considered models, without even performing a search for ideal hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
+The validation scores for NanoDet are the highest of any of the considered models, without even performing a search for hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-It is seen in general, that the higher resolution architectures (416 vs. 320) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models which have a deeper backbone also perform inference slower, however, in this case they do not perform at a higher inference quality. This may be due to not applying optimum parameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for a different dataset. The NanoDet-plus-m\_416 instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+Similar to the results of all models considered thus far - it is seen in general, that the higher resolution architectures ($416 \times 416$ vs. $320 \times 320$) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models which have a deeper backbone also perform inference slower, however, in this case they do not perform at a higher inference quality. A reason for this could be that more complex models are prone to overfitting the training data as they are able to capture the noise present. Additionally this may also be due to not applying optimum parameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for a different dataset. The ``NanoDet-plus-m\_416'' instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
-The chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this is that float32 computation is more popular as most models are implemented to maximise accuracy and therefore the operations in this representation are better optimized for the used hardware. Since the model is already of acceptable size, the quantized model is not utilized and further quantization is not investigated.
+In order to investigate model optimization for deployment, the chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this appears to be that that float16 operations is not well supported by all hardware (x86 CPUs) and thus require conversion to a float32 representation which adds an overhead. Since the model is already of acceptable size compared to the size of the ONNX Runtime binary, the quantized model is not utilized and further quantization is not investigated.
 
 \newpage
 \section{Evaluation of detection}
 
-The selected pretrained, trained and fine-tuned models are now compared relative to each other using the unseen test dataset. The results are deconstructed and evaluated by the relative size of the objects, which helps to provide an indication into the performance of the detector against distant target objects. Models that are pretrained on the COCO dataset are also included as they provide insight for how well the model generalizes to the synthetic dataset.
+The selected pretrained, trained and fine-tuned models are now compared relative to each other using the unseen test dataset. The dataset is decomposed into object sizes, scenario and occlusion for evaluation which helps to provide an insight into the performance of the detectors. 
 
-Further, the data is evaluated in three parts. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking task. Then, a dataset that does feature match image but not occluded images is used. It is thought that such a set would expose the model performance among a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. 
+The data is evaluated in three parts. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking task. Then, a dataset that does feature match image but not occluded images is used. It is thought that such a set would expose the model performance among a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. This provides the most realistic performance evaluation in a typical scenario. 
 
 The results are plotted in figure \ref{fig:evaldetect}
 
@@ -976,15 +976,29 @@ The results are plotted in figure \ref{fig:evaldetect}
 
 Various conclusions can be drawn from these results, which are now discussed.
 
-As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance and occluded images cause even further performance decline. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to detect. 
+\subsubsection{Performance against increasing difficulty}
 
-One of the interesting results that can be seen, is that the pretrained detectors chosen actually perform well on the synthetic RoboCup ball tracking dataset. This is not a generalization that one can necessarily rely on, however, it is a useful result for the domain adaptation properties of the models. The results supports the chosen approach of fine-tuning the detector to the dataset.
+As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance as the ball is more difficult to identify amount the agents. Additionally occluded images cause even further performance decline as it requires only partial information. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to classify and regress accurately. 
 
-Relatively, the VJ detector performs the worst of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality at a fraction of the training effort and framework complexity. With the ease of the modern  frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. Since the VJ model relies on the OpenCV framework the size of the model is not comparable to the other models which are evaluated on a common inference engine.
+\subsubsection{Traditional detection}
+
+Relatively, the VJ detector performs the worst of any of the detectors across the data. Despite the effort of searching for ideal parameters and tuning, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality at a fraction of the training effort and framework complexity. With the ease of the modern frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. A significant challenge is the tightness of the produced bounding boxes, which tend to be too large in the cases that a ball is even correctly identified. Since the VJ model relies on the OpenCV framework the size of the model is not comparable to the other models which are evaluated on a common inference engine.
+
+\subsubsection{Pretrained modern detection}
+
+One of the interesting results that can be seen, is that the pretrained detectors chosen actually achieve a useful performance on the synthetic RoboCup ball tracking dataset - although only for medium size objects (likely due to the COCO dataset not featuring many small objects). This is not a generalization that one can necessarily rely on, however, it is a useful result for understanding the domain adaptation properties of the models and may be helpful for initial selection of suitable algorithms for a particular task. For a fraction of the effort of training a Viola Jones classifier, a significantly better result is achieved.
+
+\subsubsection{YOLO v4 Tiny}
 
 The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. However, a real-time implementation was not able to be . This result corresponds to the results seen in the related works, where it was found that the YOLO v4 Tiny model does perform well, however, not quite in real-time.
 
+\subsubsection{Nanodet}
+
 The Nanodet model out performs all other architectures. Although a margin training effort is applied, the model achieves the highest quality inference at real-time speeds. This is true across each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model is also smaller than that of YOLO v4 by a significant margin, which means that it has a lower footprint on limited capacity machines and therefore allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
+
+\subsubsection{Overall}
+
+Confirm hypothesis
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
