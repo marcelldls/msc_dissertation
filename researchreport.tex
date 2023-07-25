@@ -1001,20 +1001,18 @@ After training and evaluating the various detectors, the principle questions of 
 \chapter{Object tracking investigation}
 
 \section{Tracking dataset}
-Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is randomized and then captured in a practice environment, as a sequence of images with metadata, at 25hz and ground-truth positions at 50Hz.
+Once again, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is randomized and then captured in a practice environment as a sequence of images (with metadata) at 25hz with respective ground-truth positions at 50Hz.
 
 \subsection{Software environment}
-The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half.
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as before. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half in order to ensure that the data set has full coverage of the arena.
 
-Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized by the server time. 
-
-Low level control of the agent is again abstracted by using magmaFatProxy-1.2.2, but needs to be further extended to handle ground truth ball and agent positions. 
+Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system to the global coordinate system. The data is synchronized by the server time. Low level control of the agent is again abstracted by using magmaFatProxy-1.2.2, but the code needs to be further extended to handle ground truth ball and agent positions. 
 
 \subsection{Preprocessing}
 
-Some of the tracking sequences need to be discarded due to abnormalities such as: agent instability, kicking outside of the play area and ball rebounding off the goal posts. These occur infrequently enough to ignore, however, must be manually identified by watching the sequence. 
+Some of the tracking sequences need to be discarded due to abnormalities such as: agent instability, kicking outside of the play area and ball rebounding off the goal posts. These edge cases occur infrequently enough to ignore for training, however, must be manually excluded by watching the sequence. 
 
-In order to conserve memory, the tracking sequence images are taken from their .json base64 encoded string and compressed into an .avi video format - which results in a 99\% reduction in size from 100mb per sequence. However, a dataloader is required.
+In order to conserve memory, the tracking sequence images are taken from their .json base64 encoded string and compressed into an .avi video format - which results in a 99\% reduction in size from 100mb per sequence. However, a dataloader is required to be constructed which also ensures synchronization between image and metadata.
 
 \subsection{Data exploration}
 
@@ -1044,7 +1042,7 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 \end{center}
 \end{figure}
 
-Two peculiar behaviors of the simulator handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified visually and indeed seems to be the case but is not understood why the simulation allows this. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position - possibly caused by the server which does not execute a true kick, but rather beams the ball to the feet of the agent and applies a velocity rather than performing a realistic kick as described by \cite{fatproxy}. This behavior only effect a minority of time-steps and is therefore accepted.
+Two peculiar behaviors of the simulator handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified by comparing the rendered images to the logging and indeed seems to be the case although it is not understood why the simulation has this behavior. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position - possibly caused by the server which does not execute a true kick, but rather beams the ball to the feet of the agent and applies a velocity rather than performing a realistic kick, described by \cite{fatproxy}. This behavior only effects a minority of time-steps and is therefore accepted.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1054,13 +1052,64 @@ Two peculiar behaviors of the simulator handling of the ball are noticed in the 
 \end{center}
 \end{figure}
 
-A variety of kicks are produced, which reflects the various trajectories that are possible. 
-
 \section{Baseline tracking}
 
 The baseline trackers, which have been chosen based on being a popular traditional method as seen in the related works, are now investigated.
 
 \subsection{Exploration}
+
+Initially, the raw detections of the tracking dataset are studied alongside the ground truth ball position as well as the ball position inferred by a perfect detection. In the latter case, the ground truth detections are forward transformed to field ball positions using the same transformation as used by the agent. A ``latch'' is used for tracking, which means that missed and intermediate steps are filled by the previous positions.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=13cm]{images/raw_error.png}
+\caption{Detection dataset ground-truths}
+\label{fig:rawerror}
+\end{center}
+\end{figure}
+
+In figure \ref{fig:rawerror} the root mean square error has been computed over binned kick distance. It can be seen that a ``noise floor'' exists due to the presence of inaccuracies in the forward transformation of the agent. A reason for this is that a simplified representation of the the agent model is used in the team which does not compensate for offsets in angular uprightness of the agent, which have generally been seen as providing an acceptable level of error compared to the complexity of a more accurate representation. Since the FatProxy agent walks on the spot when not commanded, the agent is constantly in motion and error is continuously introduced.
+
+At the near zero distance (before the Fat Proxy kick causes non-physical error) the position error is dominated by the error in the transformation. Up until approximately 4m distance from the agent, a significant portion of error can also be attributed to the transformation model. However, beyond this point, it is evident that the error explodes. 
+
+A short and long ground based kick is interrogated in figures \ref{fig:rawgroundshort} and \ref{fig:rawgroundlong}:
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/raw_ground_short.png}
+\caption{Short ground kick - Raw detections}
+\label{fig:rawgroundshort}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/raw_ground_long.png}
+\caption{Long ground kick - Raw detections}
+\label{fig:rawgroundlong}
+\end{center}
+\end{figure}
+
+In these kicks the following can be noted. Firstly, the error due to the transformation can be observed in the time domain, where it is clear that the cyclic nature of the agent motions results a significant error, as previously noted. Secondly, the inference of distance beyond .. appears problematic
+
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/raw_loft_short.png}
+\caption{Detection dataset ground-truths}
+\label{fig:rawloftshort}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/raw_loft_long.png}
+\caption{Detection dataset ground-truths}
+\label{fig:rawloftlong}
+\end{center}
+\end{figure}
+
 
 \section{Proposed tracking}
 
