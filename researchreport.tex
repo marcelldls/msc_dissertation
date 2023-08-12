@@ -1063,7 +1063,7 @@ Initially, the raw detections of the tracking dataset will be studied alongside 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=13cm]{images/raw_error.png}
-\caption{Detection dataset ground-truths}
+\caption{Basic tracking error}
 \label{fig:rawerror}
 \end{center}
 \end{figure}
@@ -1097,7 +1097,7 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/raw_loft_short.png}
-\caption{Detection dataset ground-truths}
+\caption{Short lofted kick - Raw detections}
 \label{fig:rawloftshort}
 \end{center}
 \end{figure}
@@ -1105,7 +1105,7 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/raw_loft_long.png}
-\caption{Detection dataset ground-truths}
+\caption{Long lofted kick - Raw detections}
 \label{fig:rawloftlong}
 \end{center}
 \end{figure}
@@ -1114,22 +1114,159 @@ For lofted kicks, it is firstly noted that the trajectory follows a parabolic pa
 
 \subsection{Standard Kalman Filtering}
 
-Initially, a simplistic approach is taken by assuming the process (the ground motions of the ball) can be described by Newton's equations of motion - as a constant velocity model. This model can be expressed as a linear set of first order differential equations as follows: \citep{kalmanpy}
+Initially, a simplistic approach is taken by assuming the process (the ground motions of the ball) can be described by Newton's famous equations of motion - as a constant velocity model in equation \ref{eqn:newton} below. This dynamics model can then be expressed as a linear set of recursive equations as follows in equation \ref{eqn:firstorder}:
 
+\begin{equation} 
+x_k=v\Delta t + x_{k-1}
+\label{eqn:newton}
+\end{equation}
+\begin{equation} 
+x_k
+=
+F(t)x_{k-1}
+=
+\begin{bmatrix}
+    1 & \Delta t \\
+    0 & 1 
+\end{bmatrix}
+x_{k-1}
+\label{eqn:firstorder}
+\end{equation}
 
-This formulation of Kalman filter is also known as a ``first order'' Kalman filter. The measurement noise must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model is assumed to 
+Applying this dynamics model in the formulation of Kalman filter results in what is known as a ``first order'' Kalman filter, where a zero order filter assumes constant position. The measurement noise $R$ must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model $Q$ assumes zero-mean white noise of a Gaussian nature which originate from fluctuations in the velocity term. A continuous velocity noise model $Q_c$ (equation \ref{eqn:cnoise}) can be discretized for the desired time step and propagated through the system dynamics model $F$ using equation \ref{eqn:dnoise}. \citep{kalmanpy}
 
-It is seen that the results of this model are poor. Since the prediction model is overly simplisitic, 
-The short commings are apparent
+\begin{equation} 
+Q_c
+=
+\begin{bmatrix}
+    0 & 0 \\
+    0 & 1 
+\end{bmatrix}
+\Phi
+\label{eqn:cnoise}
+\end{equation}
+\begin{equation} 
+Q = \int\limits_0^{\Delta t} F(t)Q_cF^T(t)dt
+=
+\begin{bmatrix}
+    \Delta t^3/3 & \Delta t^2/2 \\
+    \Delta t^2/2 & \Delta t 
+\end{bmatrix}
+\Phi
+\label{eqn:dnoise}
+\end{equation}
+
+$\Phi$ is the spectral density of the white noise - which is often difficult to compute or measure, especially when the process model differs from reality and is therefore often applied as an engineering factor or found by tuning. In order to find an appropriate $\Phi$ for the ball tracking task, a search is used.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/fok_ground_short.png}
+\caption{Short ground kick - First order Kalman Filter}
+\label{fig:fokgroundshort}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/fok_ground_long.png}
+\caption{Long ground kick - First order Kalman Filter}
+\label{fig:fokgroundlong}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/fok_loft_short.png}
+\caption{Short lofted kick - First order Kalman Filter}
+\label{fig:fokloftshort}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/fok_loft_long.png}
+\caption{Long lofted kick - First order Kalman Filter}
+\label{fig:fokloftlong}
+\end{center}
+\end{figure}
+
+It is seen that the results of this model are poor. Since the prediction model is overly simplistic, 
+The short comings are apparent
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=13cm]{images/fok_error.png}
+\caption{First order Kalman Filter error}
+\label{fig:fokerror}
+\end{center}
+\end{figure}
 
 \subsection{Extended Kalman Filtering}
 
-A more sophisticated model describing the ground motion of the ball, which has been successful in the RoboCup domain, is described by \cite{kalmanmodel} where it was first applied to their team (CMUnited) to win the RoboCup-97 small-robot competition. 
+A more sophisticated model describing the ground motion of the ball, which has been successful in the RoboCup domain, is described by \cite{kalmanmodel} where it was first applied to their team (CMUnited) to win the RoboCup-97 small-robot competition. As per \cite{kalmanmodel}, the rolling resistance of a ball can be expressed by a constant (but unknown) discounting factor $\lambda$ which is defined as a state variable and iteratively applied in order reducing velocity each time step by a constant descaling. 
 
-As per \cite{kalmanmodel}, the rolling resistance of a ball can be expressed by a constant (but unknown) discounting factor which is iterative applied, reducing velocity each time step by a constant descaling. 
+This dynamics model can then be expressed as a non-linear set of recursive equations as follows in equation \ref{eqn:dragorder} - which can be applied in an Extended Kalman filter:
+
+\begin{equation} 
+\begin{bmatrix}
+    x_{k+1} \\
+    \dot{x}_{k+1} \\
+	\lambda_{k+1} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    x_{k} + \dot{x}_{k} \cdot \Delta t\\
+    \dot{x}_{k} \cdot \lambda_{k} \\
+	\lambda_{k} \\
+\end{bmatrix}
+\label{eqn:dragorder}
+\end{equation}
+
+The same measurement noise $R$ is applied, as for the first order Kalman filter, as is the same process noise $Q$. Again $\Phi$ is to be found by doing a search.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/ekf_ground_short.png}
+\caption{Short ground kick - Extended Kalman Filter}
+\label{fig:ekfgroundshort}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/ekf_ground_long.png}
+\caption{Long ground kick - Extended Kalman Filter}
+\label{fig:ekfgroundlong}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/ekf_loft_short.png}
+\caption{Short lofted kick - Extended Kalman Filter}
+\label{fig:ekfloftshort}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=12cm]{images/ekf_loft_long.png}
+\caption{Long lofted kick - Extended Kalman Filter}
+\label{fig:ekfloftlong}
+\end{center}
+\end{figure}
+
+A significantly improved result can be seen. However it is also clear that for each set of $\Phi$, the model performs better at given ranges. In this manner it is possible to hand craft the gains in order to get better results. 
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=13cm]{images/ekf_error.png}
+\caption{Extended Kalman Filter error}
+\label{fig:ekferror}
+\end{center}
+\end{figure}
 
 \section{Proposed tracking}
-
 
 
 \section{Evaluation of trackers}
