@@ -1056,7 +1056,7 @@ Two peculiar behaviors of the simulator's handling of the ball are noticed in th
 
 The baseline trackers, which have been chosen based on popular traditional methods as seen in the related works, are now investigated.
 
-\subsection{Exploration}
+\subsection{Basic tracking}
 
 Initially, the raw detections of the tracking dataset will be studied alongside the ground truth ball position as well as the ball position inferred by a perfect object detector. To do this, the ball detections are forward transformed to field ball positions using the same transformation as used by the team. A simple latch is used for tracking, which means that missed and intermediate steps are filled by the previous positions.
 
@@ -1112,9 +1112,25 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 
 For lofted kicks, it is firstly noted that the trajectory follows a parabolic path as expected for projectile motion. With each bounce, energy losses causes rebounds of diminishing height. Secondly it is noted that within 5m the detector is comparable to perfect vision. Beyond 5m a limit on the ball distance is reached which causes the error to explode. Further, its clear in figure \ref{fig:rawloftlong} that at such distances ball detections start to be missed.
 
+\subsection{Standard Kalman Filtering}
+
+Initially, a simplistic approach is taken by assuming the process (the ground motions of the ball) can be described by Newton's equations of motion - as a constant velocity model. This model can be expressed as a linear set of first order differential equations as follows: \citep{kalmanpy}
+
+
+This formulation of Kalman filter is also known as a ``first order'' Kalman filter. The measurement noise must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model is assumed to 
+
+It is seen that the results of this model are poor. Since the prediction model is overly simplisitic, 
+The short commings are apparent
+
+\subsection{Extended Kalman Filtering}
+
+A more sophisticated model describing the ground motion of the ball, which has been successful in the RoboCup domain, is described by \cite{kalmanmodel} where it was first applied to their team (CMUnited) to win the RoboCup-97 small-robot competition. 
+
+As per \cite{kalmanmodel}, the rolling resistance of a ball can be expressed by a constant (but unknown) discounting factor which is iterative applied, reducing velocity each time step by a constant descaling. 
+
 \section{Proposed tracking}
 
-The baseline detectors, which have been chosen based on the reported results of the related works, are now investigated.
+
 
 \section{Evaluation of trackers}
 
