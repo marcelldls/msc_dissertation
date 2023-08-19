@@ -1133,7 +1133,7 @@ x_{k-1}
 \label{eqn:firstorder}
 \end{equation}
 
-Applying this dynamics model in the formulation of Kalman filter results in what is known as a ``first order'' Kalman filter, where a zero order filter assumes constant position. The measurement noise $R$ must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model $Q$ assumes zero-mean white noise of a Gaussian nature which originate from fluctuations in the velocity term. A continuous velocity noise model $Q_c$ (equation \ref{eqn:cnoise}) can be discretized for the desired time step and propagated through the system dynamics model $F$ using equation \ref{eqn:dnoise}. \citep{kalmanpy}
+Applying the constant velocity model in the prediction step of a Kalman filter results in what is known as a ``first order'' Kalman filter, where a zero order filter assumes constant position. The measurement noise $R$ must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model $Q$ assumes zero-mean white noise of a Gaussian nature, originating as fluctuations in the velocity. A continuous velocity noise model $Q_c$ (equation \ref{eqn:cnoise}) can be discretized for the desired time step and propagated through the system dynamics model $F$ using equation \ref{eqn:dnoise}. \citep{kalmanpy}
 
 \begin{equation} 
 Q_c
@@ -1156,7 +1156,7 @@ Q = \int\limits_0^{\Delta t} F(t)Q_cF^T(t)dt
 \label{eqn:dnoise}
 \end{equation}
 
-$\Phi$ is the spectral density of the white noise - which is often difficult to compute or measure, especially when the process model differs from reality and is therefore often applied as an engineering factor or found by tuning. In order to find an appropriate $\Phi$ for the ball tracking task, a search is used.
+$\Phi$ is the spectral density of the white noise - which is often difficult to compute or measure, especially when the process model differs from reality and is therefore often applied as an engineering factor or found by tuning. In order to find an appropriate $\Phi$ for the ball tracking task, a search is used. The results are shown in figures \ref{fig:fokgroundshort}-\ref{fig:fokloftlong}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1268,6 +1268,7 @@ A significantly improved result can be seen. However it is also clear that for e
 
 \section{Proposed tracking}
 
+It is found that the model is sensitive to initialization. 
 
 \section{Evaluation of trackers}
 
