@@ -1190,8 +1190,13 @@ $\Phi$ is the spectral density of the white noise - which is often difficult to 
 \end{center}
 \end{figure}
 
-It is seen that the results of this model are poor. Since the prediction model is overly simplistic, 
-The short comings are apparent
+By inspecting a variety of kicks, one can get an understanding of the characteristics of the first order Kalman tracker. Initially, at the start of each kick, the model uncertainty is initialized high which results in a large Kalman gain. This corresponds to a stronger dependency of the sensor measurement (rather than the prediction model) which helps to obtain a better state estimation. This makes sense as initially there is an assumption of no knowledge of the object states. As time passes, the model relies less on the measurement and more on the dynamics model, which can result in noise attenuation. The ultimate convergence of the Kalman gain depends on the balance of the magnitudes of the measurement noise and process uncertainty.
+
+When the process is very uncertain (high $\Phi$) then the filter ignores the dynamics model and a state estimation with negligible difference from a no filtering approach is achieved. As $\Phi$ is reduced, the dynamics model plays a larger role. With prior knowledge that the object is moving at constant velocity, it is possible to attenuate noise. However, if the dynamics model is overly dominant it causes a lag in the cases where the ball does not behave as is modeled by the function. This can lead to significant error, much worse than if no filtering is applied. 
+
+It can also be noted, that even though the kicks differ significantly, the convergence of the Kalman gain is unchanged. The convergence in unintelligent and only corresponds to the initialization of the parameters. This adds a further challenge in finding a fit that can be utilized across the spectrum of expected kicks.
+
+With such a simplistic tracker, which has significantly limiting assumptions, it can be seen that in the complex cases where the the measurement error is highly non-linear - that the result is poor. Although the filter can be tuned in order to achieve some noise attenuation, this however comes at a large cost of error due to increased latency when the process differs from the model. The standard Kalman filter is not able to learn and compensate for the large non-linearity. It can be seen in figure \ref{fig:fokerror} that for such a complex case, the application of a standard first order Kalman filter, across a variety of $\Phi$, is either detrimental or causes negligible improvement to the performance when no tracking is used.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1200,6 +1205,7 @@ The short comings are apparent
 \label{fig:fokerror}
 \end{center}
 \end{figure}
+
 
 \subsection{Extended Kalman Filtering}
 
