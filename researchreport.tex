@@ -1260,8 +1260,6 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 \end{center}
 \end{figure}
 
-A significantly improved result can be seen. However it is also clear that for each set of $\Phi$, the model performs better at given ranges. 
-
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=13cm]{images/ekf_error.png}
@@ -1270,13 +1268,17 @@ A significantly improved result can be seen. However it is also clear that for e
 \end{center}
 \end{figure}
 
+A significantly improved result can be seen. However it is also clear that for each set of $\Phi$, the model performs better at given ranges. 
+
+
+
 \subsection{Hand crafting better performance}
 
 It can be recognized that, per kick, initially more accurate detections are available and as the ball moves further away from the agent that the detections become significantly less accurate. Since a the EKF model attempts to account for the nonlinear trajectory after kicking, one might rather focus having early detections dominate the initial converging on the state and then allow the model predictions to dominate the state estimation and possibly even ignoring detections as they become less reliable. In order to achieve this, one might tune the measurement noise factor in order to get this behavior. Although gain scheduling is also possible, however, it is desired to rather retain the natural initialization behavior.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_ground_short.png}
+\includegraphics[width=12cm]{images/ekfg_ground_short.png}
 \caption{Short ground kick - EKF hand crafted}
 \label{fig:ekfggroundshort}
 \end{center}
@@ -1284,7 +1286,7 @@ It can be recognized that, per kick, initially more accurate detections are avai
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_ground_long.png}
+\includegraphics[width=12cm]{images/ekfg_ground_long.png}
 \caption{Long ground kick - EKF hand crafted}
 \label{fig:ekfggroundlong}
 \end{center}
@@ -1292,7 +1294,7 @@ It can be recognized that, per kick, initially more accurate detections are avai
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_loft_short.png}
+\includegraphics[width=12cm]{images/ekfg_loft_short.png}
 \caption{Short lofted kick - EKF hand crafted}
 \label{fig:ekfgloftshort}
 \end{center}
@@ -1300,19 +1302,9 @@ It can be recognized that, per kick, initially more accurate detections are avai
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_loft_long.png}
+\includegraphics[width=12cm]{images/ekfg_loft_long.png}
 \caption{Long lofted kick - EKF hand crafted}
 \label{fig:ekfgloftlong}
-\end{center}
-\end{figure}
-
-A significantly improved result can be seen. However it is also clear that for each set of $\Phi$, the model performs better at given ranges. 
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=13cm]{images/ekf_error.png}
-\caption{Extended Kalman Filter error}
-\label{fig:ekfgerror}
 \end{center}
 \end{figure}
 
