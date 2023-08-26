@@ -802,7 +802,7 @@ Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
 \end{equation}
 The number of features used is then increased until the target rates are met for this stage. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. In this study, a search is performed over $numStages$, and evaluated for the AP score against tested and validation sets, in order to ensure that the model is both sufficiently trained but also not over-fitting, for the actual targeted detection task.  
 
-In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, providing a conservative buffer of images to compensate for the cases falsely not detected by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset}. 
+In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, providing a conservative buffer of images to compensate for the cases falsely not detected by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -812,13 +812,13 @@ In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAl
 \end{center}
 \end{figure}
 
-Adding additional stages coincided with an increased training time, with the longest for 12 stages was 5 hours and 45 minutes. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
+With some difficulties obtaining GPU support, training was performed using a computing cluster hosting Intel Xeon E5-2680 processors. The speed up achieved using OpenMP was sufficient to allow reasonable training times. Adding additional stages coincided with an increased training time, with the longest for 12 stages being roughly 6 hours. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
 
 The first layers of the final stage can be visualized in figure \ref{fig:vjstages}:
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/vj_result.jpg}
+\includegraphics[width=9cm]{images/vj_result.jpg}
 \caption{Cascade classifier 4 layers of final stage}
 \label{fig:vjstages}
 \end{center}
@@ -830,7 +830,7 @@ During inference, $minNeighbors$ provides a measure of confidence to retain the 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/vj_tune.png}
+\includegraphics[width=9cm]{images/vj_tune.png}
 \caption{AP vs $minNeigbours$}
 \label{fig:vjneighbors}
 \end{center}
@@ -860,9 +860,9 @@ In the following section the steps taken to prepare the software environment and
 
 \subsubsection{Model training}
 
-The original configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. The models are trainined across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture, which is a common requirement.
+The release configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
-Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. This resulted in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
+Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
 
 \begin{figure}[h!]
 \begin{center}
@@ -929,7 +929,7 @@ NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest
 
 During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format. 
 
-In order to train the model, a variety of the popular NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. The training curves are shown in figure \ref{fig:nanodet_train} which compares the training and validation results.
+In order to train the model, a variety of the popular NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. Again, NVIDIA GeForce GTX 1060 processors are available for training. The training curves shown in figure \ref{fig:nanodet_train} compare the training and validation results.
 
 \begin{figure}[h!]
 \begin{center}
