@@ -200,7 +200,7 @@ In this model, object motion is described by a discrete linear time invariant (L
 \begin{equation} 
 x_t=Fx_{t-1}+Bu_{t}+w_{t}
 \end{equation}
-Where $x_{t}$ is the object state at time $t$ of ($n \times 1$) shape, $F$ is the state transition matrix (from a system dynamics model) of ($n \times n$) shape which describes how the state evolves between time $t$ and $t-1$. $B$ is the control-input matrix and $u$ the control vector which models the effect of control signals into the system. $w$ is the process noise vector which is normally distributed about a mean of zero with variance $Q$ which accounts for neglected and uncertain modeled behavior.
+Where $x_{t}$ is the object state at time $t$ of ($n \times 1$) shape, $F$ is the state transition matrix (from a system dynamics model) of ($n \times n$) shape which describes how the state evolves between time $t$ and $t-1$. $B$ is the control-input matrix and $u$ the control vector which models the effect of control signals into the system. $w$ is the process noise vector which is normally distributed about a mean of zero with process error covariance $Q$ which accounts for neglected and uncertain modeled behavior.
 
 An observation model describes the relationship between the object state and the measurement at the current time step:
 \begin{equation} 
@@ -215,7 +215,7 @@ The Kalman filtering algorithm is then performed for state estimation as follows
 \begin{equation}
 \hat{P}_{t|t-1}=F\hat{P}_{t-1|t-1}F^T+Q 
 \end{equation}
-Where $\hat{x}_{t|t-1}$ and $\hat{P}_{t|t-1}$ are the state and the covariance predictions at  time $t$. $Q$ is the process error covariance.
+Where $\hat{x}_{t|t-1}$ and $\hat{P}_{t|t-1}$ are the state and the covariance predictions at  time $t$. 
 
 The ``correction step'' is then computed as:
 \begin{equation} 
@@ -227,7 +227,7 @@ K = \hat{P}_{t|t-1}H^T(H\hat{P}_{t|t-1}H^T+R)^{-1}
 \begin{equation} 
 \hat{P}_{t|t}=(I-KH)\hat{P}_{t|t-1}
 \end{equation}
-$K$ is known as the Kalman gain which, for linear systems with gaussian noise, can be optimally computed for mean-square error to apply a correction based on the relative uncertainty between the process and measurement. This can be understood as a trade-off between the model predicted state and the measurement. In typical usage, $\hat{P}_0$ is initialized to a relatively high value which has the impact of the system largely ignoring the assigned value of $\hat{x}_{0}$ in favor of the first measured state.
+$K$ is known as the Kalman gain which, for linear systems with gaussian noise, can be optimally computed for mean-square error to apply a correction based on the relative uncertainty between the process and measurement. This can be understood as a trade-off between the model predicted state and the measurement. In typical usage, $\hat{P}_0$ is initialized to a relatively high value which has the impact of the system favoring the measured state while the state estimate is very uncertain.
 
 In the case of a nonlinear state transition or measurement mapping, object motion can be modeled more generally by:
 \begin{equation} 
@@ -236,14 +236,14 @@ x_t=f(x_{t-1},u_{t})+w_{t}
 \begin{equation} 
 z_t=h(x_{t})+{\upsilon}_t
 \end{equation}
-Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}. The resulting matrices can each be described as Jacobians respectively (first-order partial derivatives):
+Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}. The resulting matrices can each be computed as the Jacobian matrix (first-order partial derivatives):
 \begin{equation}
 F_t = \frac{\partial f(\mu_{t-1}, u_{t})}{\partial x_{t-1}}
 \end{equation}
 \begin{equation} 
 H_t = \frac{\partial h(\mu_{t})}{\partial x_t} 
 \end{equation}
- $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
+Here $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
 
 \subsubsection{SORT algorithm}
 
@@ -263,7 +263,7 @@ With u and v representing the horizontal and vertical location of the center of 
 	\item To assign detections, each object's new bounding box is predicted. The IoU score (see object detection) is then computed between each detection and all predicted bounding boxes and the association problem is then solved optimally using the Hungarian algorithm.
 \end{itemize}
 
-\cite{sort} reiterate the strong influence of object detector performance on overall tracking results. Further, the relevance of the Kalman filter is reaffirmed in modern tracking applications. More recent work by \cite{sort++} shows that a constant velocity model with a Kalman filter and Hungarian method is still a powerful tracking approach. For robotics applications, SORT trackers are still \textit{``achieving state-of-the-art results with a high frame rate''} \citep{sortrob}.
+\cite{sort} reiterate the strong influence of object detector performance on overall tracking results. Further, the relevance of the Kalman filter is reaffirmed in modern tracking applications. More recent work by \cite{sort++} shows that a constant velocity model with a Kalman filter and Hungarian method is still a powerful tracking approach. For robotics applications, \cite{sortrob} states that SORT trackers are still \textit{``achieving state-of-the-art results with a high frame rate''} 
 
 \subsection{Deep SORT}
 
@@ -292,9 +292,9 @@ The Kalman filter remains an effective and relevant tracking algorithm which fin
 \end{center}
 \end{figure}
 
-In this manner, KalmanNet removes the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model.
+In this manner, KalmanNet aims to remove the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model. The model can be trained end-to-end which means that the Kalman filter is embedded in the network and a loss function can be formulated to evaluate the tracking performance directly, rather than by training intermediate subcomponents and creating a pipeline.
 
-The interpretability of the original algorithm is retained whilst implicitly learning complex dynamics, reducing the need for domain knowledge and model assumptions that are needed to accurately characterize a complex system as a tractable state space model. \cite{kalmannet} conclude, \textit{``KalmanNet is shown to converge much faster compared with purely DD (data driven) systems, while outperforming the MB (model based) EKF (extended Kalman filter), UKF (Unscented Kalman filter), and PF (particle filter), when facing model mismatch and dominant non-linearities''}. This data driven approach to Kalman filtering has recently found other robotics applications -- replacing the extended Kalman filter for online Simultaneous localization and mapping (SLAM) -- a crucial task for robotic systems where a map of an environment is simultaneously constructed while localizing the position of an agent \citep{slam}.
+The interpretability of the original algorithm can be retained whilst potentially learning complex dynamics implicitly, reducing the need for domain knowledge and model assumptions that are needed to accurately characterize a complex system as a tractable state space model. \cite{kalmannet} conclude, \textit{``KalmanNet is shown to converge much faster compared with purely DD (data driven) systems, while outperforming the MB (model based) EKF (extended Kalman filter), UKF (Unscented Kalman filter), and PF (particle filter), when facing model mismatch and dominant non-linearities''}. This data driven approach to Kalman filtering has recently found other robotics applications -- replacing the extended Kalman filter for online Simultaneous localization and mapping (SLAM) -- a crucial task for robotic systems where a map of an environment is simultaneously constructed while localizing the position of an agent \citep{slam}.
 
 \subsection{Performance measures}
 
@@ -1366,7 +1366,7 @@ The aim of visual object tracking is to use a sequence of image frames to robust
 
 For the object detection task, the findings of the research showed that
 
-For the tracking task, the findings of the research showed that
+For the tracking task, the findings of the research showed that. The results are in line with the observations of \cite{diagnosingtrack}, who suggests that the performance of visual object trackers are dominated by their ability to perform feature extraction.
 
 \section{Future work}
 
