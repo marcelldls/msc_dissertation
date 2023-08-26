@@ -310,14 +310,14 @@ Where $\epsilon_{i}$ is the error for the $i$th sample which is difference betwe
 \newpage
 \section{Object detection}
 
-Object detection is one of the oldest and well studied computer vision problems. Within the scope of this problem is facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various  datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
+Object detection is one of the oldest and most popular computer vision problems. Within the scope of this problem is facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various  datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
 
 \subsection{Traditional Object detection}
 
 With the most successful approaches being based on discriminative models -- a traditional object detector can be considered in general to have the following components:  Region selection, feature extraction and classification \citep{deepreview}:
 
 \begin{itemize}
-    \item In region selection, different sub windows are considered at various scales and are passed into the detector window. This may be by a region proposal algorithm or by scanning the entire image at different scales. This approach is less complex than processing the entire image and allows a single detector to be trained and applied throughout the image, but is computationally expensive. 
+    \item In region selection, different sub windows are considered at various scales and are passed into the detector window. This may be by a region proposal algorithm or by scanning the entire image at different scales. This approach is less intensive than processing the entire image in a single pass and allows a single detector to be trained and applied throughout the image, but is computationally expensive. 
     \item Feature extraction attempts to capture patterns in the image that represent an object or provide semantic information. Low level features (textures, edges, etc.) may be combined with spacial information into a single feature descriptor.
     \item A classifier predicts the presence of an object class in the window given the extracted features. The decision boundary (which is an $n-1$ dimensional surface in an $n$ dimensional domain) is learnt using training examples. For a positive detection, the current window is returned as a bounding box. Since multiple windows will return positive for the same object, techniques such as non maximum suppression can be used to isolate a single prediction.
 \end{itemize}
@@ -325,7 +325,7 @@ With the most successful approaches being based on discriminative models -- a tr
 \noindent Some of the criticisms of traditional strategies are: 
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item Generating bounding boxes with a sliding window strategy is inefficient and inaccurate
+    \item Generating bounding boxes with a sliding window strategy is inefficient and the localization is often inaccurate.
     \item Using hand crafted low level features it is difficult to adequately capture the semantics of the image 
 \end{itemize}
 
@@ -355,9 +355,9 @@ The speed of processing an image is therefore impacted by the complexity of the 
 \newpage
 \subsection{Modern Object detection}
 
-Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \citep{rcnn} echo this sentiment: \textit{``Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context''}.
+Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \cite{rcnn} writes: \textit{``Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context''}.
 
-Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the D\&T detector of \cite{hog}.
+Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the famous ``D\&T'' detector of \cite{hog}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -367,7 +367,13 @@ Deep learning approaches are considered to have become the state of the art sinc
 \end{center}
 \end{figure}
 
-Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the algorithm error for the considered task and the aim of training is to find a local minimum of this objective. 
+Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix of trainable weights called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances, using an algorithm known as back propagation which searches for optimum weights. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the error of the prediction for the considered task and the aim of training is to find a local minimum of this objective. 
+
+Least square error ($L_2$ loss) is a common choice for regression loss when considering continuous variables:
+\begin{equation}
+L_{regression} = \sum(y_i-\hat{y_i})^2 
+\end{equation} 
+Where $y_i$ is the ground truth.
 
 Categorical cross-entropy loss is a popular choice for classification tasks, when categorical variables are considered, as it is readily differentiable for back-propagation:
 
@@ -376,27 +382,21 @@ L_{classification} = -\sum_{i=1}^{n}t_i log(p_i)
 \end{equation} 
 With $t_i$ being the ground-truth and $p_i$ being the softmax probability for the $i_{th}$ class.
 
-Least square error ($L_2$ loss) is a common choice for regression loss when considering continuous variables:
-\begin{equation}
-L_{regression} = \sum(y_i-\hat{y_i})^2 
-\end{equation} 
-Where $y_i$ is the ground truth.
+More recent architectures have seen great success by encouraging models to learn from more challenging examples, rather than focusing on ``easy'' examples, by adding an additional factor to the cross-entropy loss. This new loss function is called the ``focal loss'' which aims to reduce the weighting of easy examples. \citep{focal}
 
-Generalized Focal Loss \citep{focalloss}  \# Revise content \#
+\begin{equation}
+L_{focal} = -(1-p_i)^\gamma log(p_i)
+\end{equation} 
+
+Where $\gamma$ is a tune-able variable known as the focusing parameter
 
 \subsubsection{YOLO}
 
-A breakthrough for object detection was achieved with the introduction of the one-stage detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detections, but increases the required computation, hence being less convenient for real-time applications''}. In the YOLO architecture, various predefined ``anchor'' boxes are placed and evaluated for candidate objects - which is known as an anchor based approach. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localisation error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}.
+A breakthrough for object detection was achieved with the introduction of the one-stage (AKA single-shot) detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detection, but increases the required computation, hence being less convenient for real-time applications''}. 
 
-Many variations of the YOLO algorithm exist, where most do not originate from the original researchers. In the classic YOLO architecture, the image is divided into grid cells of $S\times S$ (typically $13\times 13$ is used) - which is achieved by down-sampling with a CNN backbone. For each cell, predefined bounding boxes (with $B$ number of boxes per cell - 5 is typical) are used as initial guesses for object location and size - which drives the depth of the feature map. These box dimensions (AKA dimensional priors) are learnt via using k-means clustering on the training data. For each anchor box, we predict class and objectness (probability of an object in the given region). For localisation, offsets from the prior is then predicted. \citep{comprehensive}
+In the basic YOLO architecture described by \cite{yolo}, the image is divided into an $S \times S$ grid  - which is achieved by down-sampling with a CNN backbone. Each grid cell predicts $B$ bounding boxes with associated objectness scores (probability of an object in the given region) and $C$ class probabilities. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
 
-\cite{yolocomprehensive}, \citep{yolov4}
-
-To train the network, a multipart loss is optimised. The function has the following high level form:
-\begin{equation}
-L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
-\end{equation} 
-With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \# 
+In order to achieve an additional performance boost, the YOLOv2 architecture by \cite{yolov2} introduces, amongst other tweaks, the usage of various predefined bounding boxes which are used as initial guesses in order to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique being known as an anchor based approach. The box dimensions (AKA dimensional priors) are learnt by k-means clustering of the training data. 
 
 \subsubsection{NanoDet}
 
@@ -859,6 +859,13 @@ In the following section the steps taken to prepare the software environment and
  The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. Before compiling the framework on the target training hardware, CUDA 11.8 is linked in the makefile - in order to benefit from GPU acceleration. The training dataset needs to be prepared in a ``Darknet style'' format. The online deep-learning service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
 \subsubsection{Model training}
+
+
+To train the network, a multipart loss is optimised. The function has the following high level form:
+\begin{equation}
+L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
+\end{equation} 
+With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \# 
 
 The release configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
@@ -1367,6 +1374,8 @@ The aim of visual object tracking is to use a sequence of image frames to robust
 For the object detection task, the findings of the research showed that
 
 For the tracking task, the findings of the research showed that. The results are in line with the observations of \cite{diagnosingtrack}, who suggests that the performance of visual object trackers are dominated by their ability to perform feature extraction.
+
+Moldel mismatch. Learn complex dynamics
 
 \section{Future work}
 
