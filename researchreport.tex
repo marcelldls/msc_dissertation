@@ -1276,19 +1276,20 @@ A significantly improved result can be seen. However it is also clear that for e
 
 \subsection{Changes to KalmanNet}
 
-Initially the KalmanNet repository is cloned, however, various issues were encountered with reproducing the reported results with the provided simulation. Some issues included broken GPU support, frequent cases of overflow in training following initialization due to models which diverge immediately as well as slow convergence. Further difficulties resulted from the project not following a formal release structure, the commit that was initially cloned has been clobbered by the maintainers, however fixes were already implemented for the purposes of this research as well as changes to the network. For this reason 
+Initially the KalmanNet repository is cloned, however, various issues were encountered with reproducing the reported results with their provided simulation. Some issues included broken GPU support, frequent cases of overflow in training following initialization due to models which diverge immediately as well as impractically slow convergence. Further difficulties resulted from the project not following a formal release structure, the commit that was initially cloned has been clobbered by the maintainers, however fixes were already implemented for the purposes of this research as well as changes to the network therefore upstream changes are not incorporated. Therefore the basic structure of the KalmanNet repository and training routine is utilized but some changes which significantly improved performance for this research has been implemented. 
 
+Although some of the KalmanNet architecture is peculiar, some of the choices are not necessarily invalid. They simply just do not work well for this research problem being considered here and may still have useful results in other domains:
+\begin{itemize}
+    \item In figure \ref{fig:architecture} it is shown that the predicted Kalman gain results from a fully connected linear output layer. Although its not necessarily an invalid approach, it does however not conform to the nature of Kalman filtering where the Kalman gain must lie between 0 and 1 - which has an intuition of describing a level of confidence in the measurements. Therefore it is chosen to replace this layer with a softmax layer, which has the effect of clamping the range. It was found that this change immediately solved the instability of the model and significantly increased the rate of convergence.
+    \item In both the paper as well as in figure \ref{fig:blockd}, the data preprocessing step is not described. It is found that the input features are scaled by the magnitude of the state vector. This introduces further non-linearity to the problem since with this processing, for example, at zero velocity the model would have the same input feature at a position of 0m or 1000m. This has the effect of destroying necessary information for this research problem being considered. A minimalistic approach was applied by simply applying an identity transformation to the data - which was found to give the best results for this dataset - and notably boosted the ultimate performance of the model by achieving a lower loss.
+\end{itemize}
 
-
- Some of the issues include
-
-It is found that the model is sensitive to initialization. 
 
 \subsection{Model training}
 
-In order to use the KalmanNet model training process, a data loader must be created that creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps.
+In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The described configuration is trained using the tracking dataset. A first order Kalman filter is used. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. Cross validation is applied in order to store the best model weights found. 
 
-The described configuration is trained using the tracking dataset. Due to the sequential nature of the data, much slower processing is achievable than before. The largest speed up was achieved by training utilizing NVIDIA GeForce RTX 3090 processors, which resulted in a training time of nearly 12 hours per model. The results  Training was found to be sensitive to initialization as well as the order of the kicks, therefore the results of each trained model differed significantly. By training numerous models with the same . The results of two trained models are plotted in figure \ref{fig:RNNtrain}.
+Due to the sequential nature of the data, much slower processing is achievable than before. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Longer training then this did not deliver better results and become impractical. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models are plotted in figure \ref{fig:RNNtrain}. The additional model emphasizes the possible variety in training.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1297,6 +1298,8 @@ The described configuration is trained using the tracking dataset. Due to the se
 \label{fig:RNNtrain}
 \end{center}
 \end{figure}
+
+Initially it is clear that the model scores extremely poorly at initialization, however, rapidly converges on a lower loss score for against both the training and cross validation score. This is a good indication that the model is learning and capturing patterns within the data. The fact that both training and validation scores are indiscernibly close provides confidence that the model is not over-fitting on the training data. Between the two models shown, further epochs may lead to either further convergence or even divergence depending on the learning of the model. The best model achieves its performance after 612 epochs with further training resulting in diminishing performance.
 
 \section{Evaluation of trackers}
 
