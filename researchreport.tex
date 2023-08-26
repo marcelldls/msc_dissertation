@@ -1278,7 +1278,7 @@ A significantly improved result can be seen. However it is also clear that for e
 
 Initially the KalmanNet repository is cloned, however, various issues were encountered with reproducing the reported results with the provided simulation. Some issues included broken GPU support, frequent cases of overflow in training following initialization due to models which diverge immediately as well as slow convergence. Further difficulties resulted from the project not following a formal release structure, the commit that was initially cloned has been clobbered by the maintainers, however fixes were already implemented for the purposes of this research as well as changes to the network. For this reason 
 
-In order to use the repository a data loader must be created that creates the expected data structure. 
+
 
  Some of the issues include
 
@@ -1286,15 +1286,15 @@ It is found that the model is sensitive to initialization.
 
 \subsection{Model training}
 
-Noise dependant on distance
-Noise dependant on distance
-Noise dependant on distance
+In order to use the KalmanNet model training process, a data loader must be created that creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps.
+
+The described configuration is trained using the tracking dataset. Due to the sequential nature of the data, much slower processing is achievable than before. The largest speed up was achieved by training utilizing NVIDIA GeForce RTX 3090 processors, which resulted in a training time of nearly 12 hours per model. The results  Training was found to be sensitive to initialization as well as the order of the kicks, therefore the results of each trained model differed significantly. By training numerous models with the same . The results of two trained models are plotted in figure \ref{fig:RNNtrain}.
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=10cm]{images/knet_train.png}
-\caption{Pretrained model performance}
-\label{fig:modelspeed}
+\caption{Neural network adided Kalman filtering model training}
+\label{fig:RNNtrain}
 \end{center}
 \end{figure}
 
