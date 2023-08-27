@@ -357,7 +357,7 @@ The speed of processing an image is therefore impacted by the complexity of the 
 
 Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \cite{rcnn} writes: \textit{``Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context''}.
 
-Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on data-sets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the famous ``D\&T'' detector of \cite{hog}.
+Deep learning approaches are considered to have become the state of the art since the year 2012 with AlexNet becoming the first CNN to lead the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \citep{alexnet}. The first widely popularized object detector to make use of CNNs is R-CNN (Regions with CNN features) \citep{rcnn}, which uses CNNs for feature extraction but otherwise retains a traditional detector pipeline with region proposal. CNN based detectors which utilize a region proposal stage and are known as two-stage detectors \citep{comprehensive}.  Modern object detectors are able to achieve near perfect results on datasets that traditional architectures fail to show even marginal comprehension of. This can be seen in the benchmarking of the You Only Look Once (YOLO) object detector (See figure \ref{fig:yoloplot}) \citep{yolo} versus the famous ``D\&T'' detector of \cite{hog}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -599,18 +599,15 @@ The principle questions which arise are:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Research Methodology}
 
-The methods used to investigate the proposed research topic can be conveniently separated into two distinct phases where the former focuses on object detection (Section 5.1) and the latter on tracking-by-detection (Section 5.2) using the previous result. 
-%It is envisioned that the focus of the tracking will be (similar to the related work) focused on the trajectory of the kick investigated from the perspective of the kicker, and tested by against a set of randomized rolling and lofted kicks in a control RoboCup soccer environment. 
+The methods used to investigate the proposed research topic can be conveniently separated into two distinct phases where the former focuses on object detection (Section 5.1) and the latter on tracking-by-detection (Section 5.2) using the result. It is envisioned that the focus of the tracking will be (similar to the related work) focused on  the kick investigated from the perspective of the kicker, and tested by against a set of randomized rolling and lofted kicks in a control RoboCup soccer environment. 
 
 \section{Phase one: Object detector investigation}
 
-In this phase, the training and performance of the Viola Jones, Yolo v4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors will be evaluated on inference speed and memory utilization. The chosen object detectors are then fine-tuned on a representative data set, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
+In this phase, the training and performance of the Viola Jones, Yolo v4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors will be evaluated on inference speed and memory utilization. The chosen object detectors are then fine-tuned on a representative dataset, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
 
 \subsection{Dataset Generation}
 
-The Robocup simulator contains an image perceptor plugin that can be enabled to produce perspective images at 25Hz (real-time). In this manner actual gameplay can be used to create representative data. 
-%Although a ground truth ball position is available to be enabled, fatproxy does not directly support processing of the additional server message at this stage and will crash. The built in feedback which includes a small amount of noise can be used as an alternative if a work around (possibly using the visualizer) is not found. 
-With some changes to the source code, ground truth bounding boxes can be automatically computed using a coordinate transform from the perceptor to the camera location followed by a correction from the wide angle image, in order to describe the ball center in image coordinates. The distance of the ball is used to compute the relative bounding box size.
+The Robocup simulator contains an image perceptor plugin that can be enabled to produce perspective images at 25Hz (real-time). In this manner actual gameplay can be used to create representative data. Although a ground truth ball position is available to be enabled, fatproxy does not directly support processing of the additional server message at this stage and will crash. Handling the server data must be added in order to extract ground truths directly. With some changes to the source code, ground truth bounding boxes can be automatically computed using a coordinate transform from the perceptor to the camera location followed by a correction from the wide angle image, in order to describe the ball center in image coordinates. The distance of the ball is used to compute the relative bounding box size.
 
 Although the empty test environment is proposed for the kick tracking, including actual match images with features such as players, field markings and the goals in the background is prudent to ensure robustness and evaluate performance in a match environment where occlusion may also occur. Since the server provides an indication whether a ball is in the vision of an agent, actual match footage that can be classified as including a ball can be generated and then included in the dataset. It is noted however that a check for occlusion is not programmed into the server so the ball could be completely hidden, therefore some manual work will need to be done to remove such images and to seperate occluded images. The dataset will then need to be prepared according to the training requirements of the given model.
 
@@ -618,11 +615,9 @@ Although the empty test environment is proposed for the kick tracking, including
 
 The selection of the baseline Viola Jones and Yolo v4 Tiny detectors follows on from the related works. NanoDet is proposed since it is a recent key-point based architecture with promising capabilities. To justify this choice, a set of various popular detectors will be evaluated on inference speed and memory utilization. The following pretrained models are selected from the ONNX model zoo \citep{modelzoo} as well as the investigation by \cite{comprehensive}: Faster-RCNN, YOLO v3, YOLOv3 Tiny, SSD, Mobilenet SSD, YOLOX and NanoDet. The three investigated models are then fine-tuned to the RoboCup dataset and are evaluated and compared using AP, model size and latency (as measured in a single threaded application on a modern mobile laptop CPU).
 
-The small scale of the ball (less than 32×32 pixels) at long range introduces a risk since it may cause difficulties in training and detection. Beyond network architecture and optimizations, the use of prior knowledge of the ball position to focus a window on the ball (as found in the related work) may boost the performance without large overhead. If this is unsuccessful, the kicking distance may be reduced to the maximum reliable range of the detector.
-
 \subsection{Training}
 
-Although it is possible in most cases to use pretrained model weights to significantly reduce training time -- the training of modern models can still require significant computational resources since typically it is desired to evaluate multiple different hyper-parameter combinations in order to optimize via a grid search. It is proposed to utilize the Wits Mathematical Sciences Cluster such that training can be done in parallel.  
+Although it is possible in most cases to use pretrained model weights to significantly reduce training time -- the training of modern neural network based models still require significant computational resources since typically it is desired to train using various hyper-parameter combinations in order to optimize via a grid search. It is proposed to utilize the Wits Mathematical Sciences Cluster such that multiple models can be trained in parallel and that GPU resources can be utilized to achieve a speed up in training.  
 
 A possible risk exists in using pretrained weights, since they are typically trained on real image datasets -- therefore domain transfer to a synthetic domain may fail to produce acceptable results. Further, most datasets used for pretraining feature few small scale object examples which may also be problematic for this application.
 
@@ -682,7 +677,7 @@ From the spherical coordinates of the ball that are given by the match server re
 
 Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the temporal misalignment visually obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
 
-Each object detector expects the data-set to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
+Each object detector expects the dataset to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
 
 \subsection{Data Exploration}
 The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any which are partially covered.
@@ -842,7 +837,7 @@ Initial experimentation showed that building the framework without any of the de
 \end{center}
 \end{figure}
 
-In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the number of training epochs is increased the loss score decreases. This corresponds to the model learning the structure of the training data-set and performing better inference on each training example. Initially a very high rate of learning is achieved which reduces over time, however, it does not yet plateau. Too much training can lead to the model over-fitting the training data-set which can harm the ability of the model to generalize to the task it is training for. The model is also evaluated against the validation data-set every 10 epochs, which provides a measure of how well the model captures the general relationships in the data. After 5000 Epochs, it is clear that a plateau in the validation performance has occurred which is a good indicator that sufficient training has been performed. 
+In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the number of training epochs is increased the loss score decreases. This corresponds to the model learning the structure of the training dataset and performing better inference on each training example. Initially a very high rate of learning is achieved which reduces over time, however, it does not yet plateau. Too much training can lead to the model over-fitting the training dataset which can harm the ability of the model to generalize to the task it is training for. The model is also evaluated against the validation dataset every 10 epochs, which provides a measure of how well the model captures the general relationships in the data. After 5000 Epochs, it is clear that a plateau in the validation performance has occurred which is a good indicator that sufficient training has been performed. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -977,7 +972,7 @@ After training and evaluating the various detectors, the principle questions of 
 As before, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is randomized and then captured in a practice environment as a sequence of images (with metadata) at 25hz with respective ground-truth positions at 50Hz.
 
 \subsection{Software environment}
-The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as used for the detection dataset. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half in order to ensure that the data set has full coverage of the arena.
+The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as used for the detection dataset. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half in order to ensure that the dataset has full coverage of the arena.
 
 Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system though the agent to the global coordinate system. The camera transformation used is the inverse from the detection dataset. The data is synchronized by the server time. Low level control of the agent is also abstracted by using magmaFatProxy-1.2.2, but the code needs to be extended to enable the server to handle ground truth ball and agent position messages without crashing. 
 
@@ -1005,7 +1000,7 @@ Test			&74				&20\%			&297.9			&20.0\%			&80.0\%			\\\hline
 \label{tab:tracking}
 \end{table*}
 
-It can be seen in table \ref{tab:tracking} that the properties of the tracking data are consistent between the data-sets. A bias towards lofted kicks is evident.
+It can be seen in table \ref{tab:tracking} that the properties of the tracking data are consistent between the datasets. A bias towards lofted kicks is evident.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1330,7 +1325,7 @@ Noise dependant on distance
 \end{center}
 \end{figure}
 
-Although over estimates. We see for data set error is reduced.
+Although over estimates. We see for dataset error is reduced.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
