@@ -557,6 +557,8 @@ Basing their work on the state-of-the-art single shot architecture, YOLO v3 Tiny
 
 In the ball tracking problem space, Kalman filtering has been successful and remains particularly popular. The approach of fusing measurements with a dynamic physics model allows noise attenuation as well as substep estimation for problems such as a parabolic trajectory or rolling with friction.
 
+After winning the RoboCup-97 small-robot competition, \cite{kalmanmodel} describe their development of an EKF model -- for their team CMUnited -- to track motion of a kicked ball. The tracker includes a velocity discounting factor in the state model which is used to represent a non-linear rolling friction. 
+
 In order to establish the real-time capability of a non-linear Kalman filtering approach for use in RoboCup, \cite{robocuptrack} investigate tracking of ball trajectories using an unscented Kalman filter (UKF) and monocular vision. Although only the tracking problem is considered (manually processed images) the investigation confirms that, compared to a maximum likelihood estimator, UKF is feasible as a real-time tracker: \textit{``after half the time of flight the error is about 0.3m which we judge to be enough for playing soccer''}.
 
 With a focus on RoboCup Middle Size League, \cite{3dparabola} consider the use of a extended Kalman filter (EKF) for real-time 3D Ball trajectory estimation using a single camera. In their research they propose applying a maximum Likelihood method to provide an initial estimate of the ball trajectory for the initialization which improves tracking of the ball.
@@ -567,13 +569,13 @@ With a focus on RoboCup Middle Size League, \cite{3dparabola} consider the use o
 \chapter{Problem Statement, Research Aims and Objectives}
 \section{Problem Statement}
 
-In RoboCup soccer most of the decision-making involves the position of the ball on the field. This affects factors such as how the players should move, when and where they should kick and how the goalkeeper should behave. In order to facilitate decision making, it is important to have an accurate understanding of the ball’s position and trajectory. In this research project, the interest lies in determining if it is feasible to accurately predict both the position and trajectory of the ball using a computer vision based system, with a neural network based approach utilized for tracking.
+In RoboCup soccer most of the decision-making involves the position of the ball on the field. This affects factors such as how the players should move, when and where they should kick and how the goalkeeper should behave. In order to facilitate decision making, it is important to have an accurate understanding of the ball’s position. In this research project, the interest lies in determining if it is feasible to accurately capture both the trajectory of a kicked ball using a computer vision based system, with a neural network based approach utilized for tracking.
 
 \section{Research Hypothesis}
 
 Hybrid approaches to state estimation which fuse intuitive model based approaches with measured data are a promising technique for state estimation. It is hypothesized that a neural network assisted approach to Kalman filtering can outperform the traditional EKF method at tracking the trajectories of a kicked RoboCup soccer ball as measured by RMSE and speed, using a tracking-by-detection framework.
 
-Modern object detection has significantly improved upon traditional approaches and various models promise reliable localization with real-time performance. Tracking-by-detection is a paradigm which takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be to used to outperform popular anchor based method (Yolo v4 Tiny) as well as the traditional Viola Jones detector for color-independent ball detection as measured by quality of inference using AP scores, at a real-time speed. 
+Modern object detection has significantly improved upon traditional approaches and various models promise reliable localization with real-time performance. Tracking-by-detection is a paradigm which takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be to used to outperform popular RoboCup approaches such as anchor based method (Yolo v4 Tiny) as well as the traditional Viola Jones detector for color-independent ball detection as measured by quality of inference using AP scores, at a real-time speed. 
 
 \section{Research Aims and Questions}
 
