@@ -626,7 +626,7 @@ Models are all translated to a neutral ONNX format which serves two purposes her
 
 \section{Phase two: Object tracking investigation}
 
-In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection. An EKF with a simple RoboCup world model (similar to the related work) will be implemented as a baseline tracker. A tracking dataset will need to be generated using the RoboCup simulator which will be used to train and optimize the neural assisted Kalman tracking framework. The trackers performances will then be compared on a test dataset with RMSE as a performance measure. Prior knowledge of the kick in the form of the initial velocity state is assumed.
+In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection. An EKF with a simple RoboCup world model (similar to the related work) will be implemented as a baseline tracker. A tracking dataset will need to be generated using the RoboCup simulator which will be used to train and optimize the neural assisted Kalman tracking framework. The trackers performances will then be compared on a test dataset with RMSE as a performance measure.
 
 \subsection{Dataset Generation}
 
@@ -635,7 +635,7 @@ To generate a tracking dataset, a series of randomized kicks are performed in or
 \subsection{Training}
 The neural assisted Kalman tracking will be based on the KalmanNet framework. By attempting to reproduce the results of the authors using the available implementation \cite{kalmangit}, it has been found that the implementation suffers significantly in-terms of training stability, initialization as well as GPU support (confirmed by others on issues page). In order to effectively train the model, it will be therefore required to investigate some architecture improvements and therefore  also familiarize with the chosen deep learning framework, PyTorch. Some architectural decisions have been noticed such as an unbounded Kalman gain as well as choice of non-descriptive input features should also be considered as areas for possible improvement.  
 
-The use of this tracking framework introduces risk as the repository is still undergoing regular changes and is unreliable in its current state. However, it provides a starting point. In order to achieve the desired results, some exploring of the framework must be undertaken as well as some refactoring for this projects purposes. The results of these investigations can be returned to the original authors.
+The use of this tracking framework introduces risk as the repository is still undergoing regular changes and is unreliable in its current state. However, it provides a starting point. In order to achieve the desired results, some further exploring of the framework must be undertaken as well as some refactoring for this projects purposes.
 
 \subsection{Evaluation}
 
