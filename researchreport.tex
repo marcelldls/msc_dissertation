@@ -367,7 +367,7 @@ Deep learning approaches are considered to have become the state of the art sinc
 \end{center}
 \end{figure}
 
-Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix of trainable weights called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances, using an algorithm known as back propagation which searches for optimum weights. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the error of the prediction for the considered task and the aim of training is to find a local minimum of this objective. 
+Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix of trainable weights called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances, using an algorithm known as back propagation which searches for optimum weights. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the error of the prediction for the considered task and the aim of training is to find a local minimum of this objective.
 
 Least square error ($L_2$ loss) is a common choice for regression loss when considering continuous variables:
 \begin{equation}
@@ -376,76 +376,53 @@ L_{regression} = \sum(y_i-\hat{y_i})^2
 Where $y_i$ is the ground truth.
 
 Categorical cross-entropy loss is a popular choice for classification tasks, when categorical variables are considered, as it is readily differentiable for back-propagation:
-
 \begin{equation}
 L_{classification} = -\sum_{i=1}^{n}t_i log(p_i)
 \end{equation} 
 With $t_i$ being the ground-truth and $p_i$ being the softmax probability for the $i_{th}$ class.
 
-More recent architectures have seen great success by encouraging models to learn from more challenging examples, rather than focusing on ``easy'' examples, by adding an additional factor to the cross-entropy loss. This new loss function is called the ``focal loss'' which aims to reduce the weighting of easy examples. \citep{focal}
-
+More recent architectures have seen great success by encouraging models to learn from more challenging examples, rather than focusing on ``easy'' examples, by adding an additional factor which reduces the weighting of easy cases. Such a loss function is known as the ``focal loss''. \citep{focal}
 \begin{equation}
-L_{focal} = -(1-p_i)^\gamma log(p_i)
+L_{focal} = -\sum_{i=1}^{n} (1-p_i)^\gamma log(p_i)
 \end{equation} 
+Where $\gamma$ is a tune-able variable known as the focusing parameter.
 
-Where $\gamma$ is a tune-able variable known as the focusing parameter
+Various loss functions can be combined into a multipart loss function which is engineered to achieve a certain behavior.
 
 \subsubsection{YOLO}
 
 A breakthrough for object detection was achieved with the introduction of the one-stage (AKA single-shot) detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detection, but increases the required computation, hence being less convenient for real-time applications''}. 
 
-In the basic YOLO architecture described by \cite{yolo}, the image is divided into an $S \times S$ grid  - which is achieved by down-sampling with a CNN backbone. Each grid cell predicts $B$ bounding boxes with associated objectness scores (probability of an object in the given region) and $C$ class probabilities. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering from some localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=7.5cm]{images/yolodemo.jpg}
+\caption{YOLO object detection \citep{yolo}}
+\label{fig:yolodemo}
+\end{center}
+\end{figure}
 
-In order to achieve an additional performance boost, the YOLOv2 architecture by \cite{yolov2} introduces, amongst other tweaks, the usage of various predefined bounding boxes which are used as initial guesses in order to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique being known as an anchor based approach. The box dimensions (AKA dimensional priors) are learnt by k-means clustering of the training data. 
+In the YOLO architecture described by \cite{yolo}, the image is divided into an $S \times S$ grid. Each grid cell is used to predict $B$ bounding boxes with associated objectness scores (probability of an object in the given region) and $C$ class probabilities which is demonstrated in figure \ref{fig:yolodemo}. As per \cite{yolo} some disadvantages of this approach is that the detector is sensitive to these hyper-parameters and has difficulty detecting objects much smaller than the anchors as well as suffering localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
+
+In order to achieve an additional performance boost, the YOLOv2 architecture by \cite{yolov2} introduces (amongst other incremental improvements) the usage of various predefined bounding boxes which are used as initial guesses in order to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique being known as an anchor based approach. The box dimensions (AKA dimensional priors) are learnt by k-means clustering of the training data. Further incremental improvements have been made with YOLOv3 \citep{yolov3} and YOLOv4 \citep{yolov4}, with the most significant enhancements being a deeper more optimized backbone as well various pre and post-processing tricks to improve the efficiency of training. 
+
+Numerous unofficial ``YOLO'' detectors have also been created which have no affiliation to the original researchers.
 
 \subsubsection{NanoDet}
 
-Contemporary object detection advancements include anchor box free detectors -- which reformulate the problem as keypoint detection. This frees the detector from the anchor box hyperparameters such as size and aspect ratio as well as allowing for simpler architecture which allow for faster computation. Although CornerNet \citep{cornernet} was proposed as the first alternative to the single stage anchor-based approaches, more recent state-of-the-art models include Fully Convolutional One-stage Object Detection (FCOS) \citep{fcos} and the subsequent NanoDet \citep{nanodet} which has been shown to be the current state-of-the-art for real-time obejct detection as shown by the comprehensive study of \cite{comprehensive}. In a keypoint based approach, a convolutional neural network is used to predict heatmaps, with the intensity peaks representing corners or object centers. The dimensions of the  bounding boxes are then predicted. \cite{comprehensive} report: \textit{``The keypoint-based methods generally outperform the anchor-based and two-stage methods in terms of accuracy and speed''} 
+Contemporary object detection advancements include anchor box free detectors -- by reformulating the problem as ``keypoint'' detection. \cite{comprehensive} report: \textit{``The keypoint-based methods generally outperform the anchor-based and two-stage methods in terms of accuracy and speed''}. Although CornerNet \citep{cornernet} was proposed as the first alternative to the single stage anchor-based approaches, more recent and successful models include Fully Convolutional One-stage Object Detection (FCOS) \citep{fcos} and the subsequent NanoDet \citep{nanodet} which has been shown to be the current state-of-the-art for real-time object detection as demonstrated by the comprehensive study of \cite{comprehensive}.
 
-Anchor-free object detectors utilise key-points (such as centers and corners of objects) rather than anchors to perform regression from. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are particularly dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}  
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=9cm]{images/keypointdetect.jpg}
+\caption{Keypoint based object detection \citep{fcos}}
+\label{fig:keypointdetect}
+\end{center}
+\end{figure}
 
-In the ``FCOS-style'' key-point approach which NanoDet is based on, each object is modelled as a single center point of a bounding box. The idea is that an input image is processed into a heat-map image where the highest activation values occur at the object center with a different channel for each class. Bounding box dimensions are then regressed from this point. 
 
-In the pipeline, after feature extraction, up-sampling is performed to create a higher-resolution output to incorporate more spacial detail - the resolution used is 4 times less (called output stride $R$) than the input image resolution.
+In the ``FCOS-style'' key-point approach which NanoDet is based on, each object is modelled as a single center point of a bounding box. A convolutional neural network is used to predict heatmaps, with the intensity peaks representing keypoints. Regression of the bounding boxes can then be performed utilizing key-points rather than anchors. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}   
 
-A single network is then used to predict key-point, size and offsets: 
-\begin{itemize}
-    \setlength\itemsep{0em}
-    \item \textbf{Classification} - This branch outputs a heat-map to estimate the center points of the objects. The number of heat-maps is equal to the number of classes. For multi-scale training, non-maxima suppression is performed to merge the results. The heat-map can be used directly by using 3x3 max pooling to check for peaks which avoids the use of non-maximum suppression. 
-    
-    \item \textbf{Embedding} - In this head, regression of parameters is performed - such as for the dimensions of the boxes or for other applications such as 3D pose estimation.
-    
-    \item \textbf{Offset} - To correct for the location error caused by the down-sampling, a local offset is predicted by this branch.
-\end{itemize}
-
-To train the network, a multipart loss is optimised. The function has the following high level form:
-\begin{equation}
-L_{CenterNet} =  L_{cls} + \lambda_1 L_{offset} + \lambda_2 L_{emb} 
-\end{equation} 
-With $\lambda$ as a balancing weight for training emphasis. 
-
-In more detail:
-
-\begin{equation}
-L_{cls} =  \frac{1}{N} \sum_{xyc}
-    \begin{cases}
-      (1-\hat{Y}_{xyc})^{\alpha}log(\hat{Y}_{xyc}) & \text{if $Y_{xyc}=1$}\\
-      (1-Y_{xyc})^{\beta}(\hat{Y}_{xyc})^{\alpha} & \text{otherwise}\\
-      log(1-\hat{Y}_{xyc})\\
-    \end{cases} 
-\end{equation}
-
-This loss function is ``penalty reduced pixel-wise logistic regression with Focal Loss''. In focal loss, there is more emphasis placed on difficult examples. $N$ is the number of objects. $\alpha$ and $\beta$ are hyperparamters for focal loss. $xyc$ refer to each pixel in the output heatmap.
-
-\begin{equation}
-L_{off} =  \frac{1}{N} \sum_{P} |\hat{O}_{\tilde{P}}-(\frac{p}{R}-\tilde{p})|
-\end{equation}
-
-\begin{equation}
-L_{emb} =  \frac{1}{N} \sum_{k=1}^{N} |\hat{S}_{Pk}-s_k|
-\end{equation}
-
-Mean abolute error (L1) is used as the loss function for these regressions, where $\tilde{p}$ is a keypoint and $s$ is the size. \# Revise content \#
+Typically, after feature extraction, up-sampling must performed to create a higher-resolution output in order to incorporate more spacial detail - typically the resolution used is 4 times less (called output stride $R$) than the input image resolution.
 
 \subsection{Performance Measures}
 
