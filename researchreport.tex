@@ -622,7 +622,7 @@ Although it is possible in most cases to use pretrained model weights to signifi
 A possible risk exists in using pretrained weights, since they are typically trained on real image datasets -- therefore domain transfer to a synthetic domain may fail to produce acceptable results. Further, most datasets used for pretraining feature few small scale object examples which may also be problematic for this application.
 
 \subsection{Evaluation}
-Models are all translated to a neutral ONNX format which serves two purposes here: Firstly, the runtime environment can be controlled with ONNX Runtime in order to limit the computational resources to single threaded execution. Secondly, it mimics practical model deployment as it is platform, device and training framework independent with support for multiple languages. The available CPU is an AMD Ryzen 5 4600H which is a common entry level gaming laptop processor, released in 2020. 
+Models are all translated to a neutral ONNX format which serves two purposes here: Firstly, the runtime environment can be controlled with ONNX Runtime in order to limit the computational resources to single threaded execution. Secondly, it mimics practical model deployment as it is platform, device and training framework independent with support for multiple languages. The available CPU is an AMD Ryzen 5 4600H which is a common entry level mobile gaming laptop processor, released in 2020. This acts as a compute constrained device which one may find on a mobile robotics platform.
 
 \section{Phase two: Object tracking investigation}
 
