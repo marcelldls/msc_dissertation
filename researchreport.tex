@@ -466,19 +466,7 @@ A criticism of these commonly used metrics is that they do not consider run-time
 
 In practice, a trade off exists between the real-time performance and accuracy achieved by a model when performing inference. Intuitively, when less data is taken into consideration -- such as by the reduction of image resolution -- inference can be faster as it requires less computation, however, the accuracy may decrease as the detail and structure of the data is lost. Therefore the performance of a computer vision algorithm should not be evaluated in isolation of latency for real-time application. According to \cite{speedacc}, many computer vision architectures tend to focus on accuracy and therefore may use model ensembling and multicrop methods which are too slow for practical implementation.
 
-Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of typically spatially and power constrained embedded robotics computers. \cite{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce memory consumption and computational costs of a model which can result in improved real-time performance -- if the appropriate operations are supported by software and hardware.
-
-The aim of quantization is to represent the weights and activations of the model with reduced precision without a significant impact on accuracy. A theoretical reduction in consumed memory of 75\% can be achieved by changing from a typical float32 representation down to an int8 representation. Further, integer arithmetic is less computationally expensive than floating point arithmetic. However, as in the case of float16 representation, both software and hardware support are required to realize the potential speed up improvements. Quantization can be performed post-training, where a dynamic approach can be used to perform online quantitation at runtime, whereas the static approach performs quantization offline in advance. In this method a mapping from the high resolution to low resolution representation is adjusted in a ``calibration'' step by passing representative data through the network. In case of a significant loss of accuracy, quantization aware training can be performed by performing pseudo quantization during the forward pass of the network whilst  still retaining the precision for the learning step. A significant disadvantage of quantization aware training is that retraining of the network is required. \citep{quantization}
-
-The initial values, represented in the real domain, $r$ are related to quantization levels in the following manner:
-\begin{equation}
-Q(r) = int(r/S) - Z
-\end{equation}
-Where $Z$ is an integer offset and $S$ a scaling factor which is computed as:
-\begin{equation}
-S = \frac{\beta-\alpha}{2^b-1}
-\end{equation}
-With $\alpha$ and $\beta$ refer to the input range of $r$ and $b$ is the quantization bit width.
+Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of typically spatially and power constrained embedded robotics computers. \cite{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce memory consumption and computational costs of a model which can result in improved real-time performance. The aim of quantization is to represent the weights and activations of the model with reduced precision without a significant impact on accuracy. 
 
 \subsection{Neural Network development and deployment}
 
@@ -496,18 +484,25 @@ Although some popular computer vision packages such as OpenCV do have an interfa
 \end{center}
 \end{figure}
 
-\newpage
 \section{RoboCup Soccer}
 RoboCup is an internationally coordinated robotics competition with a focus on advancing artificial intelligence and robotics research. The ultimate goal of the soccer competition is to support the development of a team of fully autonomous humanoid robot soccer players that are capable of winning against the winner of the most recent soccer world cup, by the year 2050. The RoboCup challenge features a dynamic environment and distributed control performed in real-time \citep{RoboCupObj}.\
 
-There are various leagues which each emphasize different challenges that need to be addressed to achieve the ultimate RoboCup objective. Of particular interest is the RoboCup 3D Soccer Simulation League (3DSSL) as well as the Standard Platform League (SPL), which focuses on the software programming aspects of Nao robots. The Nao v5 features an Intel Atom Z530 CPU with 1GB RAM \citep{naov5}.
+There are various leagues which each emphasize different challenges that need to be addressed to achieve the ultimate RoboCup objective. Of particular interest is the RoboCup 3D Soccer Simulation League (3DSSL) -- which is demonstated in figures \ref{fig:robofb} and \ref{fig:agentview} -- as well as the Standard Platform League (SPL), which focuses on the software programming aspects of Nao robots. The Nao v5 features an Intel Atom Z530 CPU with 1GB RAM \citep{naov5}.
 
 \begin{figure}[h!]
-    \centering
-    \subfloat{{\includegraphics[height=5cm]{images/Robocup1.jpg}}}
-    \qquad
-    \subfloat{{\includegraphics[height=5cm]{images/Robocup2.jpg}}}
-    \caption{Simulated RoboCup Soccer (Left) and Simulated image perceptor (Right)}
+\begin{center}
+\includegraphics[width=9.5cm]{images/Robocup1.jpg}
+\caption{Simulated RoboCup Soccer}
+\label{fig:robofb}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=9.5cm]{images/Robocup2.jpg}
+\caption{Simulated image perceptor (Agent perspective in subwindow)}
+\label{fig:agentview}
+\end{center}
 \end{figure}
 
 The position of the ball is crucial for determining appropriate agent behavior. At a close observation range the agent may need to kick the ball, in this case large errors will result in a miss-directed kick or perhaps a complete miss. At middle ranges the agent may attempt to block an opposition passing option and should position itself accordingly. At long ranges the agent may need to know what region of the field the ball is in so that an appropriate behavior is chosen. 
@@ -579,16 +574,16 @@ Modern object detection has significantly improved upon traditional approaches a
 
 \section{Research Aims and Questions}
 
-The first aim of the research project will be to prepare a suitable real-time object detector trained on localizing the ball in a simulated Robocup soccer environment. A traditional architecture (Viola Jones detector) alongside a more modern anchor based detector (YOLO v4 Tiny) serve as a benchmark against a recent keypoint based approach (NanoDet). To motivate the selection of NanoDet, a selection of different pretrained CNN detector models which use different strategies such as single stage, anchor-based and key-point based approaches will be compared on inference speed and memory usage. Inference speed is evaluated on a laptop CPU as a compute constrained device. 
+The first aim of the research project will be to prepare a suitable real-time object detector trained on localizing the ball in a simulated Robocup soccer environment. A traditional architecture (Viola Jones detector) alongside a more modern anchor based detector (YOLO v4 Tiny) serve as a benchmark against a recent keypoint based approach (NanoDet). To motivate the selection of NanoDet, a selection of different pretrained CNN detector models which use different strategies such as single stage, anchor-based and key-point based approaches will be compared on inference speed and memory usage. Inference speed is evaluated on a laptop CPU as a compute constrained device that one might find on a mobile robotic platform. 
 
 A significant challenge for object detection is the size of the ball which at distance is small in the image (as defined by COCO metrics). The ball used in RoboCup is also significantly white in colour and may be difficult to distinguish against the field markings, goals and Nao robots. The algorithm further needs to act in real-time since slow responses due to heavy computational load can result in delayed agent responses or leading to control inaccuracies and instability. The memory footprint of the architecture should also be considered in the context of embedded computing capacities, which can be improved using model quantization.
 
 The principle questions which arise are:
 \begin{itemize}
-    \item Does the more recent keypoint based NanoDet detector outperform the proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
+    \item Does the more recent keypoint based NanoDet detector outperform the RoboCup proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
     \item Can a CNN object detector run at real-time on a modern mobile laptop CPU?
     \item Can pretraining on real images transfer to a simulated RoboCup environment?
-    \item Does model quantization cause a noticeable performance degradation? 
+    \item Does model quantization offer a worthwhile optimization versus performance degradation? 
 \end{itemize}
 
 The second aim of the research project will be to use the object detector to implement a tracking-by-detection framework based on neural aided Kalman filtering. Using ball telemetry from the robocup simulation as a ground truth and processing the associated visualization with the object detector, a tracker based on the KalmanNet approach can be trained. As a baseline, an extended Kalman filter can be implemented in a similar fashion to the Robocup trackers found in the related works. 
@@ -936,6 +931,9 @@ Similar to the results of all models considered thus far - it is seen in general
 
 In order to investigate model optimization for deployment, the chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this appears to be that that float16 operations is not well supported by all hardware (x86 CPUs) and thus require conversion to a float32 representation which adds an overhead. Since the model is already of acceptable size compared to the size of the ONNX Runtime binary, the quantized model is not utilized and further quantization is not investigated.
 
+!!!
+A theoretical reduction in consumed memory of 75\% can be achieved by changing from a typical float32 representation down to an int8 representation. Further, integer arithmetic is less computationally expensive than floating point arithmetic. However, as in the case of float16 representation, both software and hardware support are required to realize the potential speed up improvements. Quantization can be performed post-training, where a dynamic approach can be used to perform online quantitation at runtime, whereas the static approach performs quantization offline in advance. In this method a mapping from the high resolution to low resolution representation is adjusted in a ``calibration'' step by passing representative data through the network. In case of a significant loss of accuracy, quantization aware training can be performed by performing pseudo quantization during the forward pass of the network whilst  still retaining the precision for the learning step. A significant disadvantage of quantization aware training is that retraining of the network is required. \citep{quantization}
+!!!
 \section{Evaluation of detection}
 
 The selected pretrained, trained and fine-tuned object detection models are now compared relative to each other using the test dataset which has been isolated and remained unseen thus far. The dataset is decomposed into object sizes, scenario and occlusion for evaluation which helps to provide an insight into the performance of the detectors across various circumstances. 
