@@ -583,7 +583,7 @@ The principle questions which arise are:
     \item Does the more recent keypoint based NanoDet detector outperform the RoboCup proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
     \item Can a CNN object detector run at real-time on a modern mobile laptop CPU?
     \item Can pretraining on real images transfer to a simulated RoboCup environment?
-    \item Does model quantization offer a worthwhile optimization versus performance degradation? 
+    \item Can model quantization offer a worthwhile optimization versus performance degradation? 
 \end{itemize}
 
 The second aim of the research project will be to use the object detector to implement a tracking-by-detection framework based on neural aided Kalman filtering. Using ball telemetry from the robocup simulation as a ground truth and processing the associated visualization with the object detector, a tracker based on the KalmanNet approach can be trained. As a baseline, an extended Kalman filter can be implemented in a similar fashion to the Robocup trackers found in the related works. 
@@ -592,12 +592,8 @@ A significant challenge is the non-linearity of the trajectories due to rolling 
 
 The principle questions which arise are:
 \begin{itemize}
-    \item In the context of the simulated RoboCup soccer environment, can a neural aided Kalman filter outperform a traditional EKF for:
-    \begin{itemize}
-    	\item Rolling kicks?
-    	\item Lofted kicks?
-	\end{itemize}
-	\item Can a tracking-by-detection approach meet real-time performance requirements?
+    \item In the context of the simulated RoboCup soccer environment, can a neural aided Kalman filter outperform a traditional EKF for rolling and lofted kicks?
+	\item Can a tracking-by-detection approach meet the real-time performance requirements?
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
