@@ -949,22 +949,22 @@ As a whole - it is observed that the models perform worse on the datasets of inc
 
 \subsubsection{Traditional detection}
 
-Relatively, the VJ detector performs the worst of any of the detectors across the data. Despite the effort of searching for ideal parameters, performing tuning and the trouble of training, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality without any training effort and framework complexity. With the ease of the modern frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. When a ball is correctly identified, a further challenge appears to be the tightness of the fit of the bounding box due to the sliding window approach.
+Relatively, the VJ detector performs the worst of any of the detectors across the data. Despite the effort of searching for ideal parameters, performing tuning and the trouble of training, it does not out perform any trained detector. Infact, the pretrained detectors provide better inference quality without any training effort and framework complexity. With the ease of the modern frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. When a ball is correctly identified (as in figure \ref{fig:evalvjnano}), a further challenge appears to be the tightness of the fit of the bounding box due to the sliding window approach.
 
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=5cm]{images/eval_vj.png}}\label{fig:haarft}}
+    \subfloat{{\includegraphics[height=5cm]{images/eval_vj.png}}\label{fig:evalvjnano}}
     \qquad
     \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet0.png}}}
-    \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
+    \caption{Trained Viola Jones (Left) and Trained NanoDet (Right)}
 \end{figure}
 \vspace*{-0.5cm}
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodetpre.png}}\label{fig:haarft}}
+    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodetpre.png}}\label{fig:evalnanonano}}
     \qquad
     \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet1.png}}}
-    \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
+    \caption{Pretrained NanoDet (Left) and Trained NanoDet (Right)}
 \end{figure}
 
 \subsubsection{Pretrained modern detection}
@@ -973,24 +973,19 @@ One of the interesting results that can be seen is that the pretrained detectors
 
 \subsubsection{YOLO v4 Tiny}
 
-The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in the related works, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An alarming result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
+The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in the related works, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An unfortunate result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. This is seen in figure \ref{fig:evalyolonano} where the boundary of the prediction slightly extends to include the agent behind the ball. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
 
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=7cm]{images/eval_yolo.png}}\label{fig:haarft}}
+    \subfloat{{\includegraphics[height=6cm]{images/eval_yolo.png}}\label{fig:evalyolonano}}
     \qquad
-    \subfloat{{\includegraphics[height=7cm]{images/eval_nanodet2.png}}}
-    \caption{Haar features \cite{vjdet} (Left) and strong responses (Right)}
+    \subfloat{{\includegraphics[height=6cm]{images/eval_nanodet2.png}}}
+    \caption{Trained YOLOv4 (Left) and Trained NanoDet (Right)}
 \end{figure}
 
 \subsubsection{NanoDet}
 
-The NanoDet model model 
-A key observation that can be identified is that the pretrained Nanodet is the only pretrained model which has a useful performance for identifying at the small size balls (long range). It is believed that this is due to the intrinsic properties of the architecture, since the YOLO v4 Tiny model has also been trained for optimum performance against COCO. The trained Nanodet model clearly out performs all other architectures at real-time speeds. This is true across each dataset characteristic and by a significant margin. Further, for the easiest examples, NanoDet scores a near perfect result which is impressive. This model also has the smallest memory footprint, only utilizing 5mb of storage capacity. For limited capacity machines this allows the memory to be used for other tasks, which likely leads to improving the overall performance of the robotic platform as a whole. 
-
-\subsubsection{Reflection}
-
-After training and evaluating the various detectors, the principle questions of the object detection study can be addressed. Firstly, it is clear that pretraining on real images can indeed be transferred to a simulated RoboCup environment - with the pretrained object detectors that are trained on COCO managing to achieve useful scores and even outperforming trained VJ detection. Further, it is clear that CNN object detectors can run at real-time on a modern mobile CPU and achieve useful performances. Both the YOLO v4 Tiny as well as NanoDet can be trained for real-time speeds and achieve useful inference which can be used on a robotics platform. Most significantly, the more recent key point based NanoDet detector outperforms the popular YOLO v4 Tiny and and traditional VJ detectors as measured by AP at real-time speed. Finally, it is seen that model quantization can indeed cause a noticeable performance degradation, with the reduction in model size not yielding a worthwhile return to justify its inclusion. 
+The NanoDet model shows itself to be the best network across all scenarios by out performing all other architectures at real-time speeds. This is true across each dataset characteristic and by a significant margin. A key insight that can be observed is that the pretrained Nanodet is the only pretrained model which has a useful performance for identifying at the small size balls (long range). This is interesting since the pretrained YOLO v4 Tiny model has also been trained for optimum performance against COCO but has no comprehension before training. Further, for the easiest scenario, the trained NanoDet scores a near perfect result which is impressive. This model also has the smallest memory footprint, only utilizing 5mb of storage capacity. For limited capacity machines this allows the memory to be used for other tasks, helping to improve the overall performance of the robotic platform. Therefore, for a ball detection system that may be used in a match scenario or for the proposed tracking, NanoDet is chosen.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
@@ -1360,6 +1355,11 @@ Although over estimates. We see for dataset error is reduced.
 The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It was proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
 
 For the object detection task, the findings of the research showed that
+
+
+\subsubsection{Reflection}
+
+After training and evaluating the various detectors, the principle questions of the object detection study can be addressed. Firstly, it is clear that pretraining on real images can indeed be transferred to a simulated RoboCup environment - with the pretrained object detectors that are trained on COCO managing to achieve useful scores and even outperforming trained VJ detection. Further, it is clear that CNN object detectors can run at real-time on a modern mobile CPU and achieve useful performances. Both the YOLO v4 Tiny as well as NanoDet can be trained for real-time speeds and achieve useful inference which can be used on a robotics platform. Most significantly, the more recent key point based NanoDet detector outperforms the popular YOLO v4 Tiny and and traditional VJ detectors as measured by AP at real-time speed. Finally, it is seen that model quantization can indeed cause a noticeable performance degradation, with the reduction in model size not yielding a worthwhile return to justify its inclusion. 
 
 For the tracking task, the findings of the research showed that. The results are in line with the observations of \cite{diagnosingtrack}, who suggests that the performance of visual object trackers are dominated by their ability to perform feature extraction.
 
