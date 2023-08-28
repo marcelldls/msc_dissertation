@@ -996,11 +996,11 @@ As before, the dataset is generated using various open source programs in the Ro
 \subsection{Software environment}
 The kick tracking data is also generated using the RoboCup match server rcssserver3d-0.7.3 and simspark-0.3.2 simulator using the same settings as used for the detection dataset. Additionally, in the match server: a ball and agent ground truth perceptor is added to append global ball and agent positions to the server messages. The limit of the agent ``BeamEffector'' is changed to extend the beam-able area of the agent into the opposition half in order to ensure that the dataset has full coverage of the arena.
 
-Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system though the agent to the global coordinate system. The camera transformation used is the inverse from the detection dataset. The data is synchronized by the server time. Low level control of the agent is also abstracted by using magmaFatProxy-1.2.2, but the code needs to be extended to enable the server to handle ground truth ball and agent position messages without crashing. 
+Alongside producing .json files for image with metadata as before, the Wits agent stores a .csv file for each kick sequence which captures, for each time step, ground-truth positions as well as the agent transformation matrices from the Nao head coordinate system though the agent torso to the global coordinate system. The camera transformation used is the inverse from the detection dataset - taking a bounding box at the camera position to a spherical coordinate located at the center of the agent head. The data is synchronized by the server time. Low level control of the agent is also abstracted by using magmaFatProxy-1.2.2, but the code needs to be extended to enable the server to handle ground truth ball and agent position messages without crashing. 
 
 \subsection{Preprocessing}
 
-Some of the tracking sequences need to be discarded due to abnormalities such as: agent instability, kicking outside of the play area and ball rebounding off the goal posts. These edge cases occur infrequently enough to ignore for training, however, must be manually excluded by watching the sequence. 
+A small portion of the tracking sequences need to be discarded due to abnormalities such as: agent instability, kicking outside of the play area and ball rebounding off the goal posts. These edge cases occur infrequently enough to ignore for training, however, are manually excluded by watching the sequence. 
 
 In order to conserve memory, the tracking sequence images are taken from their .json base64 encoded string and compressed into an .avi video format - which results in a 99\% reduction in size from 100mb per sequence. However, a dataloader is required to be constructed which also ensures synchronization between image and metadata.
 
@@ -1032,11 +1032,11 @@ It can be seen in table \ref{tab:tracking} that the properties of the tracking d
 \end{center}
 \end{figure}
 
-Two peculiar behaviors of the simulator's handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified by comparing the rendered images to the logging and indeed seems to be the case although it is not understood why the simulation has this behavior. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position - which is caused by the server that does not execute a true kick, but rather instantaneously places the ball by the feet of the agent and then applies a velocity rather than performing a realistic kick, described by \cite{fatproxy}. This behavior only effects a minority of time-steps and is therefore accepted.
+The ground truth ball trajectories are plotted in \ref{fig:plotkicks} - which show a spectrum of different kicks have been captured. Two peculiar behaviors of the simulator's handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified by comparing the rendered images to the logging and indeed seems to be the case although it is not understood why the simulation has this behavior. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position - which is caused by the server that does not execute a true kick, but rather instantaneously places the ball by the feet of the agent and then applies a velocity rather than performing a realistic kick, described by \cite{fatproxy}. This behavior only effects a minority of time-steps and is therefore accepted.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/trackingplot.png}
+\includegraphics[width=16cm]{images/trackingplot.png}
 \caption{Tracking dataset statistics}
 \label{fig:trackplot}
 \end{center}
@@ -1044,11 +1044,11 @@ Two peculiar behaviors of the simulator's handling of the ball are noticed in th
 
 \section{Baseline tracking}
 
-The baseline trackers, which have been chosen based on popular traditional methods as seen in the related works, are now investigated.
+The baseline trackers, which have been chosen based on traditional methods popular in RoboCup as seen identified in the related works, are now investigated.
 
 \subsection{Basic tracking}
 
-Initially, the raw detections of the tracking dataset will be studied alongside the ground truth ball position as well as the ball position inferred by a perfect object detector. To do this, the ball detections are forward transformed to field ball positions using the same transformation as used by the team. A simple latch is used for tracking, which means that missed and intermediate steps are filled by the previous positions.
+Initially, the raw detections of the tracking dataset will be studied alongside the ground truth ball position as well as the ball position inferred by a perfect object detector. To do this, the ball detections are forward transformed to field ball positions using the same transformation as is used by the team, which has been extracted and captured in the meta data. A simple latch is then used for the most basic tracking, which means that missed and intermediate steps are filled by the previous positions.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1060,7 +1060,7 @@ Initially, the raw detections of the tracking dataset will be studied alongside 
 
 In figure \ref{fig:rawerror}, after forward transforming the bounding box to the field coordinates using the agents world model, the root mean square error is computed over binned kick distance. It can be seen from the error in the ``perfect vision'' that a ``noise floor'' exists due to the presence of inaccuracies in the forward transformation of the agent. A reason for this is that a simplified representation of the the agent model is presently used in the code base of the team which does not compensate for offsets in angular uprightness of the agent, which have generally been seen as providing an acceptable level of error compared to the complexity of a more accurate computation. Since the FatProxy agent walks on the spot when not commanded, the agent is constantly in motion and error is continuously introduced.
 
-Near zero distance (before the Fat Proxy kick causes non-physical error) the position error is dominated by the error in the transformation. Up until approximately 4m distance from the agent, a significant portion of error can also be attributed to the transformation model. However, beyond this point, it is evident that the error explodes. Individual trajectories are investigated further in order to better understand this.
+Near zero distance (before the Fat Proxy kick causes the ball beaming) the position error is dominated by the error in the transformation. This shows that the detector that has been trained is as effective as perfect vision up until the time of kicking. Up until approximately 4m distance from the agent, a portion of error can be assigned both the ball detector as well as the transformation model. Here the system works comparably to the performance suggested in the related works (tracking error of 0.3m) -- however the system has room for improvement although the improvement could equally be achieved by improving the transformation. However, beyond this point, it is evident that the error due to the detector explodes. Individual trajectories are investigated further in order to better understand this.
 
 A short and long ground based kick is interrogated in figures \ref{fig:rawgroundshort} and \ref{fig:rawgroundlong}:
 
@@ -1080,7 +1080,7 @@ A short and long ground based kick is interrogated in figures \ref{fig:rawground
 \end{center}
 \end{figure}
 
-In these kicks the following is noted. Firstly, for ground kicks the height of the ball remains zero as expected. Distance covered per unit time decreases in a non-linear manner after the kick takes place, due to rolling friction. Secondly, noise is introduced by the detector and transformation which here can be observed in the time domain, where it is clear that the cyclic nature of the agent motion results in an error in the perceived ball height. The correctness of the height has a dependency on the placement of the bounding box, which appears to be comparable to the perfect object detector. Until 5m the inference of distance appears to be effective, although noisy. Beyond this distance, inference of the ball position appears to be problematic. Since accuracy of the distance is dependent on the size of the bounding box, it seems that a limit exists.
+In these kicks the following is noted. Firstly, looking at the ground truth trajectory for a kick along the ground the height of the ball remains zero as expected. The distance covered by the ball per unit time decreases in a non-linear manner after the kick takes place, due to rolling friction. Secondly, looking at the measurements of the trajectory there is noise introduced by the detector and transformation which here can be observed in the time domain, where it is clear that the cyclic nature of the agent motion results in an error in the perceived ball height. The correctness of the height has a dependency on the placement of the bounding box, which appears to be comparable to the perfect object detector. Until 4m the inference of distance appears to be effective, although noisy. Beyond this distance, inference of the ball position appears to be problematic. Since accuracy of the distance is dependent on the size of the bounding box, it seems that a limit exists.
 
 A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} and \ref{fig:rawloftlong}:
 
@@ -1100,7 +1100,7 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 \end{center}
 \end{figure}
 
-For lofted kicks, it is firstly noted that the trajectory follows a parabolic path as expected for projectile motion. With each bounce, energy losses causes rebounds of diminishing height. Secondly it is noted that within 5m the detector is comparable to perfect vision. Beyond 5m a limit on the ball distance is reached which causes the error to explode. Further, its clear in figure \ref{fig:rawloftlong} that at such distances ball detections start to be missed.
+For lofted kicks, it is firstly noted that the trajectory follows a parabolic path as expected for projectile motion. With each bounce, energy losses causes rebounds of diminishing height. Secondly it is noted that within 4m the detector is comparable to perfect vision. Beyond 4m a limit on the ball distance is reached which causes the error to explode. The distance measurement at long range is the limiting factor for the overall performance of the system, however applying a tracking algorithm has the potential to improve the tracking of the ball trajectory. 
 
 \subsection{Standard Kalman Filtering}
 
@@ -1151,7 +1151,7 @@ $\Phi$ is the spectral density of the white noise - which is often difficult to 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/fok_ground_short.png}
-\caption{Short ground kick - First order Kalman Filter}
+\caption{Short ground kick - First order Kalman Filter search}
 \label{fig:fokgroundshort}
 \end{center}
 \end{figure}
@@ -1159,26 +1159,26 @@ $\Phi$ is the spectral density of the white noise - which is often difficult to 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/fok_ground_long.png}
-\caption{Long ground kick - First order Kalman Filter}
+\caption{Long ground kick - First order Kalman Filter search}
 \label{fig:fokgroundlong}
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/fok_loft_short.png}
-\caption{Short lofted kick - First order Kalman Filter}
-\label{fig:fokloftshort}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/fok_loft_short.png}
+%\caption{Short lofted kick - First order Kalman Filter search}
+%\label{fig:fokloftshort}
+%\end{center}
+%\end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/fok_loft_long.png}
-\caption{Long lofted kick - First order Kalman Filter}
-\label{fig:fokloftlong}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/fok_loft_long.png}
+%\caption{Long lofted kick - First order Kalman Filter search}
+%\label{fig:fokloftlong}
+%\end{center}
+%\end{figure}
 
 By inspecting a variety of kicks, one can get an understanding of the characteristics of the first order Kalman tracker. Initially, at the start of each kick, the model uncertainty is initialized high which results in a large Kalman gain. This corresponds to a stronger dependency of the sensor measurement (rather than the prediction model) which helps to obtain a better state estimation. This makes sense as initially there is an assumption of no knowledge of the object states. As time passes, the model relies less on the measurement and more on the dynamics model, which can result in noise attenuation. The ultimate convergence of the Kalman gain depends on the balance of the magnitudes of the measurement noise and process uncertainty.
 
@@ -1234,21 +1234,21 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/ekf_loft_short.png}
-\caption{Short lofted kick - Extended Kalman Filter}
-\label{fig:ekfloftshort}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/ekf_loft_short.png}
+%\caption{Short lofted kick - Extended Kalman Filter}
+%\label{fig:ekfloftshort}
+%\end{center}
+%\end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/ekf_loft_long.png}
-\caption{Long lofted kick - Extended Kalman Filter}
-\label{fig:ekfloftlong}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/ekf_loft_long.png}
+%\caption{Long lofted kick - Extended Kalman Filter}
+%\label{fig:ekfloftlong}
+%\end{center}
+%\end{figure}
 
 \begin{figure}[h!]
 \begin{center}
@@ -1323,21 +1323,21 @@ Noise dependant on distance
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/eval_loft_short.png}
-\caption{Short lofted kick - Tracker evaluation}
-\label{fig:ekfloftshort}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/eval_loft_short.png}
+%\caption{Short lofted kick - Tracker evaluation}
+%\label{fig:ekfloftshort}
+%\end{center}
+%\end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=12cm]{images/eval_loft_long.png}
-\caption{Long lofted kick - Tracker evaluation}
-\label{fig:ekfloftlong}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=12cm]{images/eval_loft_long.png}
+%\caption{Long lofted kick - Tracker evaluation}
+%\label{fig:ekfloftlong}
+%\end{center}
+%\end{figure}
 
 \begin{figure}[h!]
 \begin{center}
