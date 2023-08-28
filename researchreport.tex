@@ -820,11 +820,11 @@ The release configuration for YOLO v4 Tiny was utilized for model training which
 \begin{equation}
 L_{YOLO} =  L_{cls} + \lambda L_{reg} + \lambda' L_{confi} 
 \end{equation} 
-Where $\lambda$ and $\lambda'$ are balancing weights used to regulate the importance of each term inorder to give importance to bounding box regression and decrease the importance of boxes which do not contain objects (AKA ``noobj'') respectively. $L_{cls} $ refers to the class prediction which is represented by the focal loss. $L_{confi}$ refers to the objectness score (which is the probability that and object is present) which is represented by the $L2$ loss. $L_{reg} $ refers to the bounding box regression loss. YOLOv4 applies a loss known as ``Complete-IOU'' (CIoU) \citep{diouloss} (rather than a basic $L2$ loss) which offers an objective which is made to suit to the IoU evaluation metric. CIoU solves the ``gradient-vanishing`` problem which refers to an issue of a basic IoU loss which would only ``work'' when the bounding boxes overlap. 
-
-The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
+Where $\lambda$ and $\lambda'$ are balancing parameters used to weigh each term -- giving importance to bounding box regression and decreasing the importance of boxes not containing objects (AKA ``noobj'') respectively. $L_{cls} $ refers to the class prediction which is represented by the focal loss. $L_{confi}$ refers to the objectness score (which is the probability that and object is present) which is represented by the $L2$ loss. $L_{reg} $ refers to the bounding box regression loss. YOLOv4 applies a loss known as ``Complete-IOU'' (CIoU) \citep{diouloss} (rather than $L2$ loss) which offers an objective which is made to suit to the IoU evaluation metric. CIoU is an incremental improvement over ``Generalized-IoU'' (GIoU) \citep{giouloss} which solves the ``gradient-vanishing`` problem resulting from a basic IoU loss which would only ``work'' when the bounding boxes have overlap. 
 
 Initial trials showed that compiling the framework without any of the performance enhancing dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
+
+The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
 \begin{figure}[h!]
 \begin{center}
@@ -846,7 +846,7 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 
 It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the COCO dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, shown in figure \ref{fig:yolov4tiny_compare}. A reduced resolution allows faster inference. In order to achieve real-time inference, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality.
 
-The additional data point of the pretrained model is also included. Although this model evaluates 80 COCO classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without design consequence.
+The additional data point of the pretrained model is also included. Although this model evaluates 80 COCO classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without significant time consequence.
 
 \section{Proposed detection}
 
@@ -855,9 +855,9 @@ Initially, a simple naive study is performed to justify the selection of the Nan
 \subsection{Naive latency evaluation}
 In order to justify the selection of a modern real-time object detection architecture, a naive approach is taken to simply evaluate pretrained models on the target device. In this approach, only the latency of the forward pass is considered and the accuracy of the detentions is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
 
-The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is accessible in the pytorch library and is included due to its ease of access. 
+The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is readily accessible in the pytorch library and is included due to its ease of access. 
 
-In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models smaller than 50mb are readily accommodated and similarly sized to the ONNXruntime linux binary ($\approx13mb$).
+In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models larger than 50mb are certainly difficult to accommodate and larger than ONNXruntime linux binary itself ($\approx13mb$).
 
 \begin{figure}[h!]
 \begin{center}
@@ -879,19 +879,34 @@ It is found that most of the detectors do not execute in real-time on this hardw
 
 \subsection{NanoDet}
 
-The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference using the Python programming language. The NanoDet repository can be found on github along with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus`` architecture which is the most recent and best performing architecture. A formal paper does not currently exist for this architecture.
+The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference in Python. The NanoDet repository can be found on github with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus'' architecture which is the most recent and best performing architecture. A formal paper is not available.
 
-In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
+%In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are trying to build on the results of previous work.
+NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are using previous work.
 
 \subsubsection{Model training}
 
-During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format. 
+During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format, therefore a script is created to do this. The web service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
-In order to train the model, a variety of the popular NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. Again, NVIDIA GeForce GTX 1060 processors are available for training. The training curves shown in figure \ref{fig:nanodet_train} compare the training and validation results.
+In order to train the network, a multipart loss must be minimized. The NanoDet objective function can be understood by the following high level form:
+\begin{equation}
+L_{NanoDet} =  L_{GFL}(L_{QFL}, \lambda L_{DFL}, \lambda' L_{GIoU})
+\end{equation} 
+
+Generalized Focal Loss (GPL) combines classification and regression to provide one score
+
+$L_{QFL}$ and $L_{DFL}$ are the Quality and Distributed Focal losses respectively. $L_{GIoU}$ is the Generalized IoU loss.
+
+QFL combines classification and IoU quality to provide one score
+
+Generalized Focal Loss as classification and regression loss.
+
+Where $\lambda$ and $\lambda'$ are balancing weights used to regulate the importance of each term inorder to give importance to bounding box regression and decrease the importance of boxes which do not contain objects (AKA ``noobj'') respectively. $L_{cls} $ refers to the class prediction which is represented by the focal loss. $L_{confi}$ refers to the objectness score (which is the probability that and object is present) which is represented by the $L2$ loss. $L_{reg} $ refers to the bounding box regression loss. YOLOv4 applies a loss known as ``Complete-IOU'' (CIoU) \citep{diouloss} (rather than a basic $L2$ loss) which offers an objective which is made to suit to the IoU evaluation metric. CIoU solves the ``gradient-vanishing`` problem which refers to an issue of a basic IoU loss which would only ``work'' when the bounding boxes overlap. 
+
+A variety of the release NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. Again, NVIDIA GeForce GTX 1060 processors are available for training. The training curves shown in figure \ref{fig:nanodet_train} compare the training and validation results.
 
 \begin{figure}[h!]
 \begin{center}
