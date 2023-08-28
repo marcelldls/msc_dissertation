@@ -1146,7 +1146,7 @@ Q = \int\limits_0^{\Delta t} F(t)Q_cF^T(t)dt
 \label{eqn:dnoise}
 \end{equation}
 
-$\Phi$ is the spectral density of the white noise - which is often difficult to compute or measure, especially when the process model differs from reality and is therefore often applied as an engineering factor or found by tuning. In order to find an appropriate $\Phi$ for the ball tracking task, a search is used. The results are shown in figures \ref{fig:fokgroundshort}-\ref{fig:fokloftlong}.
+$\Phi$ is the spectral density of the white noise - which is often difficult to compute or measure, especially when the process model differs from reality and is therefore often applied as an engineering factor or found by tuning. In order to find an appropriate $\Phi$ for the ball tracking task, a search is used. The results are shown in figures \ref{fig:fokgroundshort} and \ref{fig:fokgroundlong}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1180,13 +1180,9 @@ $\Phi$ is the spectral density of the white noise - which is often difficult to 
 %\end{center}
 %\end{figure}
 
-By inspecting a variety of kicks, one can get an understanding of the characteristics of the first order Kalman tracker. Initially, at the start of each kick, the model uncertainty is initialized high which results in a large Kalman gain. This corresponds to a stronger dependency of the sensor measurement (rather than the prediction model) which helps to obtain a better state estimation. This makes sense as initially there is an assumption of no knowledge of the object states. As time passes, the model relies less on the measurement and more on the dynamics model, which can result in noise attenuation. The ultimate convergence of the Kalman gain depends on the balance of the magnitudes of the measurement noise and process uncertainty.
+By inspecting a set of kicks, one can get an understanding of the characteristics of the first order Kalman tracker. Initially, at the start of each kick, the model uncertainty is initialized high which results in a Kalman gain close to 1. This corresponds to a strong dependency on the sensor measurement (rather than the prediction model) which helps to obtain a better initial state estimation. This makes sense as initially there is an assumption of no knowledge of the object states. As time steps are performed the Kalman gain reduces and the model relies less on the measurement and more on the dynamics model, which can result in noise attenuation. The rate of convergence is an intrinsic property of the model -- it is not ``intelligent'' and relies on timing -- and in this case convergence happens before the ball is kicked which means that the constant velocity assumption causes a significant lag when it is strongly relied upon.
 
-When the process is very uncertain (high $\Phi$) then the filter ignores the dynamics model and a state estimation with negligible difference from a no filtering approach is achieved. As $\Phi$ is reduced, the dynamics model plays a larger role. With prior knowledge that the object is moving at constant velocity, it is possible to attenuate noise. However, if the dynamics model is overly dominant it causes a lag in the cases where the ball does not behave as is modeled by the function. This can lead to significant error, much worse than if no filtering is applied. 
-
-It can also be noted, that even though the kicks differ significantly, the convergence of the Kalman gain is unchanged. The convergence in unintelligent and only corresponds to the initialization of the parameters. This adds a further challenge in finding a fit that can be utilized across the spectrum of expected kicks.
-
-With such a simplistic tracker, which has significantly limiting assumptions, it can be seen that in the complex cases where the the measurement error is highly non-linear - that the result is poor. Although the filter can be tuned in order to achieve some noise attenuation, this however comes at a large cost of error due to increased latency when the process differs from the model. The standard Kalman filter is not able to learn and compensate for the large non-linearity. It can be seen in figure \ref{fig:fokerror} that for such a complex case, the application of a standard first order Kalman filter, across a variety of $\Phi$, is either detrimental or causes negligible improvement to the performance when no tracking is used.
+The ultimate steady state of the Kalman gain depends on the balance of the magnitudes of the measurement noise and process uncertainty. When the process is very uncertain (high $\Phi$) then the filter tends to ignore the dynamics model and a state estimation with negligible difference from a no filtering approach is achieved. As $\Phi$ is reduced, the dynamics model plays a larger role. With prior knowledge that the object is moving at constant velocity, it is possible to attenuate noise. However, if the dynamics model is overly dominant it causes a lag in the cases where the ball does not behave as is modeled by the function. This can lead to significant error, much worse than if no filtering is applied. There exists a trade off between responsiveness and noise attenuation.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1196,6 +1192,7 @@ With such a simplistic tracker, which has significantly limiting assumptions, it
 \end{center}
 \end{figure}
 
+The tracking error has been plotted in figure \ref{fig:fokerror}. Although the filter can be tuned in order to achieve some noise attenuation, the Kalman filter assumes Gaussian noise with a zero mean and is therefore is not able to capture the heavily non-linear characteristics of the distance measurement. Therefore, the standard Kalman filter is not able to learn and compensate for the large non-linearity which in this cases dominates the error significantly more than the position jitter. It can be seen in figure \ref{fig:fokerror} that for such a complex case, the application of a standard first order Kalman filter, across a variety of $\Phi$, is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
 \subsection{Extended Kalman Filtering}
 
@@ -1216,7 +1213,7 @@ A more sophisticated model describing the ground motion of the ball, which has b
 \label{eqn:dragorder}
 \end{equation}
 
-The same measurement noise $R$ is applied, as for the first order Kalman filter, as is the same process noise $Q$. Again $\Phi$ is to be found by doing a search.
+The same measurement noise $R$ is applied, as for the first order Kalman filter, as is the same process noise model $Q$. Again $\Phi$ is to be found by doing a search (figures \ref{fig:ekfgroundshort} and \ref{fig:ekfgroundlong}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1258,11 +1255,19 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 \end{center}
 \end{figure}
 
-A significantly improved result can be seen. However it is also clear that for each set of $\Phi$, the model performs better at given ranges. 
+The EKF operates in a similar fashion to the standard Kalman filter. Initially the Kalman gain is set close to 1 and it converges (unintelligently) towards a steady state which is dependent of the balance between measurement and process noise. In the case of an EKF however there is some instability, due to the nonlinearity of the process model, which causes the Kalman gain to oscillate in some cases. Compared to the first order Kalman filter, it is seen that after the initial kick that the tracker has a reduction in overshoot. The model is therefore more responsive and can in principle be more aggressively tuned for noise rejection.
+
+The tracking error has been plotted in figure \ref{fig:ekferror}. Although a more sophisticated approach, the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. Since the tracking error is not dominated by a Gaussian process noise with a zero mean the EKF is not an optimal tracker and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
 
 \section{Proposed tracking}
 
+For these cases tracker is sub optimal
+
+
+Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
+
+The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference in Python. The NanoDet repository can be found on github with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus'' architecture which is the most recent and best performing architecture. A formal paper is not available.
 
 \subsection{Changes to KalmanNet}
 
@@ -1343,11 +1348,14 @@ Noise dependant on distance
 \begin{center}
 \includegraphics[width=13cm]{images/eval_error.png}
 \caption{Tracker error}
-\label{fig:ekferror}
+\label{fig:evalerror}
 \end{center}
 \end{figure}
 
 Although over estimates. We see for dataset error is reduced.
+
+Initialisationn and convergence behavior
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
