@@ -896,9 +896,12 @@ In order to train the network, a multipart loss must be minimized. The NanoDet o
 L_{NanoDet} =  L_{GFL}(L_{QFL}, \lambda L_{DFL}, \lambda' L_{GIoU})
 \end{equation} 
 
-Generalized Focal Loss (GPL) combines classification and regression to provide one score
+Generalized Focal Loss (GFL) combines classification and regression to provide one score
 
-$L_{QFL}$ and $L_{DFL}$ are the Quality and Distributed Focal losses respectively. $L_{GIoU}$ is the Generalized IoU loss.
+$L_{QFL}$ and $L_{DFL}$ are the Quality and Distributed Focal losses respectively. $L_{GIoU}$ is the Generalized IoU loss \citep{giouloss}.
+
+ QFL and DFL can be unified into a general form, which
+is called the Generalized Focal Loss (GFL
 
 QFL combines classification and IoU quality to provide one score
 
