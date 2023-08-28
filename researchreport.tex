@@ -816,19 +816,15 @@ In the following section the steps taken to prepare the software environment and
 
 \subsubsection{Model training}
 
-The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found hosted on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations -- such as photometric and geometric distortions as well as simulated object occlusion are applied. 
-
-To train the network, YOLOv4 uses a loss function known as ``Distance-IOU'' \citep{diouloss} which offers an objective which tailored to the IoU evaluation metric.
-
-To train the network, a multipart loss is optimised. The function has the following high level form:
+The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found hosted on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations -- such as photometric and geometric distortions as well as simulated object occlusion are applied. To train the network, a multipart loss is minimized. The classic YOLO objective function has the following high level form:
 \begin{equation}
-L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls} 
+L_{YOLO} =  L_{cls} + \lambda L_{reg} + \lambda' L_{confi} 
 \end{equation} 
-With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \# 
+Where $\lambda$ and $\lambda'$ are balancing weights used to regulate the importance of each term inorder to give importance to bounding box regression and decrease the importance of boxes which do not contain objects (AKA ``noobj'') respectively. $L_{cls} $ refers to the class prediction which is represented by the focal loss. $L_{confi}$ refers to the objectness score (which is the probability that and object is present) which is represented by the $L2$ loss. $L_{reg} $ refers to the bounding box regression loss. YOLOv4 applies a loss known as ``Complete-IOU'' (CIoU) \citep{diouloss} (rather than a basic $L2$ loss) which offers an objective which is made to suit to the IoU evaluation metric. CIoU solves the ``gradient-vanishing`` problem which refers to an issue of a basic IoU loss which would only ``work'' when the bounding boxes overlap. 
 
 The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
-Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
+Initial trials showed that compiling the framework without any of the performance enhancing dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
 
 \begin{figure}[h!]
 \begin{center}
