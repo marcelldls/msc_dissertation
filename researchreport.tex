@@ -665,7 +665,7 @@ Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which
 
 The images are decoded into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Hidden and occluded ball images must be manually separated, since the server vision messages do not include the breakage of line-of-sight (all objects are transparent to the agent).
 
-From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, one can transform them to the camera position by converting the coordinates to a Cartesian axis, performing a translation (given 6.5cm head radius) and then returning the coordinate system to spherical. From the spherical coordinates at the camera, with the known 58\textdegree\ field of view of the camera, it is possible to use an ideal wide angle lens transformation to determine the BB center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:wideangle}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball -- of known 8.4cm diameter -- and the expected size on the optical projection plane.
+From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, one can transform them to the camera position by converting the coordinates to a Cartesian axis, performing a translation (given 6.5cm head radius) and then returning the coordinate system to spherical. From the spherical coordinates at the camera, with the known 58\textdegree\ field of view of the camera, it is possible to use an ideal wide angle lens transformation to determine the BB center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:wideangle}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball (with known 8.4cm diameter) and the expected size on the optical projection plane.
 
 \begin{figure}[h!]
 \begin{center}
@@ -680,7 +680,7 @@ Although the transformations can automatically be computed to get BBs for all ba
 Each object detector expects the dataset to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
 
 \subsection{Data Exploration}
-The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any which are partially covered.
+The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any where a percentage of the pixels of the ball are hidden.
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -708,7 +708,7 @@ The ground truth BBs are plotted with some examples of the dataset in figure \re
 \end{center}
 \end{figure}
 
-The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball is bias to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait, as some architectures may capture this.
+The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It is seen that the ball has a bias to be found in the center of the agent perspective, this is caused by the agent which tends to focus on the ball. Data augmentation such as cropping can be used to avoid over-fitting on this trait.
 
 \begin{figure}[h!]
 \begin{center}
@@ -724,7 +724,7 @@ The baseline detectors, which have been chosen based on the reported results of 
 
 \subsection{Viola Jones}
 
-The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference - much like the modern object detectors of today. A multi-scale implementation is utilized which, applies a scaling factor ($scaleFactor$) that reduces the image size to create a "scale pyramid" to evaluate different object sizes with the same detector. 
+The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference. A multi-scale implementation is utilized which, applies a scaling factor ($scaleFactor$) that reduces the image size to create an ``image pyramid'' to evaluate different object sizes with the same detector. 
 
 In the following section, the steps taken to prepare the software environment and data are described. Following this the training process, which aims to maximize the quality of the inference is discussed. Finally, an ablation study is performed to maximize real-time performance of the detector.
 
@@ -770,21 +770,21 @@ In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAl
 \end{center}
 \end{figure}
 
-With some difficulties obtaining GPU support, training was performed using a computing cluster hosting Intel Xeon E5-2680 processors. The speed up achieved using OpenMP was sufficient to allow reasonable training times. Adding additional stages coincided with an increased training time, with the longest for 12 stages being roughly 6 hours. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set is chosen for further optimization.
+With some difficulties obtaining GPU support, CPU based training was performed using a computing cluster hosting Intel Xeon E5-2680 processors. The speed up achieved using OpenMP was sufficient to allow reasonable training times. Adding additional stages coincided with an increased training time, with the longest for 12 stages being roughly 6 hours. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set ($FA=0.35$) is chosen for further optimization.
 
-The first layers of the final stage can be visualized in figure \ref{fig:vjstages}:
+The first layers of the final stage can be visualized in figure \ref{fig:vjlayers}:
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=9cm]{images/vj_result.jpg}
 \caption{Cascade classifier 4 layers of final stage}
-\label{fig:vjstages}
+\label{fig:vjlayers}
 \end{center}
 \end{figure}
 
-In the layers investigated, it can be observed that the model seems to learn: the outer boundary of the ball as well as the internal edges of the patches of the ball. These make intuitive sense and provide a level of confidence in the results that have been obtained.
+In the layers investigated, it can be observed that the model seems to learn: the outer boundary of the ball, the thickness of the edges as well as the patches of the ball. These make intuitive sense and provide confidence in the results that have been obtained.
 
-During inference, $minNeighbors$ provides a measure of confidence to retain the candidate, which is fine-tuned on the validation set to maximize the AP score.
+During inference, $minNeighbors$ provides a measure of confidence to retain the candidate, which is fine-tuned on the validation set to maximize the AP score (figure \ref{fig:vjneighbors}).
 
 \begin{figure}[h!]
 \begin{center}
@@ -796,7 +796,7 @@ During inference, $minNeighbors$ provides a measure of confidence to retain the 
 
 \subsubsection{Model tuning}
 
-An ablation study is now performed in order to optimize accuracy in the context of a real-time performance. A search is performed to optimize the $scaleFactor$.
+An ablation study is now performed in order to optimize accuracy in the context of a real-time performance. A search is performed to optimize the $scaleFactor$ (figure \ref{fig:vjspeeds}).
 
 \begin{figure}[h!]
 \begin{center}
