@@ -403,9 +403,7 @@ A breakthrough for object detection was achieved with the introduction of the on
 
 In the YOLO architecture by \cite{yolo}, the image is divided into an $S \times S$ grid. Each grid cell is used to predict $B$ bounding boxes with associated confidence scores and $C$ class probabilities which is demonstrated in figure \ref{fig:yolodemo}. This is done by passing the output of the backbone into fully connected layers with output nodes representing each cell. \cite{yolo} considers disadvantages of this approach to be a sensitivity to hyper-parameters, difficulty detecting objects much smaller than the anchors as well as suffering localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
 
-To achieve additional performance, the YOLOv2 architecture by \cite{yolov2} introduces (besides other incremental improvements) the usage of predefined bounding boxes which are used as initial guesses to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique dubbed an anchor-based approach. The box dimensions (dimensional priors) are learnt by k-means clustering of the dataset. Further improvements have been made with YOLOv3 \citep{yolov3} and YOLOv4 \citep{yolov4}, with the most significant enhancements being a deeper more optimized backbone as well various pre and post-processing tricks to improve the efficiency of training. These models are also released with a ``tiny'' version which trades accuracy for speed and model size.
-
-Numerous unofficial ``YOLO'' detectors have also been created which have no affiliation to the original researchers.
+To achieve additional performance, the YOLOv2 architecture by \cite{yolov2} introduces (besides other incremental improvements) the usage of predefined bounding boxes which are used as initial guesses to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique dubbed an anchor-based approach. The box dimensions (dimensional priors) are learnt by k-means clustering of the dataset. Further improvements have been made with YOLOv3 \citep{yolov3} and YOLOv4 \citep{yolov4}, with the most significant enhancements being a deeper and more optimized backbone, a loss function tailored to the evaluation metric as well including various proven pre and post-processing tricks (``bag-of-freebies and ``bag-of-specials'') to improve the accuracy with little overhead. These models are also released with a ``tiny'' version which trades accuracy for speed and model size. Note that numerous unofficial ``YOLO'' detectors have also been created which have no affiliation to the original researchers.
 
 \subsubsection{NanoDet}
 
@@ -720,7 +718,7 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 
 \section{Baseline detection}
 
-The baseline detectors, which have been chosen based on the reported results of the related works, are now investigated.
+The baseline detectors, which have been chosen based on known prior usage in RoboCup as seen in the related works, are now investigated.
 
 \subsection{Viola Jones}
 
@@ -808,16 +806,19 @@ An ablation study is now performed in order to optimize accuracy in the context 
 
 \subsection{YOLO v4 Tiny}
 
-YOLO object detection is based on the Darknet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 Tiny \citep{yolov4tiny} model from the author is made available, which has been trained on the COCO dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the COCO dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as getting a feel for the performance gain that can be achieved at the cost of additional training.
+YOLO object detection is based on the Darknet deep learning framework, which is purpose built for training and evaluating the YOLO architecture in the object detection task. Alongside the framework, the pretrained YOLO v4 Tiny \citep{yolov4tiny} model from the author is made available, which has been pretrained on the COCO dataset, as well as the configuration and pretrained backbone that have been used to get the reported results. Since the COCO dataset features a ``sports ball'' category, it is possible to apply the pretrained model to the Robocup ball dataset in order to evaluate how well the models generalize between the domains as well as getting a feel for the performance gain that can be achieved at the cost of additional training.
 
 In the following section the steps taken to prepare the software environment and data are described in order to train YOLO v4 Tiny on the RoboCup dataset. Trained models of this framework are represented and stored by a configuration file and weights file. External tooling can be used to convert the results into the desired ONNX format. 
 
 \subsubsection{Software environment}
 
- The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. Before compiling the framework on the target training hardware, CUDA 11.8 is linked in the makefile - in order to benefit from GPU acceleration. The training dataset needs to be prepared in a ``Darknet style'' format. The online deep-learning service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
+ The ``YOLO V4'' release is cloned from the official repository hosted on github \citep{yolov4repo}. Before compiling the framework on the target training hardware, CUDA 11.8 is linked in the makefile - in order to benefit from GPU acceleration. The training dataset needs to be prepared in a ``Darknet style'' format, therefore a script is created to do this. The web service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
 \subsubsection{Model training}
 
+The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found hosted on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations -- such as photometric and geometric distortions as well as simulated object occlusion are applied. 
+
+To train the network, YOLOv4 uses a loss function known as ``Distance-IOU'' \citep{diouloss} which offers an objective which tailored to the IoU evaluation metric.
 
 To train the network, a multipart loss is optimised. The function has the following high level form:
 \begin{equation}
@@ -825,7 +826,7 @@ L_{YOLO} =  \lambda L_{reg} + L_{confi} + L_{cls}
 \end{equation} 
 With $\lambda$ as a balancing weight for training emphasis.  \# Revise content \# 
 
-The release configuration for YOLO v4 Tiny was utilized for model training alongside a pretrained backbone. Links to these can be found hosted on the repository \citep{yolov4repo}. The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
+The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
 Initial experimentation showed that building the framework without any of the desired dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
 
