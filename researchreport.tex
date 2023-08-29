@@ -1262,12 +1262,10 @@ The tracking error has been plotted in figure \ref{fig:ekferror}. Although a mor
 
 \section{Proposed tracking}
 
-For these cases tracker is sub optimal
-
-
+For the tracking cases considered it is apparent that thr oerformance is sub optimal
+Neural Kalman filtering has shown to be hadve the potential to implicitly learn through model fusion
+In this section thebapplication of neaural kalman filteringto the tracking problem is invertigated
 Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
-
-The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference in Python. The NanoDet repository can be found on github with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus'' architecture which is the most recent and best performing architecture. A formal paper is not available.
 
 \subsection{Changes to KalmanNet}
 
@@ -1284,7 +1282,7 @@ Although some of the KalmanNet architecture is peculiar, some of the choices are
 
 In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The described configuration is trained using the tracking dataset. A first order Kalman filter is used. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. Cross validation is applied in order to store the best model weights found. 
 
-Due to the sequential nature of the data, much slower processing is achievable than before. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Longer training then this did not deliver better results and become impractical. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models are plotted in figure \ref{fig:RNNtrain}. The additional model emphasizes the possible variety in training.
+Significantly slower processing of the data was relsised -- which is mst likely due to the sequential nature of the porblem and data. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Longer training then this did not deliver better results and become impractical. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models are plotted in figure \ref{fig:RNNtrain}. The additional model emphasizes the possible variety in training.
 
 \begin{figure}[h!]
 \begin{center}
