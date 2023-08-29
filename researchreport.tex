@@ -1052,7 +1052,7 @@ Initially, the raw detections of the tracking dataset will be studied alongside 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=13cm]{images/raw_error.png}
+\includegraphics[width=14cm]{images/raw_error.png}
 \caption{Basic tracking error}
 \label{fig:rawerror}
 \end{center}
@@ -1062,11 +1062,19 @@ In figure \ref{fig:rawerror}, after forward transforming the bounding box to the
 
 Near zero distance (before the Fat Proxy kick causes the ball beaming) the position error is dominated by the error in the transformation. This shows that the detector that has been trained is as effective as perfect vision up until the time of kicking. Up until approximately 4m distance from the agent, a portion of error can be assigned both the ball detector as well as the transformation model. Here the system works comparably to the performance suggested in the related works (tracking error of 0.3m) -- however the system has room for improvement although the improvement could equally be achieved by improving the transformation. However, beyond this point, it is evident that the error due to the detector explodes. Individual trajectories are investigated further in order to better understand this.
 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=8.5cm]{images/5mball.jpeg}
+\caption{A ball at 5m distance}
+\label{fig:farball}
+\end{center}
+\end{figure}
+
 A short and long ground based kick is interrogated in figures \ref{fig:rawgroundshort} and \ref{fig:rawgroundlong}:
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/raw_ground_short.png}
+\includegraphics[width=14cm]{images/raw_ground_short.png}
 \caption{Short ground kick - Raw detections}
 \label{fig:rawgroundshort}
 \end{center}
@@ -1074,7 +1082,7 @@ A short and long ground based kick is interrogated in figures \ref{fig:rawground
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/raw_ground_long.png}
+\includegraphics[width=14cm]{images/raw_ground_long.png}
 \caption{Long ground kick - Raw detections}
 \label{fig:rawgroundlong}
 \end{center}
@@ -1086,7 +1094,7 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/raw_loft_short.png}
+\includegraphics[width=14cm]{images/raw_loft_short.png}
 \caption{Short lofted kick - Raw detections}
 \label{fig:rawloftshort}
 \end{center}
@@ -1094,13 +1102,15 @@ A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} a
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/raw_loft_long.png}
+\includegraphics[width=14cm]{images/raw_loft_long.png}
 \caption{Long lofted kick - Raw detections}
 \label{fig:rawloftlong}
 \end{center}
 \end{figure}
 
-For lofted kicks, it is firstly noted that the trajectory follows a parabolic path as expected for projectile motion. With each bounce, energy losses causes rebounds of diminishing height. Secondly it is noted that within 4m the detector is comparable to perfect vision. Beyond 4m a limit on the ball distance is reached which causes the error to explode. The distance measurement at long range is the limiting factor for the overall performance of the system, however applying a tracking algorithm has the potential to improve the tracking of the ball trajectory. 
+For lofted kicks, it is firstly noted that the trajectory follows a parabolic path as expected for projectile motion. With each bounce, energy losses causes rebounds of diminishing height. Secondly it is noted that within 4m the detector is comparable to perfect vision. Beyond 4m a limit on the ball distance is reached which causes the error to explode. 
+
+The distance measurement at long range is the limiting factor for the overall performance of the system - in figure \ref{fig:farball} it is understandably so since the ball becomes tiny, therefore any changes in distance are difficult to perceive. However, early detections are reliable, therefore applying a tracking algorithm has the potential to improve the tracking of the ball trajectory. 
 
 \subsection{Standard Kalman Filtering}
 
@@ -1186,7 +1196,7 @@ The ultimate steady state of the Kalman gain depends on the balance of the magni
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=13cm]{images/fok_error.png}
+\includegraphics[width=14cm]{images/fok_error.png}
 \caption{First order Kalman Filter error}
 \label{fig:fokerror}
 \end{center}
@@ -1217,7 +1227,7 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_ground_short.png}
+\includegraphics[width=11cm]{images/ekf_ground_short.png}
 \caption{Short ground kick - Extended Kalman Filter}
 \label{fig:ekfgroundshort}
 \end{center}
@@ -1225,7 +1235,7 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_ground_long.png}
+\includegraphics[width=11cm]{images/ekf_ground_long.png}
 \caption{Long ground kick - Extended Kalman Filter}
 \label{fig:ekfgroundlong}
 \end{center}
@@ -1247,46 +1257,45 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 %\end{center}
 %\end{figure}
 
+The EKF operates in a similar fashion to the standard Kalman filter. Initially the Kalman gain is set close to 1 and it converges (unintelligently) towards a steady state which is dependent of the balance between measurement and process noise. In the case of an EKF however there is some instability, due to the nonlinearity of the process model, which causes the Kalman gain to oscillate in some cases. Compared to the first order Kalman filter, it is seen that after the initial kick that the tracker has a reduction in overshoot. The model is therefore more responsive and can in principle be more aggressively tuned for noise rejection.
+
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=13cm]{images/ekf_error.png}
+\includegraphics[width=12cm]{images/ekf_error.png}
 \caption{Extended Kalman Filter error}
 \label{fig:ekferror}
 \end{center}
 \end{figure}
 
-The EKF operates in a similar fashion to the standard Kalman filter. Initially the Kalman gain is set close to 1 and it converges (unintelligently) towards a steady state which is dependent of the balance between measurement and process noise. In the case of an EKF however there is some instability, due to the nonlinearity of the process model, which causes the Kalman gain to oscillate in some cases. Compared to the first order Kalman filter, it is seen that after the initial kick that the tracker has a reduction in overshoot. The model is therefore more responsive and can in principle be more aggressively tuned for noise rejection.
+Although a more sophisticated approach, in figure \ref{fig:ekferror} the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. The EKF is not an optimal tracker and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
-The tracking error has been plotted in figure \ref{fig:ekferror}. Although a more sophisticated approach, the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. Since the tracking error is not dominated by a Gaussian process noise with a zero mean the EKF is not an optimal tracker and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
-
-
+\newpage
 \section{Proposed tracking}
 
-For the tracking cases considered it is apparent that thr oerformance is sub optimal
-Neural Kalman filtering has shown to be hadve the potential to implicitly learn through model fusion
-In this section thebapplication of neaural kalman filteringto the tracking problem is invertigated
-Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
+For the tracking cases considered it is apparent that the performance is sub optimal. Neural Kalman filtering is an approach to Kalman filtering which can be used when the underlying state space model is non-linear and acccurate knowledge of it is unknown. In this section the application of neural Kalman filtering to the tracking problem is investigated.
 
 \subsection{Changes to KalmanNet}
 
-Initially the KalmanNet repository is cloned, however, various issues were encountered with reproducing the reported results with their provided simulation. Some issues included broken GPU support, frequent cases of overflow in training following initialization due to models which diverge immediately as well as impractically slow convergence. Further difficulties resulted from the project not following a formal release structure, the commit that was initially cloned has been clobbered by the maintainers, however fixes were already implemented for the purposes of this research as well as changes to the network therefore upstream changes are not incorporated. Therefore the basic structure of the KalmanNet repository and training routine is utilized but some changes which significantly improved performance for this research has been implemented. 
+Initially the KalmanNet Github repository \cite{kalmangit} is cloned and it is attempted to reproduce their training results and then begin training for the ball tracking problem. Various issues were encountered with reproducing the reported results with their provided simulation. 
+
+Some issues included broken GPU support, frequent cases of overflow in training following initialization ( models which diverge immediately) as well as impractically slow convergence. Further difficulties resulted from the project not following a formal release structure, the commit that was initially cloned has been clobbered by the maintainers, however fixes were already implemented for the purposes of this research as well as changes to the network therefore upstream changes are not incorporated. Therefore the basic structure of the KalmanNet repository and training routine is utilized but some changes which significantly improved performance for this research has been implemented to achieve neural Kalman filtering. 
 
 Although some of the KalmanNet architecture is peculiar, some of the choices are not necessarily invalid. They simply just do not work well for this research problem being considered here and may still have useful results in other domains:
 \begin{itemize}
     \item In figure \ref{fig:architecture} it is shown that the predicted Kalman gain results from a fully connected linear output layer. Although its not necessarily an invalid approach, it does however not conform to the nature of Kalman filtering where the Kalman gain must lie between 0 and 1 - which has an intuition of describing a level of confidence in the measurements. Therefore it is chosen to replace this layer with a softmax layer, which has the effect of clamping the range. It was found that this change immediately solved the instability of the model and significantly increased the rate of convergence.
-    \item In both the paper as well as in figure \ref{fig:blockd}, the data preprocessing step is not described. It is found that the input features are scaled by the magnitude of the state vector. This introduces further non-linearity to the problem since with this processing, for example, at zero velocity the model would have the same input feature at a position of 0m or 1000m. This has the effect of destroying necessary information for this research problem being considered. A minimalistic approach was applied by simply applying an identity transformation to the data - which was found to give the best results for this dataset - and notably boosted the ultimate performance of the model by achieving a lower loss.
+    \item In both the paper as well as in figure \ref{fig:blockd}, the data preprocessing step is not described. It is found that the input features are scaled by the magnitude of the state vector. This introduces further non-linearity to the problem since with this processing, for example, at zero velocity the model would have the same input feature (state estimate and measurement) at a position of 0m or 1000m. This has the effect of destroying necessary information for this research problem being considered. A minimalistic approach was applied by simply applying an identity transformation to the state data and measurement - which was found to give sufficient results for this dataset - and notably boosted the ultimate performance of the model by achieving a lower loss than using the existing feature.
 \end{itemize}
 
 
 \subsection{Model training}
 
-In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The described configuration is trained using the tracking dataset. A first order Kalman filter is used. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. Cross validation is applied in order to store the best model weights found. 
+In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. Cross validation is applied in order to store the best model weights found. 
 
-Significantly slower processing of the data was relsised -- which is mst likely due to the sequential nature of the porblem and data. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Longer training then this did not deliver better results and become impractical. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models are plotted in figure \ref{fig:RNNtrain}. The additional model emphasizes the possible variety in training.
+Compared to the CNN models trained previously, significantly slower processing of the data was realized -- which is most likely due to the sequential nature of the problem and data. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Apart from being impractical, is not believed that longer training of this model would deliver better results. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models (best and cherry picked) are plotted in figure \ref{fig:RNNtrain} in order to emphasize the possible variety in training.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/knet_train.png}
+\includegraphics[width=9.5cm]{images/knet_train.png}
 \caption{Neural network adided Kalman filtering model training}
 \label{fig:RNNtrain}
 \end{center}
@@ -1306,7 +1315,7 @@ Noise dependant on distance
 \begin{center}
 \includegraphics[width=8cm]{images/tracker_speeds.png}
 \caption{Long lofted kick - Tracker evaluation}
-\label{fig:ekfloftlong}
+\label{fig:evalloftlong}
 \end{center}
 \end{figure}
 
@@ -1314,7 +1323,7 @@ Noise dependant on distance
 \begin{center}
 \includegraphics[width=12cm]{images/eval_ground_short.png}
 \caption{Short ground kick - Tracker evaluation}
-\label{fig:ekfgroundshort}
+\label{fig:evalgroundshort}
 \end{center}
 \end{figure}
 
@@ -1322,7 +1331,7 @@ Noise dependant on distance
 \begin{center}
 \includegraphics[width=12cm]{images/eval_ground_long.png}
 \caption{Long ground kick - Tracker evaluation}
-\label{fig:ekfgroundlong}
+\label{fig:evalgroundlong}
 \end{center}
 \end{figure}
 
@@ -1330,7 +1339,7 @@ Noise dependant on distance
 %\begin{center}
 %\includegraphics[width=12cm]{images/eval_loft_short.png}
 %\caption{Short lofted kick - Tracker evaluation}
-%\label{fig:ekfloftshort}
+%\label{fig:evalloftshort}
 %\end{center}
 %\end{figure}
 
@@ -1338,7 +1347,7 @@ Noise dependant on distance
 %\begin{center}
 %\includegraphics[width=12cm]{images/eval_loft_long.png}
 %\caption{Long lofted kick - Tracker evaluation}
-%\label{fig:ekfloftlong}
+%\label{fig:evalloftlong}
 %\end{center}
 %\end{figure}
 
