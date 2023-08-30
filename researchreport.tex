@@ -1267,7 +1267,7 @@ The EKF operates in a similar fashion to the standard Kalman filter. Initially t
 \end{center}
 \end{figure}
 
-Although a more sophisticated approach, in figure \ref{fig:ekferror} the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. The EKF is not an optimal tracker and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
+Although a more sophisticated approach, in figure \ref{fig:ekferror} the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. The EKF is not an optimal tracker for this case and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
 \newpage
 \section{Proposed tracking}
@@ -1289,7 +1289,7 @@ Although some of the KalmanNet architecture is peculiar, some of the choices are
 
 \subsection{Model training}
 
-In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. Cross validation is applied in order to store the best model weights found. 
+In order to use the KalmanNet model training routine, a data loader must be constructed which creates the expected data structure in a tensor format. The duration of each kick must be the same, therefore the kicks are clipped at 230 time steps, which corresponds to the shortest kick in the training dataset. The GRU is reset only per epoch, which aims to prevent over fitting on the moment of starting the kick as well as reducing the importance of timing initialization. To train the network, the mean square error is minimized with cross validation applied to store the best model weights found.
 
 Compared to the CNN models trained previously, significantly slower processing of the data was realized -- which is most likely due to the sequential nature of the problem and data. A speed up was achieved (more than an order of magnitude over CPU) by training utilizing NVIDIA GeForce RTX 3090 processors, which still resulted in a training time of nearly 12 hours per model for 1000 Epochs. Apart from being impractical, is not believed that longer training of this model would deliver better results. Training results were found be highly variable and the results of each trained model differed significantly. By training numerous models with the same parameters, it was possible to select the best one. The results of two trained models (best and cherry picked) are plotted in figure \ref{fig:RNNtrain} in order to emphasize the possible variety in training.
 
@@ -1305,19 +1305,7 @@ Initially it is clear that the model scores extremely poorly at initialization, 
 
 \section{Evaluation of trackers}
 
-Noise dependant on distance
-Noise dependant on distance
-Noise dependant on distance
-Noise dependant on distance
-Noise dependant on distance
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=8cm]{images/tracker_speeds.png}
-\caption{Long lofted kick - Tracker evaluation}
-\label{fig:evalloftlong}
-\end{center}
-\end{figure}
+The trackers that have been considered thus far are now evaluated against the unseen test training set. In order to have a feel for the results - a short and long grounded kick are interrogated in figures \ref{fig:evalgroundshort} and \ref{fig:evalgroundlong}:
 
 \begin{figure}[h!]
 \begin{center}
@@ -1351,21 +1339,35 @@ Noise dependant on distance
 %\end{center}
 %\end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=13cm]{images/eval_error.png}
-\caption{Tracker error}
-\label{fig:evalerror}
-\end{center}
-\end{figure}
+
+Initially, the network predicts a Kalman gain close to 1. This is consistent with the findings that the measurements are initially accurate. As the ball travels further away. as the agent performs the kick. The Kalman gain is reduced which means that the dynamics model is used. Therefore it is apparent that the model has learnt an behavior which is a smarter initialization. It also shows that the model has learnt to rely on the measurements when the ball is near.  The transition is sharp - which may indicate that at this point the model recognized that a kick has occurred
+
+Responsiveness
 
 Although over estimates. We see for dataset error is reduced.
 
 Initialisationn and convergence behavior
 
-Initially, the network predicts a Kalman gain close to 1. This is conisitent with the finidngs that the measurements are initally accuracye
-As the ball travels further away. as the agent oerfrms the kick. The The kalman gain is reduced which means that the dynamics model is used. Therefore it is aoparent that the modelhas learnt an behavior which is a smarter initikaisation. It also shows that the model has learnt to rely on the measurmeents when the ball is near. 
-The transition is sharp - which may indictate that at this point the model rcognised that a kick has occured
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=13cm]{images/eval_error.png}
+\caption{Tracker error (Test set)}
+\label{fig:evalerror}
+\end{center}
+\end{figure}
+
+Profiling of the trackers is performed and plotted in figure \ref{fig:trackspeeds}:
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=8cm]{images/tracker_speeds.png}
+\caption{Tracker speeds}
+\label{fig:trackspeeds}
+\end{center}
+\end{figure}
+
+All algorithms are have been poorly implemented in Python and tested on a mobile laptop CPU as done with the evaluation of object detectors. In \ref{fig:trackspeeds} it is seen that the simple latch tracker is the best performing approach in terms of computational speed. At such frequencies, the measurement error is likely significant however is useful for relative comparison. The standard Kalman filter and EKF tracker have a diminished speed respectively due to increased complexity. Neural network aided Kalman filtering is two orders of magnitude slower than the latch, however, still completes multiple orders of magnitude faster than the object detectors. Therefore the tracking step is not limiting and completes in real time despite the addition of further complexity. 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 
@@ -1382,6 +1384,8 @@ For the tracking task, the findings of the research showed that. The results are
 
 Moldel mismatch. Learn complex dynamics
 
+Addition of PAN
+
 \section{Future work}
 
 The natural continuation of this work would be to apply it to a physical robotic system to investigate how it generalizes to the real world with real physics as well as variations in scene and ball complexity.
@@ -1389,6 +1393,9 @@ The natural continuation of this work would be to apply it to a physical robotic
 A limitation of the approach used in this research is that a pipeline between detection and tracking is utilized rather than end-to-end training. Although, in this manner the performance of the detector can be better interrogated and extended to other classes that are independent of the tracking task. An approach which would train end-to-end, possibly utilizing a common backbone with different heads for each of the desired tasks, would result in better performances but at a cost of complexity and loss of intuition.
 
 As a further extension of the real-time neural kalman filtering approach, the prediction of future time steps for significantly forward guesses might be considered, since the non-linearity of the systems investigated mean that using the partially known model for prediction alone would be inaccurate. This might be done by predicting future measurements on demand and fusing them to the partially known model.
+
+
+Focal loss based on distance as
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\appendix
