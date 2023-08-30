@@ -1303,9 +1303,9 @@ Compared to the CNN models trained previously, significantly slower processing o
 
 Initially it is clear that the model scores extremely poorly at initialization, however, rapidly converges on a lower loss score for against both the training and cross validation score. This is a good indication that the model is learning and capturing patterns within the data. The fact that both training and validation scores are indiscernibly close provides confidence that the model is not over-fitting on the training data. Between the two models shown, further epochs may lead to either further convergence or even divergence depending on the learning of the model. The best model achieves its performance after 612 epochs with further training resulting in diminishing performance.
 
-\section{Evaluation of trackers}
+\subsection{Evaluation of results}
 
-The trackers that have been considered thus far are now evaluated against the unseen test training set. In order to have a feel for the results - a short and long grounded kick are interrogated in figures \ref{fig:evalgroundshort} and \ref{fig:evalgroundlong}:
+The trackers that have been considered thus far are now evaluated against the unseen test training set. In order to have a feel for the results - a short and long grounded kick are interrogated in figures \ref{fig:evalgroundshort} and \ref{fig:evalgroundlong}. In particular the focus is on understanding the performance of the neural aided tracking method as well as how it compares to the traditional approaches.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1339,14 +1339,22 @@ The trackers that have been considered thus far are now evaluated against the un
 %\end{center}
 %\end{figure}
 
+Initially, at the start of the kick routine, the neural network predicts Kalman gains close to 1. This is consistent with the findings that the measurements are initially accurate and shows that this has been captured by the model -- which is an desirable initialization behavior. This is also shared and considered to be a highly effective feature of the standard Kalman and EKF trackers. Compared to the standard and EKF trackers however, the neural assisted method does not show an initial convergence. Due to this, it can be recognized, that when the kick is performed the neural aided Kalman filter does not show any lag in the same manner as the traditional methods do, which have already converged. Since the traditional trackers have a portion of a mismatching physics model as part of the update, these models will always experience a lag.
 
-Initially, the network predicts a Kalman gain close to 1. This is consistent with the findings that the measurements are initially accurate. As the ball travels further away. as the agent performs the kick. The Kalman gain is reduced which means that the dynamics model is used. Therefore it is apparent that the model has learnt an behavior which is a smarter initialization. It also shows that the model has learnt to rely on the measurements when the ball is near.  The transition is sharp - which may indicate that at this point the model recognized that a kick has occurred
+At close range, after agent has performed the kick, the Kalman gain remains consistent but is not static. In this manner it benefits from accurate detection and retains responsiveness.
+
+ the ball travels further away. as the agent performs the kick. The Kalman gain is reduced which means that the dynamics model is used. Therefore it is apparent that the model has learnt an behavior which is a smarter initialization. It also shows that the model has learnt to rely on the measurements when the ball is near.  The transition is sharp - which may indicate that at this point the model recognized that a kick has occurred
+
+The fluctuations possibly have two interpretations. Firstly they appear to be consistent with uncertainty. Frequency. Amplitude.
+
+A less than useful chatacterstic however is the 
+
+ As the ball travels further away
 
 Responsiveness
 
 Although over estimates. We see for dataset error is reduced.
 
-Initialisationn and convergence behavior
 
 \begin{figure}[h!]
 \begin{center}
@@ -1387,6 +1395,8 @@ Moldel mismatch. Learn complex dynamics
 Addition of PAN
 
 \section{Future work}
+
+Little can be done from the limited monocular vision in terms of improving the detections. In order to improve the distance measurement however it may be possible to use further clues such as optical methods or environmental information. One optical approach may be to utilise parrellax -- in the same manner as one sees in nature from a pigeon. In this manner whe natural sideways bobbing of the agent can give information. Further environment infomation such as the position of the ball against field markings 
 
 The natural continuation of this work would be to apply it to a physical robotic system to investigate how it generalizes to the real world with real physics as well as variations in scene and ball complexity.
 
