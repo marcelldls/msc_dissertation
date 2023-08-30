@@ -1363,7 +1363,9 @@ Although over estimates. We see for dataset error is reduced.
 
 Initialisationn and convergence behavior
 
-
+Initially, the network predicts a Kalman gain close to 1. This is conisitent with the finidngs that the measurements are initally accuracye
+As the ball travels further away. as the agent oerfrms the kick. The The kalman gain is reduced which means that the dynamics model is used. Therefore it is aoparent that the modelhas learnt an behavior which is a smarter initikaisation. It also shows that the model has learnt to rely on the measurmeents when the ball is near. 
+The transition is sharp - which may indictate that at this point the model rcognised that a kick has occured
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 
