@@ -1404,15 +1404,21 @@ Although the performance of the object detectors on detecting a distant ball was
 \end{center}
 \end{figure}
 
-The largest feature map that is laterally connected has undergone down-scaling due to the stride of the CNN backbone. Therefore, in order to improve the bounding box regression, a higher resolution feature map may boost regression by supplementing additional spatial information. In NanoDet a stride of 8 is used, however, reducing the stride is undesirable for real-time performance since -- due to the arithmetic complexity of the CNN -- in order to achieve a bottle neck of the same ultimate feature map size with a reduced stride by factor $a$, results in an expansion of the number of computations proportional to $a^3$. A potential approach that adds only a small overhead would be the addition of an additional up-sampling layer, with a lateral connection to the input.
+The largest feature map that is laterally connected has undergone down-scaling due to the stride of the CNN backbone. Therefore, in order to improve the bounding box regression, a higher resolution feature map may boost regression by supplementing additional spatial information. In NanoDet a stride of 8 is used, however, reducing the stride is undesirable for real-time performance since -- due to the arithmetic complexity of the CNN -- in order to achieve a bottle neck of the same ultimate feature map size with a reduced stride by factor $a$, an expansion of the number of computations proportional to $a^3$ would result which would impact the detector real-time performance. In the simplest approach one might resize the image by a factor $8$, however this creates $8^2$ more computations in the backbone. A potential approach that adds only a small overhead would be the addition of an additional up-sampling layer, with a lateral connection to the input layer.
 
 Constrained to monocular vision, in order to further improve the distance measurement -- after having computed a bounding box -- it may be possible to use further clues such as optical methods or environmental information. One optical approach may be to utilize the phenomenon of motion parallax  where an observation from two different points leads to an apparent displacement of an object. In this manner the natural sideways bobbing of the agent can give depth information -- similar in the same manner as one sees in nature from pigeons \citep{parrelax}. Further environmental observations such as the position of the ball against field markings as well as the perceived gravitational drop of a ball, if it is a lofted kick, can give additional information in the correct circumstances.
 
 \subsection{Improving state estimation}
 
-Although neural Kalman filtering was able to. Focal loss based on distance as. Penalty for jitter may be harm ful. A possible aporach is using the EKF.
+Although neural Kalman filtering was able to outperform the traditional tracking methods as measured by mean square error -- some of the characteristics are undesirable for control purposes. One issue is that within the reliable range of the object detector, the traditional methods out perform the neural based approach. 
 
-As a further extension of the real-time neural kalman filtering approach, the prediction of future time steps for significantly forward guesses might be considered, since the non-linearity of the systems investigated mean that using the partially known model for prediction alone would be inaccurate. This might be done by predicting future measurements on demand and fusing them to the partially known model.
+ Focal loss based on distance as. Penalty for jitter may be harmful. A possible approach is using the EKF.
+
+\subsection{Extensions}
+
+Additional further work is considered below:
+
+As a further extension of the real-time neural Kalman filtering approach, the prediction of future time steps for significantly forward guesses might be considered, since the non-linearity of the systems investigated mean that using the partially known model for prediction alone would be inaccurate. This might be done by predicting future measurements on demand and fusing them to the partially known model.
 
 A limitation of the approach used in this research is that a pipeline between detection and tracking is utilized rather than end-to-end training. Due to this, the detection loss is not the same as the ultimate metric which is used to evaluate the tracker. A benefit of this approach is that there is modularity in the system -- a newly trained object detector model could be substituted in without requiring retraining of the tracker. Further, other visual systems -- such as for agent localization -- can plug in to use the results without further complicating training. A consequence of this is that the detector not actually optimized specifically for the tracking task, so there is potentially additional performance which can be gained here. 
 
