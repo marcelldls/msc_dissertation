@@ -1339,13 +1339,13 @@ The trackers that have been considered thus far are now evaluated against the un
 
 Initially, at the start of the kick routine, the neural network predicts Kalman gains close to 1 -- which is a desirable initialization behavior. This is also shared and considered to be a highly effective feature of the standard Kalman and EKF trackers. This also corresponds to the knowledge that the early measurements are reliable and shows that meaningful learning has occurred. Compared to the standard and EKF trackers however, the neural assisted method does not show an initial convergence of the gain. Due to this, it can be recognized, that when the kick is performed the neural Kalman filter does not show any lag in the same manner as the traditional methods do, which have already converged. Since the traditional trackers have a portion of a mismatching physics model as part of the update, these models will always experience a lag.
 
-At close range, after agent has performed the kick, the Kalman gain remains consistent but is not static. In this manner the prediction benefits from accurate detections and retains responsiveness. As the ball travels further in distance within the region of reliable detection the rolling average Kalman gain drops only slightly. With a gain near 1, the neural Kalman filter tracks the trajectory similarly to the latch tracker (a reflection of the raw detections) rather than the ground truth. An explanation for a lack of learning here is likely that the loss resulting from such a case is very small compared to the loss from range limited detections. This argument may also explain why there seems to be no noise attenuation -- simply the error reduction is imperceptible.
+At close range, after agent has performed the kick, the Kalman gain remains consistent but is not static. In this manner the state estimation benefits from accurate measurements and retains responsiveness. As the ball travels further in distance within the region of reliable detection the rolling average Kalman gain drops only slightly. With a gain near 1, the neural Kalman filter tracks the trajectory similarly, but slightly ahead of, the latch tracker (a reflection of the raw detections) rather than the ground truth. An explanation for a lack of learning here is likely that the loss resulting from such a case is very small compared to the loss from range limited detections. This may also explain why there seems to be no noise attenuation -- the error reduction is imperceptible.
 
 In figure \ref{fig:evalgroundlong} the impacts of the ball moving into the longer range region is seen. It is apparent that as the ball moves into the region where the detection become range limited that the Kalman gain predictions start to become interesting. A sudden onset of high frequency jumps in the Kalman gain appear, which has the effect of increasing the state estimate beyond the measured distance. The result of this is that the state estimate diverges from the measurements. The mechanism for this appears to be that certain measurements are ``extrapolated'' upwards by the first order Kalman filter by dropping the gain. A high Kalman gain then corrects for an overshoot by using the measurement to drop the state estimation. In this manner, the amplitude of the fluctuations might be understood as a measure of uncertainty. A side effect of this is that it results in an amplification of the jitter resulting from the measurement noise.
 
 As more time steps are elapsed and velocity of the ball starts to reduce the rolling average Kalman gain drops further -- this places a greater emphasis on the dynamics model. The effect of this is that despite more range limited measurements arriving, the state estimations are able to track the ground truth rather than converging on the measurements as with the traditional tracking methods. A complex behavior appears been learnt where the tracker has been able to capture the trajectory of the ball despite the range limited measurements. In this manner it does appear that the network has indeed implicitly learnt to capture the underlying system dynamics. 
 
-The error of the trackers is plotted in figure \ref{fig:evalerror}:
+The error of the trackers against the unseen test data is plotted in figure \ref{fig:evalerror}:
 
 \begin{figure}[h!]
 \begin{center}
@@ -1355,13 +1355,15 @@ The error of the trackers is plotted in figure \ref{fig:evalerror}:
 \end{center}
 \end{figure}
 
-Overall it can be seen that of all the trackers considered, neural Kalman filtering has achieved the lowest root mean square error against the test dataset. The majority of the performance arises from the long kciks
+Overall it can be seen that of all the trackers considered, neural Kalman filtering has achieved the lowest root mean square error against the test dataset. The majority of the performance gain arises from an improved tracking from the long kicks which travel beyond the range where the object detector is reliable. In this region the neural network has implicitly captured the underlying system dynamics which facilitates divergence of the state estimation from the measurements accordingly. Neural Kalman filtering is also the most responsive tracking approach, having a reduced error in the region up to 1m after the kick due to a reduction in latency when the process diverges from the dynamics model. 
+
+With the model that has been utilized there are however aspects which come at a cost of the previously mentioned performance. In the region where the detections are accurate, the traditional approaches track better. A possible explanation is that the loss scores due to this error are small in comparison to the error from the range limited measurements. Therefore, during training, the network does not learn to optimize Kalman gain predictions in the middle range regions. Another cost is noise amplification, which seems to manifest due to the fluctuations in the Kalman gain predictions as the network has some level of uncertainty.
 
 In order to evaluate the real-time performance of the tracking algorithms, a bench-marking of the trackers is performed and plotted in figure \ref{fig:trackspeeds}:
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=8cm]{images/tracker_speeds.png}
+\includegraphics[width=7cm]{images/tracker_speeds.png}
 \caption{Tracker speeds}
 \label{fig:trackspeeds}
 \end{center}
