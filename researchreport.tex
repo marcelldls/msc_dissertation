@@ -419,7 +419,7 @@ Contemporary object detection advancements include anchor box free detectors -- 
 
 In the ``FCOS-style'' key-point approach which NanoDet is based on, each object is modeled as a single center point of a bounding box. The network is used to predict heatmaps where the intensity peaks are representing keypoints. Regression of the bounding boxes can then be performed utilizing key-points rather than anchors. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}   
 
-After passing the input image through the convolutional backbone for feature extraction, NanoDet utilizes a modified lightweight Path Aggregation network (PAN) \citep{pan} neck before passing the output to it's detection head. PAN is an incremental improvement of a Feature Pyramid Network \citep{fpn} which is a popular technique in the object detection space. In a feature pyramid network, the output feature maps taken from various shallow and Deeper levels from the backbone network (representing spacial and semantic information respectively) are utilized by the model to better detect objects across a range of scales. This is a similar concept to the idea of an image pyramid which is popular with traditional approaches, however it naturally leverages the pyramidal hierarchy of the backbone without the additional computational overhead. The output stride refers to the down-sampling ratio compared to the input image. 
+After passing the input image through the convolutional backbone for feature extraction, NanoDet utilizes a modified lightweight Path Aggregation network (PAN) \citep{pan} neck before passing the output to it's detection head. PAN is an incremental improvement of a Feature Pyramid Network \citep{fpn} which is a popular technique in the object detection space. In a feature pyramid network, the output feature maps taken from various shallow and deeper levels from the backbone network (representing spacial and semantic information respectively) are utilized by the model to better detect objects across a range of scales. This is a similar concept to the idea of an image pyramid which is popular with traditional approaches, however it naturally leverages the pyramidal hierarchy of the backbone without the additional computational overhead. The output stride refers to the down-sampling ratio compared to the input image. 
 
 \subsection{Performance Measures}
 
@@ -578,8 +578,7 @@ A significant challenge for object detection is the size of the ball which at di
 
 The principle questions which arise are:
 \begin{itemize}
-    \item Does the more recent keypoint based NanoDet detector outperform the RoboCup proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP and latency, on a RoboCup ball tracking dataset? 
-    \item Can a CNN object detector run at real-time on a modern mobile laptop CPU?
+    \item Does the more recent keypoint based NanoDet detector outperform the RoboCup proven anchor based Yolo v4 Tiny and traditional Viola Jones detectors found in the related works, as measured by AP in real-time on a RoboCup ball detection dataset? 
     \item Can pretraining on real images transfer to a simulated RoboCup environment?
     \item Can model quantization offer a worthwhile optimization versus performance degradation? 
 \end{itemize}
@@ -590,7 +589,7 @@ A significant challenge is the non-linearity of the trajectories due to rolling 
 
 The principle questions which arise are:
 \begin{itemize}
-    \item In the context of the simulated RoboCup soccer environment, can a neural aided Kalman filter outperform a traditional EKF for rolling and lofted kicks?
+    \item In the context of the simulated RoboCup soccer environment, can a neural aided Kalman filter outperform a traditional EKF for tracking rolling and lofted kicks?
 	\item Can a tracking-by-detection approach meet the real-time performance requirements?
 \end{itemize}
 
@@ -1088,7 +1087,7 @@ A short and long ground based kick is interrogated in figures \ref{fig:rawground
 \end{center}
 \end{figure}
 
-In these kicks the following is noted. Firstly, looking at the ground truth trajectory for a kick along the ground the height of the ball remains zero as expected. The distance covered by the ball per unit time decreases in a non-linear manner after the kick takes place, due to rolling friction. Secondly, looking at the measurements of the trajectory there is noise introduced by the detector and transformation which here can be observed in the time domain, where it is clear that the cyclic nature of the agent motion results in an error in the perceived ball height. The correctness of the height has a dependency on the placement of the bounding box, which appears to be comparable to the perfect object detector. Until 4m the inference of distance appears to be effective, although noisy. Beyond this distance, inference of the ball position appears to be problematic. Since accuracy of the distance is dependent on the size of the bounding box, it seems that a limit exists.
+In these kicks the following is noted. Firstly, looking at the ground truth trajectory for a kick along the ground the height of the ball remains zero as expected. The distance covered by the ball per unit time decreases in a non-linear manner after the kick takes place, due to rolling friction. Secondly, looking at the measurements of the trajectory there is noise introduced by the detector and transformation which here can be observed in the time domain, where it is clear that the cyclic nature of the agent motion results in an error in the perceived ball height. The correctness of the height has a dependency on the placement of the bounding box, which appears to be comparable to the perfect object detector. Until 4m the inference of distance appears to be effective, although noisy. Beyond this distance, inference of the ball position appears to be problematic. Since accuracy of the distance is dependent on the size of the bounding box, it seems that a limit exists. The object detector is impressive within it's reliable range.
 
 A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} and \ref{fig:rawloftlong}:
 
@@ -1374,7 +1373,7 @@ All algorithms are have been implemented in Python and tested on a mobile laptop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 
-The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision. Results from the popular problem space of object detection can be used for tracking by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It was proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
+The aim of visual object tracking is to use a sequence of image frames to robustly estimate the motion state of a target object. This offers a versatile approach that is capable of acquiring an abundance of environmental information that can be used by robotic agents to perceive and interact with a dynamic environment in real-time. In this research report, the context of ball tracking in a simulated RoboCup soccer environment is considered. It has been proposed to take advantage of the progress of modern neural approaches to computer vision by utilizing models from the popular problem space of object detection by utilizing a tracking-by-detection framework. Correspondence can then be achieved through the the use of Kalman filtering which is a popular model based commonly used for state-estimation in the robotics domain. It was proposed to apply neural assisted Kalman filtering, which balances the ease of interpretation of a model-based approach and the ability to learn complex dynamics using neural networks. 
 
 For the object detection task, the findings of the research showed that
 
@@ -1391,16 +1390,35 @@ Addition of PAN
 
 \section{Future work}
 
-Little can be done from the limited monocular vision in terms of improving the detections. In order to improve the distance measurement however it may be possible to use further clues such as optical methods or environmental information. One optical approach may be to utilise parrellax -- in the same manner as one sees in nature from a pigeon. In this manner whe natural sideways bobbing of the agent can give information. Further environment infomation such as the position of the ball against field markings 
+In this subsection some potential areas for further investigation are discussed which follow the observations and results of the research. 
 
-The natural continuation of this work would be to apply it to a physical robotic system to investigate how it generalizes to the real world with real physics as well as variations in scene and ball complexity.
+\subsection{Improving ball measurements}
 
-A limitation of the approach used in this research is that a pipeline between detection and tracking is utilized rather than end-to-end training. Although, in this manner the performance of the detector can be better interrogated and extended to other classes that are independent of the tracking task. An approach which would train end-to-end, possibly utilizing a common backbone with different heads for each of the desired tasks, would result in better performances but at a cost of complexity and loss of intuition.
+Although the performance of the object detectors on detecting a distant ball was more impressive than expected, there is room for improvement of the bounding box regression which appears to have a minimum size limit despite still being able to make successful ball classifications. A reason for this may be found in the architecture of the Path Aggregation Network, which leverages the pyramidal hierarchy of the network backbone in order to combine higher and lower level feature maps which represent semantic and spacial information accordingly as seen in figure \ref{fig:pan}. 
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=10cm]{images/pan.jpg}
+\caption{Path Aggregation Network \citep{pan}}
+\label{fig:pan}
+\end{center}
+\end{figure}
+
+The largest feature map that is laterally connected has undergone down-scaling due to the stride of the CNN backbone. Therefore, in order to improve the bounding box regression, a higher resolution feature map may boost regression by supplementing additional spatial information. In NanoDet a stride of 8 is used, however, reducing the stride is undesirable for real-time performance since -- due to the arithmetic complexity of the CNN -- in order to achieve a bottle neck of the same ultimate feature map size with a reduced stride by factor $a$, results in an expansion of the number of computations proportional to $a^3$. A potential approach that adds only a small overhead would be the addition of an additional up-sampling layer, with a lateral connection to the input.
+
+Constrained to monocular vision, in order to further improve the distance measurement -- after having computed a bounding box -- it may be possible to use further clues such as optical methods or environmental information. One optical approach may be to utilize the phenomenon of motion parallax  where an observation from two different points leads to an apparent displacement of an object. In this manner the natural sideways bobbing of the agent can give depth information -- similar in the same manner as one sees in nature from pigeons \citep{parrelax}. Further environmental observations such as the position of the ball against field markings as well as the perceived gravitational drop of a ball, if it is a lofted kick, can give additional information in the correct circumstances.
+
+\subsection{Improving state estimation}
+
+Although neural Kalman filtering was able to. Focal loss based on distance as. Penalty for jitter may be harm ful. A possible aporach is using the EKF.
 
 As a further extension of the real-time neural kalman filtering approach, the prediction of future time steps for significantly forward guesses might be considered, since the non-linearity of the systems investigated mean that using the partially known model for prediction alone would be inaccurate. This might be done by predicting future measurements on demand and fusing them to the partially known model.
 
+A limitation of the approach used in this research is that a pipeline between detection and tracking is utilized rather than end-to-end training. Due to this, the detection loss is not the same as the ultimate metric which is used to evaluate the tracker. A benefit of this approach is that there is modularity in the system -- a newly trained object detector model could be substituted in without requiring retraining of the tracker. Further, other visual systems -- such as for agent localization -- can plug in to use the results without further complicating training. A consequence of this is that the detector not actually optimized specifically for the tracking task, so there is potentially additional performance which can be gained here. 
 
-Focal loss based on distance as
+Although, in this manner the performance of the detector can be better interrogated and extended to other classes that are independent of the tracking task. An approach which would train end-to-end, possibly utilizing a common backbone with different heads for each of the desired tasks, would result in better performances but at a cost of complexity and loss of intuition.
+
+The natural continuation of this work would be to apply the detection and tracking to a physical robotic system. For detections it is interesting to investigate how well the detectors generalizes to the real world with various natural sources of optical noise as well as scene variation in both the foreground (different balls) and the background. For the tracking there will be significantly more variation possible especially on a natural pitch where wind, spin and an imperfect surface can result in changes to the ball trajectory.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\appendix
