@@ -1410,9 +1410,13 @@ Constrained to monocular vision, in order to further improve the distance measur
 
 \subsection{Improving state estimation}
 
-Although neural Kalman filtering was able to outperform the traditional tracking methods as measured by mean square error -- some of the characteristics are undesirable for control purposes. One issue is that within the reliable range of the object detector, the traditional methods out perform the neural based approach. 
+Although neural Kalman filtering was able to outperform the traditional tracking methods as measured by MSE -- there are some issues which should be addressed. 
 
- Focal loss based on distance as. Penalty for jitter may be harmful. A possible approach is using the EKF. A benefit of this appraoch is that the model would be able to compute useful future predictions
+One issue is that, within the reliable range of the object detector, the neural based approach underperforms versus the traditional methods. It is more desirable to have a tracker which is best across the range rather than specializing for certain circumstances. The current issue appears to be that the region where the detector is reliable does not contribute significantly to the loss score. Therefore, applying a focal loss inversely based on distance may encourage a better performance in this region (possibly at a cost at the long range which might be tuned using a hyper-parameter). Alternatively, a loss based on integrated error (similar in nature to the integral gain of a PID controller) may help to reduce the steady state error which will also boost the performance in this region.  
+
+A further issue is the impact of jitter, which is undesirable for control purposes. Traditional Kalman filters are often used to provide some noise attenuation in a signal. The neural Kalman filter used in this research however has a tendency to add additional noise. One approach may be to punish volatility using a loss metric of sorts, however, this may have ill consequences since punishing rapid change is likely to result in the loss of responsiveness. The fluctuations also seemed to be related to an expression of uncertainty, punishing this may also result in a degradation of performance. Therefore a better way may to to rather add a component dedicated to smoothing within the end-to-end trained model. This might be a traditional Kalman filter (or a more sophisticated filter).
+
+A final issue considered here is that the neural Kalman filter does not offer a  A benefit of this appraoch is that the model would be able to compute useful future predictions
 
 \subsection{Extensions}
 
