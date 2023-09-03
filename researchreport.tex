@@ -649,7 +649,7 @@ This dataset is generated using various open source programs in the RoboCup socc
 \subsection{Software environment}
 The ball detection images are generated using the RoboCup match server rcssserver3d-0.7.3 which is built on the simspark-0.3.2 simulator. In the simulator, the ``agentSyncMode'' variable is changed to true to enable synchronized execution despite additional rendering and file-writing. In the match server: ``enableRealTimeMode'' is set to false, ``addNoise'' is set to false and an ``ImagePerceptor'' is added to the Nao model to enable rendered perspective images to be appended to the server messages \citep{perceptors} sent to each agent.  
 
-The Wits agent message parser is extended to include the image messages which are received in a base64 string encoded format. Each image is stored as a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}), if its inside the agent vision cone and the image size. 
+The Wits agent message parser is extended to include the image messages which are received in a base64 string encoded format. Each serialized image is stored in a .json file, for readability, which includes the image metadata such as the spherical coordinates of the ball (See figure \ref{fig:spherical}), if the ball is inside the agent vision cone and the image size. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -663,13 +663,13 @@ Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which
 
 \subsection{Preprocessing}
 
-The images are decoded into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Hidden and occluded ball images must be manually separated, since the server vision messages do not include the breakage of line-of-sight (all objects are transparent to the agent).
+A script is written to decode the images into an RGB array format that can be displayed, manipulated and stored using the Numpy and OpenCv Python libraries. In order to better understand the performance of each detector in the context of the image content, images are sorted into categories that classify ball visibility, occlusion, size as well as play mode. Hidden and occluded ball images must be manually separated, since the server vision messages do not include the breakage of line-of-sight (all objects are transparent to the agent).
 
 From the spherical coordinates of the ball that are given by the match server relative to the center of the head of the Nao agent, one can transform them to the camera position by converting the coordinates to a Cartesian axis, performing a translation (given 6.5cm head radius) and then returning the coordinate system to spherical. From the spherical coordinates at the camera, with the known 58\textdegree\ field of view of the camera, it is possible to use an ideal wide angle lens transformation to determine the BB center in image coordinates. This transformation is based on the ideal fish-eye lens model (See figure \ref{fig:wideangle}) which is then extended to the two rotational axes using spherical geometry. The size of the bounding box is then determined based on the distance of the ball (with known 8.4cm diameter) and the expected size on the optical projection plane.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=6.5cm]{images/FOVmodel.jpg}
+\includegraphics[width=6cm]{images/FOVmodel.jpg}
 \caption{Ideal wide angle lens transformation \citep{wideangle} }
 \label{fig:wideangle}
 \end{center}
@@ -696,7 +696,7 @@ Test			&513			&20\%			&68.8\%			&20.9\%			&10.3\%			&70.6\%			&50.9\%			&54.2\%	
 \label{tab:detection}
 \end{table*}
 
-With the data acquired using the target environment, it is expected that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. This is to be expected.
+With the data acquired using the target environment, it is thought that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. 
 
 The ground truth BBs are plotted with some examples of the dataset in figure \ref{fig:detectimages}:
 
@@ -770,7 +770,7 @@ In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAl
 \end{center}
 \end{figure}
 
-With some difficulties obtaining GPU support, CPU based training was performed using a computing cluster hosting Intel Xeon E5-2680 processors. The speed up achieved using OpenMP was sufficient to allow reasonable training times. Adding additional stages coincided with an increased training time, with the longest for 12 stages being roughly 6 hours. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set ($FA=0.35$) is chosen for further optimization.
+With some difficulties obtaining GPU support, CPU based training was performed using the Wits computing cluster hosting Intel Xeon E5-2680 processors. The speed up achieved using OpenMP was sufficient to allow reasonable training times. Adding additional stages coincided with an increased training time, with the longest for 12 stages being roughly 6 hours. Initially, it can be seen on the training curves (figure \ref{fig:vjstages}) that the addition of stages allows the model to better fit the data, which leads to convergence - a show of sufficient training. However, the further addition of stages can lead to over-fitting which results in a decrease in validation performance. In general, the validation and training scores are not significantly different, which indicates that sufficient training examples are provided and that the datasets are reflective. The best performer on the validation set ($FA=0.35$) is chosen for further optimization.
 
 The first layers of the final stage can be visualized in figure \ref{fig:vjlayers}:
 
@@ -824,7 +824,7 @@ L_{YOLO} =  L_{cls} + \lambda L_{reg} + \lambda' L_{confi}
 \end{equation} 
 Where $\lambda$ and $\lambda'$ are balancing parameters used to weigh each term -- giving importance to bounding box regression and decreasing the importance of boxes not containing objects (AKA ``noobj'') respectively. $L_{cls} $ refers to the class prediction which is represented by the focal loss. $L_{confi}$ refers to the objectness score (which is the probability that and object is present) which is represented by the $L2$ loss. $L_{reg} $ refers to the bounding box regression loss. YOLOv4 applies a loss known as ``Complete-IOU'' (CIoU) \citep{diouloss} (rather than $L2$ loss) which offers an objective which is made to suit to the IoU evaluation metric. CIoU is an incremental improvement over ``Generalized-IoU'' (GIoU) \citep{giouloss} which solves the ``gradient-vanishing`` problem resulting from a basic IoU loss which would only ``work'' when the bounding boxes have overlap. 
 
-Initial trials showed that compiling the framework without any of the performance enhancing dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. A cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
+Initial trials showed that compiling the framework without any of the performance enhancing dependencies led to model training being estimated at over 200 hours to achieve completion, which was unacceptable. This was reduced by an order of magnitude if OpenMP was included for parallelizing and then by a further order of magnitude if CUDA was included for GPU acceleration of the training passes. The Wits computing cluster hosting NVIDIA GeForce GTX 1060 processors was utilized, resulting in a model training time of approximately 2 hours which is a significantly more manageable duration. The recommended number of cycles by the author is applied for training, which is 2000 epochs per class but no less than 6000 overall.
 
 The models are trained across various resolutions in order to investigate the speed/accuracy trade off and make a sensible selection of a real-time solution. It should be noted that model image resolutions need to be in multiples of 32 due to the model architecture.
 
@@ -846,7 +846,7 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 \end{center}
 \end{figure}
 
-It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the COCO dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, shown in figure \ref{fig:yolov4tiny_compare}. A reduced resolution allows faster inference. In order to achieve real-time inference, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality.
+It can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect result. This gives confidence that although the architecture has been prepared for the COCO dataset, it is capable of capturing the patterns within the data without the cost of a comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, shown in figure \ref{fig:yolov4tiny_compare}. A reduced resolution allows faster inference. In order to achieve real-time inference, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality, however, it does confirm that established modern CNN detectors can run in real-time on a mobile laptop CPU. 
 
 The additional data point of the pretrained model is also included. Although this model evaluates 80 COCO classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without significant time consequence.
 
@@ -859,7 +859,7 @@ In order to justify the selection of a modern real-time object detection archite
 
 The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is readily accessible in the pytorch library and is included due to its ease of access. 
 
-In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models larger than 50mb are certainly difficult to accommodate and larger than ONNXruntime linux binary itself ($\approx13mb$).
+In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -869,9 +869,11 @@ In this experiment, a 15 second perspective sequence (375 frames at 25hz) of Rob
 \end{center}
 \end{figure}
 
+The faster models tend to have less mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models larger than 50mb are certainly difficult to accommodate and larger than ONNXruntime linux binary itself ($\approx13mb$).
+
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=10cm]{images/modelspeed.png}
+\includegraphics[width=9cm]{images/modelspeed.png}
 \caption{Pretrained model performance}
 \label{fig:modelspeed}
 \end{center}
@@ -887,11 +889,11 @@ The NanoDet object detector is built using PyTorch which is a popular general pu
 
 \subsubsection{Software environment}
 
-NanoDet-Plus v1.0.0 (d3fb34f) is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for researchers that are using previous work.
+NanoDet-Plus v1.0.0 is cloned from \cite{nanodet}, which is the latest release of the repository at this time. The PyTorch deep-learning framework is used however only versions $<$ 2.0.0 are supported which must be therefore be manually installed, rather than using the currently outdated instructions found on the repository, before installing the required packages to get a suitable environment. It should also be noted (since it is not documented) that the ``Plus'' architecture has a different output shape, which may cause frustration for unknowing researchers that are using previous work.
 
 \subsubsection{Model training}
 
-During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This supported the approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format, therefore a script is created to do this. The web service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
+During an initial study using the pretrained model, it is found that the model achieves a useful performance on the target dataset (see figure \ref{fig:evaldetect}) - even though it is synthetic. This confirms that real-image training can generalize to the synthetic RoboCup environment and supports an approach of fine-tuning the pretrained model onto the RoboCup ball dataset. The NanoDet model expects the data to be structured and annotated in a COCO style format, therefore a script is created to do this. The web service ``Roboflow'' \citep{roboflow} is utilized as a means of validating the produced annotations by importing and visualizing the data. 
 
 In order to train the network, a multipart loss must be minimized. The NanoDet objective function can be understood by the following high level form:
 \begin{equation}
@@ -899,7 +901,7 @@ L_{NanoDet} =  L_{GFL}(L_{QFL}, \lambda L_{DFL}, \lambda' L_{GIoU})
 \end{equation} 
 Generalized Focal Loss (GFL) \citep{gflloss} generalizes Focal Loss from a discrete form to a continuous form -- which results in improvements to network training. GFL unifies Quality Focal Loss (QFL) and Distributed Focal Loss (DFL) where QFL is a joint representation of localization quality and classification -- which softens a typical one-hot category label to a float representation of each category -- and DFL softens the representation of bounding box regression by viewing the offsets from the predicted center to the bounding box boundaries as a continuous arbitrary distribution rather than deterministically.
 
-A variety of the release NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. Again, NVIDIA GeForce GTX 1060 processors are available for training. The training curves shown in figure \ref{fig:nanodet_train} compare the training and validation results.
+A variety of the release NanoDet architectures - which have been shared by the authors - are chosen and the default parameters and augmentations are utilized. Again, NVIDIA GeForce GTX 1060 processors are available and utilized for training. The training curves shown in figure \ref{fig:nanodet_train} compare the training and validation results.
 
 \begin{figure}[h!]
 \begin{center}
@@ -911,7 +913,7 @@ A variety of the release NanoDet architectures - which have been shared by the a
 
 In general, it can be seen that as more epochs are performed, the loss scores are reduced. This indicates that the model is learning the training data and improving its ability to perform object detection. Further, it can be seen that as training epochs are performed the validation scores of each of the models increases. This indicates that the model is indeed learning the general structure of the data. After a number of epochs have been performed, the validation scores reaches a pleateu. This indicates that sufficient training iterations have been performed and that further training may lead to over-fitting of the training data. The best iteration of each model is chosen based on the validation AP scores. 
 
-Post training, repository provided tools are used to produce the model in an ONNX format. A crucial step not documented by \cite{nanodet} is to post-process the ONNX model with the ONNX runtime $remove\_initializer\_from\_input$ function. Without this, a significant degradation in inference speed occurs, preventing the detector to run in real-time. The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
+Post training, a script is used to convert the model to an ONNX format. A crucial step not documented by \cite{nanodet} is to post-process the ONNX model with the ONNX runtime $remove\_initializer\_from\_input$ function. Without this, a significant degradation in inference speed occurs, preventing the detector to run in real-time. The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -923,11 +925,11 @@ Post training, repository provided tools are used to produce the model in an ONN
 
 The validation scores for NanoDet are the highest of any of the considered models, without even performing a search for hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-Similar to the results of all models considered thus far - it is seen in general, that the higher resolution architectures ($416 \times 416$ vs. $320 \times 320$) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models -- which have a deeper backbone -- also perform inference slower, however, in this case they do not perform at a higher inference quality. A reason for this could be that more complex models are prone to overfitting the pretraining data as they are able to capture the complex characteristics that are only present in the training data. The ``NanoDet-plus-m\_416'' instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+Similar to the results of all models considered thus far - it is seen in general, that the higher resolution architectures ($416 \times 416$ vs. $320 \times 320$) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models -- which have a deeper backbone -- also perform inference slower, however, in this case they do not perform at a higher inference quality. A reason for this could be that more complex models are prone to overfitting the pretraining data as they are able to capture the complex characteristics that are only present in the pretraining data. The ``NanoDet-plus-m\_416'' instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
 %Additionally due to an increased network complexity they may also be more sensitive to hyperparameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for the COCO different dataset.
 
-In order to investigate model optimization for deployment, the chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this appears to be that that float16 operations is not well supported by all hardware (x86 CPUs) and thus require conversion to a float32 representation which adds an overhead. Since the model is already of acceptable size compared to the size of the ONNX Runtime binary, the quantized model is not utilized and further quantization is not investigated.
+In order to investigate model optimization for deployment, the chosen model is quantized from a float32 to a float16 representation - which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this appears to be that that float16 operations is not well supported by all hardware (x86 CPUs) and thus require conversion to a float32 representation which adds an overhead. Since the model is already of acceptable size compared to the size of the ONNX Runtime binary, the quantized model is not utilized and further quantization is not considered worthwhile.
 
 \section{Evaluation of detection}
 
@@ -979,15 +981,15 @@ The YOLO v4 Tiny model shows significant improvements in performance and surpass
 
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=6cm]{images/eval_yolo.png}}\label{fig:evalyolonano}}
+    \subfloat{{\includegraphics[height=5cm]{images/eval_yolo.png}}\label{fig:evalyolonano}}
     \qquad
-    \subfloat{{\includegraphics[height=6cm]{images/eval_nanodet2.png}}}
+    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet2.png}}}
     \caption{Trained YOLOv4 (Left) and Trained NanoDet (Right)}
 \end{figure}
 
 \subsubsection{NanoDet}
 
-The NanoDet model shows itself to be the best network across all scenarios by out performing all other architectures at real-time speeds. This is true across each dataset characteristic and by a significant margin. A key insight that can be observed is that the pretrained Nanodet is the only pretrained model which has a useful performance for identifying at the small size balls (long range). This is interesting since the pretrained YOLO v4 Tiny model has also been trained for optimum performance against COCO but has no comprehension before training. Further, for the easiest scenario, the trained NanoDet scores a near perfect result which is impressive. This model also has the smallest memory footprint, only utilizing 5mb of storage capacity. For limited capacity machines this allows the memory to be used for other tasks, helping to improve the overall performance of the robotic platform. Therefore, for a ball detection system that may be used in a match scenario or for the proposed tracking, NanoDet is chosen.
+The NanoDet model shows itself to be the best network across all scenarios by out performing all other architectures at real-time speeds. This is true across each dataset characteristic and by a significant margin. A key insight that can be observed is that the pretrained Nanodet is the only pretrained model which has a useful performance for identifying at the small size balls (long range) before fine tuning. This is interesting since the pretrained YOLO v4 Tiny model has also been trained for optimum performance against COCO but has negligible comprehension before training. Further, for the easiest scenario, the trained NanoDet scores a near perfect result which is impressive. This model also has the smallest memory footprint, only utilizing 5mb of storage capacity. For limited capacity machines this allows the memory to be used for other tasks, helping to improve the overall performance of the robotic platform. Therefore, for a ball detection system that may be used in a match scenario or for the proposed tracking, NanoDet is chosen. The key-point based NanoDet outperforms the baseline detectors -- which confirms the object detector hypothesis.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Object tracking investigation}
