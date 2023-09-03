@@ -167,12 +167,12 @@ In this section, an overview is given for some of the underlying topics relevant
 
 Object tracking describes the problem of estimating the trajectory of an object as it moves around the scene. Object tracking can be divided into offline (also known as batch) and online problem spaces. In the offline problem a complete image sequence can be used, whereas in online problems only the images of the previous time steps are available  \citep{track0}. Real-time tracking is online by definition. Some of the challenges include object occlusion, objects going out of frame, complex object motion, background clutter, dynamic backgrounds, imaging noise, motion blurring, illumination changes, object deformation, multiple instances, monocular vision and real-time processing requirements \citep{tradtrack0}.
 
-An object tracker can be understood using the general framework suggested by \cite{diagnosingtrack} where the authors have decomposed and studied the object tracking problem in its constituent parts. Figure \ref{fig:tracker} provides a representation of a generalized tracking process. Here it is assumed that an ensemble model is not utilized, which is typically avoided for real-time application due to a higher computational demand. The modeling of the object motion and appearance aids with data association as well as improving trajectory estimation. \citep{sort}  
+A visual object tracker can be understood using the general framework suggested by \cite{diagnosingtrack} where the authors have decomposed and studied the object tracking problem in its constituent parts. Figure \ref{fig:tracker} provides a representation of a generalized tracking process. Here it is assumed that an ensemble model is not utilized, which is typically avoided for real-time application due to a higher computational demand. The modeling of the object motion and appearance aids with data association as well as improving trajectory estimation. \citep{sort}  
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=13.5cm]{images/Tracking_flowchart.jpeg}
-\caption{Generalized tracker flowchart}
+\caption{Generalized tracker flowchart (Redrawn from \cite{diagnosingtrack})}
 \label{fig:tracker}
 \end{center}
 \end{figure}
@@ -243,7 +243,7 @@ F_t = \frac{\partial f(\mu_{t-1}, u_{t})}{\partial x_{t-1}}
 \begin{equation} 
 H_t = \frac{\partial h(\mu_{t})}{\partial x_t} 
 \end{equation}
-Here $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and is popularly applied.
+Here $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and popularly used.
 
 \subsubsection{SORT algorithm}
 
@@ -251,7 +251,7 @@ With real-time performance being a crucial component of online tracking, the lig
 
 SORT comprises of the following components:
 \begin{itemize}
-	\item A linear constant velocity model which is used to model the states of a tracked object. Without a detection associated to the object, its state is simply predicted without correction using the linear velocity model. With an associated detection, the predicted bounding box (BB) can be used to update the object states using the Kalman filtering algorithm.
+	\item A first order Kalman filter (linear constant velocity assumption) which is used to model the states of a tracked object. Without a detection associated to the object, its state is simply predicted without correction using the linear velocity model. With an associated detection, the predicted bounding box (BB) can be used to update the object states using the Kalman filtering algorithm.
 
 	The state of each object is modelled as:
 \begin{equation}
@@ -259,7 +259,7 @@ x = [u,v,s,r,\dot{u},\dot{v},\dot{s}]^T
 \end{equation}
 With u and v representing the horizontal and vertical location of the center of the object and the area (s) and aspect ratio (r) of the target’s bounding box.
 
-	\item For feature extraction, the original implementation uses an object detector known as ``Faster R-CNN'', however, since SORT utilities only bounding box position and size for both motion estimation and data association \citep{sort} it is possible to evaluate and choose any sufficiently performing object detector.
+	\item For feature extraction, the original implementation uses an object detector known as ``Faster R-CNN'', however, since SORT utilities only bounding box position and size for both motion estimation and data association it is possible to evaluate and choose any sufficiently performing object detector \citep{sort}.
 	\item To assign detections, each object's new bounding box is predicted. The IoU score (see object detection) is then computed between each detection and all predicted bounding boxes and the association problem is then solved optimally using the Hungarian algorithm.
 \end{itemize}
 
@@ -272,9 +272,9 @@ As an extension to the SORT algorithm, Deep SORT (Simple Online and Real-time Tr
 \pagebreak
 \subsection{KalmanNet}
 
-The Kalman filter remains an effective and relevant tracking algorithm which finds itself in common use in computer vision and robotics \citep{kalmanforever}. A downside of model based methods is that performance relies on accurate knowledge of the underlying dynamics -- which typically requires domain knowledge and valid assumptions. Modern data driven approaches try to learn entirely from data, however, they have many parameters, require significant amounts of data and lack intuition, which prevents their application in embedded systems \citep{kalmannet}.
+The Kalman filter remains an effective and popular tracking algorithm which finds itself in common use in computer vision and robotics \citep{kalmanforever}. A downside of  motion model based methods is that performance relies on accurate knowledge of the underlying dynamics -- which typically requires domain knowledge and valid assumptions. Modern data driven approaches try to learn entirely from data, however, they have many parameters, require significant amounts of data and lack intuition, which ultimately prevents their application in embedded systems \citep{kalmannet}.
 
-\cite{kalmannet} propose a hybrid data-driven and model based approach to real-time Kalman filtering, where the underlying state space model is non-linear and accurate knowledge of it is unknown. In this approach a recurrent neural network (RNN) (more specifically a Gated Recurrent Unit (GRU) variant) can be trained on representative data in order to predict the appropriate Kalman gain at each time step  (See figure \ref{fig:blockd}). Compared to ``traditional'' feed-forward neural networks where fixed length input data simply flows through the network to compute an output, in an RNN the input as well as a hidden state (which represents the history) are fed back into the network -- which allows a series of temporal information to be processed  (See figure \ref{fig:architecture}). 
+\cite{kalmannet} propose a hybrid data-driven and model based approach to real-time Kalman filtering, where the underlying state space model is non-linear and accurate knowledge of it is unknown. In this approach a recurrent neural network (RNN) (more specifically a Gated Recurrent Unit (GRU) variant) is trained on representative data in order to predict the appropriate Kalman gain at each time step  (See figure \ref{fig:blockd}). Compared to ``traditional'' feed-forward neural networks where fixed length input data simply flows through the network to compute an output, in an RNN the input as well as a hidden state (which represents the history) are fed back into the network -- which allows a series of temporal information to be processed  (See figure \ref{fig:architecture}). 
 
 \begin{figure}[h!]
 \begin{center}
@@ -292,9 +292,9 @@ The Kalman filter remains an effective and relevant tracking algorithm which fin
 \end{center}
 \end{figure}
 
-In this manner, KalmanNet aims to remove the dependency of knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model. The model can be trained end-to-end which means that the Kalman filter is embedded in the network and a loss function can be formulated to evaluate the tracking performance directly, rather than by training intermediate subcomponents and creating a pipeline.
+In this manner, KalmanNet aims to remove the dependency of accurate knowledge of the underlying process and measurement noise and a facilitates a partially known or approximated underlying state space model from a system dynamics model. The model can be trained end-to-end which means that the Kalman filter is embedded in the network and a loss function can be formulated to evaluate the tracking performance directly, rather than by training intermediate subcomponents and creating a pipeline.
 
-The interpretability of the original algorithm can be retained whilst potentially learning complex dynamics implicitly, reducing the need for domain knowledge and model assumptions that are needed to accurately characterize a complex system as a tractable state space model. \cite{kalmannet} conclude, \textit{``KalmanNet is shown to converge much faster compared with purely DD (data driven) systems, while outperforming the MB (model based) EKF (extended Kalman filter), UKF (Unscented Kalman filter), and PF (particle filter), when facing model mismatch and dominant non-linearities''}. This data driven approach to Kalman filtering has recently found other robotics applications -- replacing the extended Kalman filter for online Simultaneous localization and mapping (SLAM) -- a crucial task for robotic systems where a map of an environment is simultaneously constructed while localizing the position of an agent \citep{slam}.
+The interpretability of the original algorithm can be retained whilst potentially learning complex dynamics implicitly, reducing the need for domain knowledge and model assumptions that are needed to accurately characterize a complex system as a tractable state space model. \cite{kalmannet} conclude, \textit{``KalmanNet is shown to converge much faster compared with purely data driven systems, while outperforming the model based extended Kalman filter, Unscented Kalman filter and particle filter, when facing model mismatch and dominant non-linearities''}. This data driven approach to Kalman filtering has recently found other robotics applications -- replacing the extended Kalman filter for online Simultaneous localization and mapping (SLAM) -- a crucial task for robotic systems where a map of an environment is simultaneously constructed while localizing the position of an agent \citep{slam}.
 
 \subsection{Performance measures}
 
@@ -310,7 +310,7 @@ Where $\epsilon_{i}$ is the error for the $i$th sample which is difference betwe
 \newpage
 \section{Object detection}
 
-Object detection is one of the oldest and most popular computer vision problems. Within the scope of this problem is facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various  datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
+Object detection is one of the oldest and most fundamental computer vision problems. Within the scope of this problem is facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various  datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
 
 \subsection{Traditional Object detection}
 
@@ -325,7 +325,7 @@ With the most successful approaches being based on discriminative models -- a tr
 \noindent Some of the criticisms of traditional strategies are: 
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item Generating bounding boxes with a sliding window strategy is inefficient and the localization is often inaccurate.
+    \item Generating bounding boxes with a sliding window strategy is inefficient and the localization is often inaccurate (loose fitting bounding boxes).
     \item Using hand crafted low level features it is difficult to adequately capture the semantics of the image 
 \end{itemize}
 
@@ -335,7 +335,7 @@ Traditional object detectors that had relative success and some real-time applic
 
 The Viola Jones (VJ) detector \cite{vjdet} was a breakthrough algorithm that was considered to be the first viable real-time object detector still maintaining state-of-the-art accuracy. Although targeting face detection, it can be equally applied to different object classes. The VJ detector uses a sliding window detector with a fixed step size. A scaling factor can be applied to the window which increases the filter size proportionally after each complete image traversal in order to search for larger faces. 
 
-Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. ``Haar-like'' features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - in the case of a 24x24 window approximately 180k features exist each detection window. 
+Firstly considering feature extraction, an observation can be made that classes of objects, such as faces, have a typical layout that can be approximated by patterns of adjacent lighter and darker regions. These ``Haar-like'' features (Figure \ref{fig:haarft}) are applied to a gray-scale image to capture the differences in regions with a single number. Filters of pattern A and B respond to edges, filters of pattern C respond to lines and filters of pattern D respond to diagonal features. During training, an exhaustive search for features is performed where all possible scale, aspect ratios and positions of the filters in the detection window are considered for each training face example - in the case of a 24x24 window approximately 180k features exist each detection window. 
 
 \begin{figure}[h!]
     \centering
@@ -367,7 +367,7 @@ Deep learning approaches are considered to have become the state of the art sinc
 \end{center}
 \end{figure}
 
-Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix of trainable weights called a filter kernel is swept across an image in order to take advantage of the spacial context of an image. CNNs are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances, using an algorithm known as back propagation which searches for optimum weights. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the error of the prediction for the considered task and the aim of training is to find a local minimum of this objective.
+Modern object detectors utilize deep CNNs in order to learn feature extraction. CNNs are based upon the mathematical operation of convolution, where a matrix of trainable weights called a filter kernel is swept across an image. CNNs take advantage of the spacial context of an image and are able to extract both low level and high level contextual features due to a hierarchical network structure, often referred to as the backbone of the network. The networks can be trained by minimizing a loss function that combines the regression and classification performances by using an algorithm known as back propagation to search for optimum kernel weights. The object detection problem can be considered as the combination of both classification and regression tasks. A loss function is a measure of the error of the prediction for the considered task and the aim of training is to find a local minimum of this objective.
 
 Least square error ($L_2$ loss) is a common choice for regression loss when considering continuous variables:
 \begin{equation}
@@ -381,7 +381,7 @@ L_{classification} = -\sum_{i=1}^{n}t_i log(p_i)
 \end{equation} 
 With $t_i$ being the ground-truth and $p_i$ being the softmax probability for the $i_{th}$ class.
 
-More recent architectures have seen great success by encouraging models to learn from more challenging examples, rather than focusing on ``easy'' examples, by adding an additional factor which reduces the weighting of easy cases. Such a loss function is known as the ``focal loss''. \citep{focal}
+More recent architectures have seen great success by encouraging models to learn from more challenging examples, rather than focusing on ``easy'' examples, by adding an additional factor which reduces the weighting of easy cases. Such a loss function is known as a ``focal loss''. \citep{focal}
 \begin{equation}
 L_{focal} = -\sum_{i=1}^{n} (1-p_i)^\gamma log(p_i)
 \end{equation} 
@@ -391,7 +391,7 @@ Various loss functions can be combined into a multipart loss function which is e
 
 \subsubsection{YOLO}
 
-A breakthrough for object detection was achieved with the introduction of the one-stage (AKA single-shot) detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detection, but increases the required computation, hence being less convenient for real-time applications''}. 
+A breakthrough for real-time object detection was achieved with the introduction of the one-stage (AKA single-shot) detector YOLO by \cite{yolo} which achieved real-time speeds whilst remaining competitive with state-of-the-art detectors. The speed of single stage detectors is in general considered to be faster than that of two-stage detectors -- but at a cost of accuracy. According to \cite{stagecomp} regarding two stage detection: \textit{``This architecture can achieve more reliable detection, but increases the required computation, hence being less convenient for real-time applications''}. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -401,9 +401,9 @@ A breakthrough for object detection was achieved with the introduction of the on
 \end{center}
 \end{figure}
 
-In the YOLO architecture by \cite{yolo}, the image is divided into an $S \times S$ grid. Each grid cell is used to predict $B$ bounding boxes with associated confidence scores and $C$ class probabilities which is demonstrated in figure \ref{fig:yolodemo}. This is done by passing the output of the backbone into fully connected layers with output nodes representing each cell. \cite{yolo} considers disadvantages of this approach to be a sensitivity to hyper-parameters, difficulty detecting objects much smaller than the anchors as well as suffering localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
+In the basic YOLO architecture by \cite{yolo}, the image is divided into an $S \times S$ grid. Each grid cell is used to predict $B$ bounding boxes with associated confidence scores and $C$ class probabilities which is demonstrated in figure \ref{fig:yolodemo}. This is done by passing the output of the backbone into fully connected layers with output nodes representing each cell. \cite{yolo} considers disadvantages of this approach to be a sensitivity to hyper-parameters, difficulty detecting objects much smaller than the anchors as well as suffering localization error: \textit{``While it can quickly identify objects in images it struggles to precisely localize some objects, especially small ones''}. 
 
-To achieve additional performance, the YOLOv2 architecture by \cite{yolov2} introduces (besides other incremental improvements) the usage of predefined bounding boxes which are used as initial guesses to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique dubbed an anchor-based approach. The box dimensions (dimensional priors) are learnt by k-means clustering of the dataset. Further improvements have been made with YOLOv3 \citep{yolov3} and YOLOv4 \citep{yolov4}, with the most significant enhancements being a deeper and more optimized backbone, a loss function tailored to the evaluation metric as well including various proven pre and post-processing tricks (``bag-of-freebies and ``bag-of-specials'') to improve the accuracy with little overhead. These models are also released with a ``tiny'' version which trades accuracy for speed and model size. Note that numerous unofficial ``YOLO'' detectors have also been created which have no affiliation to the original researchers.
+To achieve additional performance, the YOLOv2 architecture by \cite{yolov2} introduces (besides other incremental improvements) the usage of predefined bounding boxes which are used as initial guesses to facilitate the model learning more diverse object sizes and aspect ratios. These are known as ``anchor'' boxes, with the technique dubbed an anchor-based approach. The box dimensions (dimensional priors) are learnt by k-means clustering of the dataset. Further improvements have been made with YOLOv3 \citep{yolov3} and YOLOv4 \citep{yolov4}, with the most significant enhancements being a deeper and more optimized backbone, a loss function tailored to the evaluation metric as well including various proven pre and post-processing tricks (``bag-of-freebies and ``bag-of-specials'') to improve the accuracy with little overhead. These models are also released with a ``tiny'' version which further trades accuracy for speed and model size. Note that numerous unofficial ``YOLO'' detectors have also been created which have no affiliation to the original researchers.
 
 \subsubsection{NanoDet}
 
@@ -419,7 +419,7 @@ Contemporary object detection advancements include anchor box free detectors -- 
 
 In the ``FCOS-style'' key-point approach which NanoDet is based on, each object is modeled as a single center point of a bounding box. The network is used to predict heatmaps where the intensity peaks are representing keypoints. Regression of the bounding boxes can then be performed utilizing key-points rather than anchors. A benefit of this approach is that it eliminates the anchor-box hyper-parameters, which are dataset-dependant, as well as avoiding the problem of having to compute and reject redundant (non-maximal) box predictions. According to \cite{cnet} \textit{``Most successful object detectors enumerate a nearly exhaustive list of potential object locations and classify each. This is wasteful, inefficient, and requires additional post-processing.''}   
 
-After passing the input image through the convolutional backbone for feature extraction, NanoDet utilizes a modified lightweight Path Aggregation network (PAN) \citep{pan} neck before passing the output to it's detection head. PAN is an incremental improvement of a Feature Pyramid Network \citep{fpn} which is a popular technique in the object detection space. In a feature pyramid network, the output feature maps taken from various shallow and deeper levels from the backbone network (representing spacial and semantic information respectively) are utilized by the model to better detect objects across a range of scales. This is a similar concept to the idea of an image pyramid which is popular with traditional approaches, however it naturally leverages the pyramidal hierarchy of the backbone without the additional computational overhead. The output stride refers to the down-sampling ratio compared to the input image. 
+After passing the input image through the convolutional backbone for feature extraction, NanoDet utilizes a modified lightweight Path Aggregation network (PAN) \citep{pan, nanodet} neck before passing the output to it's detection head. PAN is an incremental improvement of a Feature Pyramid Network \citep{fpn} which is a popular technique in the object detection space. In a feature pyramid network, the output feature maps taken from various shallow and deeper levels from the backbone network (representing spacial and semantic information respectively) are utilized by the model to better detect objects across a range of scales. This is a similar concept to the idea of an image pyramid which is popular with traditional approaches, however it naturally leverages the pyramidal hierarchy of the backbone without the additional computational overhead.
 
 \subsection{Performance Measures}
 
@@ -427,7 +427,7 @@ In order to evaluate object detection algorithms, it is important to choose a me
 \begin{equation}
 Accuracy = \frac{TP + TN}{TP + FP + TN + FN}
 \end{equation}
-However, in the case of class imbalance this measure gives misleading results. Consider an extreme of 0.5\% of ground truth labels being positive in a dataset -- a classifier that predicts all labels as negative will achieve 99.5\% accuracy, however will not have learnt any aspect of the data. Therefore precision is often used, which considers the correctness of the predictions that have been made:
+However, in the case of class imbalance this measure gives misleading results. Consider an extreme of 0.5\% of ground truth labels being positive in a dataset -- a classifier that predicts all labels as negative will achieve 99.5\% accuracy, however will not have learnt any aspect of the data. Therefore precision is often used, which considers the correctness of the positive predictions that have been made:
 \begin{equation}
 Precision = \frac{TP}{TP + FP}
 \end{equation}
@@ -439,7 +439,7 @@ In the extreme of using only recall, all examples can be classified positive and
 
 Precision and recall have a relationship (See fig \ref{fig:yoloplot}) through the chosen threshold of the confidence value, as only making predictions when the confidence is high, means that less confident cases will be missed. The relationship can be plotted as an ROC curve, however, comparing the performance of multiple algorithms using this approach makes it difficult to evaluate quantitatively. In order to represent this curve as a single value for comparison, there are a variety of approaches possible including F1 score, Area Under Curve and Average Precision (AP).
 
-AP is a popular metric used in the context of modern object detection -- which is calculated by averaging the sum of the precisions across 11 evenly distributed levels in recall. A good score requires both high precision and recall: \citep{vocdataset}.
+AP is a popular metric used in the context of modern object detection -- traditionally calculated by averaging the sum of the precisions $p$ across 11 evenly distributed levels in recall. A good score requires high precision and recall $r$: \citep{vocdataset}.
 
 \begin{equation}
 AP = \frac{1}{11}\sum_{r\in\left\{0,0.1,0.2,...,1\right\}}^{} p_{interp}(r)
@@ -449,7 +449,7 @@ where:
 p_{interp}(r) =\max_{\widetilde{r} > r} p(\widetilde{r})
 \end{equation}
 
-$AP_{small}$, $AP_{medium}$, $AP_{large}$ are variations used to denote differently sized detection objects (COCO consider images less than $32 \times 32$ as small and larger than $64 \times 64$ as large), to get an understanding of the performance over scale. In order to account for multiple classes, the mean average precision (mAP) is computed which is nothing but the sum of the AP per class divided by the number of classes:
+$AP_{small}$, $AP_{medium}$, $AP_{large}$ are variations used to denote differently sized detection objects (COCO consider images less than $32 \times 32$ as small and larger than $64 \times 64$ as large), to get an understanding of the performance over scale. In order to account for multiple classes, the mean average precision (mAP) is commonly computed which is nothing but the sum of the AP per class divided by the number of classes:
 
 \begin{equation}
 mAP = \frac{1}{N}\sum_{i=1}^{N} AP_{i}
@@ -457,12 +457,12 @@ mAP = \frac{1}{N}\sum_{i=1}^{N} AP_{i}
 
 When detecting an object, a bounding box is placed around the target. It is possible to compare quality of the localization prediction with the ground truth by evaluating the overlapping areas -- called Intersection-over-union (IoU). A perfect overlap results in a score of 1 and a score of 0 for a complete miss. AP may be evaluated at a given threshold of IOU, for example an IoU of 0.5 may be specified (denoted as AP@.50). A series of IoU might be used by averaging the AP results over the range to try evaluate the results in isolation of threshold (denoted as AP@[.5 : .95]).  \citep{pmetrics}
 
-A criticism of these commonly used metrics is that they do not consider run-time or memory usage -- which are required for practical deployment. The real-time performance is difficult to compare between algorithms since most papers do not go into significant depth regarding the relationship between accuracy and speed \citep{speedacc} -- with most vision applications focusing on quality of prediction. A further challenge is that the actual real-time performance is also largely dependent on the hardware and software infrastructure on which the algorithm is executed. An approach to understanding the run-time performance (sometimes called latency) of different architectures is to consider relative comparisons that are bench-marked under the same conditions. A typical metric is frames per second (FPS).
+A criticism of these commonly used metrics is that they do not consider run-time or memory usage -- which are required for practical deployment. The real-time performance is difficult to compare between algorithms since most papers do not go into significant depth regarding the relationship between accuracy and speed \citep{speedacc} -- with most vision applications focusing on quality of prediction. A further challenge is that the actual real-time performance is also largely dependent on the hardware and software infrastructure on which the algorithm is executed. An approach to understanding the run-time performance (sometimes called latency) of different architectures is to consider relative comparisons that are bench-marked under the same conditions. Typical metrics are frames per second (FPS) or Hz.
 
 \newpage
 \subsection{Optimizing models for real-time performance}
 
-In practice, a trade off exists between the real-time performance and accuracy achieved by a model when performing inference. Intuitively, when less data is taken into consideration -- such as by the reduction of image resolution -- inference can be faster as it requires less computation, however, the accuracy may decrease as the detail and structure of the data is lost. Therefore the performance of a computer vision algorithm should not be evaluated in isolation of latency for real-time application. According to \cite{speedacc}, many computer vision architectures tend to focus on accuracy and therefore may use model ensembling and multicrop methods which are too slow for practical implementation.
+In practice, a trade off exists between the real-time performance and accuracy achieved by a model when performing inference. Intuitively, when less data is taken into consideration -- such as by the reduction of image resolution -- inference can be faster as it requires less computation, however, the accuracy may decrease as the detail and structure of the data is lost. Therefore the performance of a computer vision algorithm should not be evaluated in isolation of latency for real-time application. According to \cite{speedacc}, many computer vision architectures tend to focus on accuracy and therefore may use model ensembling and multicrop methods which are too slow for practical real-time implementation.
 
 Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of typically spatially and power constrained embedded robotics computers. \cite{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce memory consumption and computational costs of a model which can result in improved real-time performance. The aim of quantization is to represent the weights and activations of the model with reduced precision without a significant impact on accuracy. 
 
@@ -470,7 +470,7 @@ Deep learning models in particular tend to be large in both memory and computati
 
 A variety of software tools have been developed in order to abstract the low level implementation details of neural networks from high level model architecture for the convenience of the researcher. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} utilised for the development of R-CNN \citep{rcnn} as well as Darknet used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow (Google) \citep{tensorflow} and Pytorch (Facebook) \citep{pytorch} facilitate the development of a variety of deep learning model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are meticulously maintained, continuously developed in an open source community and have the vast resources of tech giants which supports the current rapid growth of machine learning technologies.
 
-Researchers often implement model architectures using the paradigm of a particular framework and therefore models are often not easily interchangeable between frameworks. Further, the libraries and tooling provided by these frameworks are typically used in the context of development and training therefore are therefore not optimum environments for practical model deployment where only the forward pass is desired as they are large in memory are not necessarily portable between computing architecture and platform. In the context of a real world multidisciplinary development environment with many interacting components, such as in Robotics, it is good practice to consider the management of models, the run-time environment as well as avoiding a framework dependency so that models from a variety of frameworks might be used. 
+Researchers often implement model architectures using the paradigm of a particular framework and therefore models are often not easily interchangeable between frameworks. Further, the libraries and tooling provided by these frameworks are typically used in the context of development and training therefore are therefore not optimum environments for practical model deployment where only the forward pass is desired as they are large in memory are not necessarily portable between computing architecture and platform. In the context of a real world multidisciplinary development environment with many interacting components, such as in Robotics, it is good practice to consider the management of subsystems, the run-time environment as well as avoiding a framework dependency so that models from a variety of frameworks might be used. 
 
 Although some popular computer vision packages such as OpenCV do have an interface to load models from a limited set of frameworks -- not all operations are supported, each framework has different configurations and run-time optimization is not possible, Empirically, the real-time performance is poor. Open Neural Network Exchange (ONNX) is a well accepted standard \citep{onnx} for machine learning interoperability that provides a neutral format which can be executed in the ONNX Runtime environment (Microsoft). This inference engine supports different neural network types, multiple platforms, hardware architectures, operations as well as execution and model optimizations such as quantitation. Models compiled to be run on ONNX Runtime have shown to receive significant real-time performance improvements \citep{inference}.
 
@@ -498,7 +498,7 @@ There are various leagues which each emphasize different challenges that need to
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=9.5cm]{images/Robocup2.jpg}
-\caption{Simulated image perceptor (Agent perspective in subwindow)}
+\caption{Simulated image perceptor (Agent perspective in subwindow with a ball in the distance)}
 \label{fig:agentview}
 \end{center}
 \end{figure}
@@ -536,15 +536,17 @@ The RoboCup 3D Soccer Simulation League runs on a simulator known as the RoboCup
 
 \chapter{Related work}
 
-In this section, a selection of published works that are related to ball detection  (Section 3.1) and tracking (Section 3.2) in RoboCup are considered. This overview lists some important approaches and results whilst keeping in mind the historical context of traditional versus modern techniques. It is shown that recent approaches take advantage of fine tuning state-of-the-art CNN object detector architectures for transferring to their own problem domain as well as Kalman filtering for tracking.
+In this section, a selection of published works that are related to ball detection  (Section 3.1) and tracking (Section 3.2) in RoboCup are considered. This overview lists some important approaches and results whilst keeping in mind the historical context of traditional versus modern techniques by arranging them chronologically. It is shown that recent approaches take advantage of fine tuning state-of-the-art CNN object detector architectures for transferring to their own problem domain as well as Kalman filtering for tracking.
 
 \section{Ball detection}
 
 The object detection space has significantly changed over time, with the most successful detectors being deep learning based. Using what is now considered a traditional approach, \cite{robovj} implement a Viola Jones based object detector that performs real-time ball detection with a focus on mobile robots in a Robocup soccer environment. They perform a edge detection proprocessing step which allows them to achieve a satisfactory color-independent result.
 
-Attempting to apply more modern deep learning techniques to improve real-time ball localization, \cite{selfcnn} propose a novel CNN to localize multicolored, patterned balls for Robocup by formulating their approach as a regression problem. They develop an architecture that can process an entire image at once to avoid a sliding window approach by predicting Gaussians that correspond to probabilities of the ball location. They find their proposed model to be too large for their robot (over 2GB) but also find that reducing their model size leads to a poor performance. \cite{selfcnn} conclude, \textit{``Thus, either faster processors for robots are necessary (to run the bigger nets) or low classification rates at medium to high distances have to be accepted''}. Although the design was not successful, the single shot strategy is for real-time is widely adopted by state-of-the-art detectors such as YOLO.
+Attempting to apply more modern deep learning techniques to improve real-time ball localization, \cite{selfcnn} propose a novel CNN to localize multicolored, patterned balls for Robocup by formulating their approach as a regression problem. They develop an architecture that can process an entire image at once to avoid a sliding window approach by predicting Gaussians that correspond to probabilities of the ball location. They find their proposed model to be too large for their robot (over 2GB) but also find that reducing their model size leads to a poor performance. \cite{selfcnn} conclude, \textit{``Thus, either faster processors for robots are necessary (to run the bigger nets) or low classification rates at medium to high distances have to be accepted''}. Although the design was not successful, the single shot strategy is for real-time is widely adopted by state-of-the-art detectors such as YOLO. This might also be seen as a step towards the keypoint based approach.
 
-Basing their work on the state-of-the-art single shot architecture, YOLO v3 Tiny, \cite{robo} propose a real-time object detector which is fine tuned for RoboCup ball detection for the Nao v5 platform. The maximum reported speed is only 13 FPS. Synthetic transfer learning is successfully applied, which involves pretraining the network on a fully synthetic dataset. \cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLO v4 Tiny performs the best in terms of AP@75 as well as for the small and medium images which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real-time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture which does compute in real-time.
+Basing their work on the state-of-the-art single shot architecture, YOLO v3 Tiny, \cite{robo} propose a real-time object detector which is fine tuned for RoboCup ball detection for the Nao v5 platform. The maximum reported speed is only 13 FPS. Synthetic transfer learning is successfully applied, which involves pretraining the network on a fully synthetic dataset. 
+
+\cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLO v4 Tiny performs the best in terms of the AP@75 metric, as well as for the small and medium images, which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real-time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture which does compute in real-time.
 
 \section{Ball tracking}
 
@@ -556,7 +558,7 @@ In order to establish the real-time capability of a non-linear Kalman filtering 
 
 With a focus on RoboCup Middle Size League, \cite{3dparabola} consider the use of a extended Kalman filter (EKF) for real-time 3D Ball trajectory estimation using a single camera. In their research they propose applying a maximum Likelihood method to provide an initial estimate of the ball trajectory for the initialization which improves tracking of the ball.
 
-\cite{golftrack} investigates real-time golf ball tracking by taking advantage of state-of-the-art CNN based object detection and Kalman filter based tracking -- with small object detection as a primary focus. They report: \textit{``most object detectors do not perform well on small object detection''} where is is explained that since most detectors are pretrained on datasets, such as MS COCO, where the size of the objects tend to be larger. The detectors: Faster R-CNN, SSD, YOLO v3, YOLO v4 as well as RefineDet are investigated, however, GPU compute is available. By cropping patches according to a prior location of the region of interest, the ball is made relatively “larger” which improves the accuracy.  
+\cite{golftrack} investigates real-time golf ball tracking by taking advantage of state-of-the-art CNN based object detection and Kalman filter based tracking -- with small object detection as a primary focus. They report: \textit{``most object detectors do not perform well on small object detection''} where is is explained that since most detectors are pretrained on datasets, such as MS COCO, where the size of the objects tend to be larger. The detectors: Faster R-CNN, SSD, YOLO v3, YOLO v4 as well as RefineDet are investigated, however, GPU compute is available. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Problem Statement, Research Aims and Objectives}
