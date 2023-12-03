@@ -188,7 +188,7 @@ The components are described as follows:
     \item Model Updater -- Adaptation of the observation model.
 \end{itemize}
 
-It is reported that not all components have equal importance, which is useful insight when real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Feature extraction is found to affect the performance most, which is a task that CNNs excel at. This has been exploited in the popular "Simple Online and Real-time tracking" (SORT) object detection algorithm of \cite{sort}.
+It is reported that not all components have equal importance, which is useful insight when real-time performance is desired. \cite{diagnosingtrack} conclude, \textit{``Contrary to popular belief, it turns out that the observation model (which is the focus of many papers on visual tracking) does not play the most important role in a tracker''}. Feature extraction is found to affect the performance most, which is a task that CNNs excel at. This has been exploited in the popular ``Simple Online and Real-time tracking'' (SORT) object detection algorithm of \cite{sort}.
 
 \subsection{SORT}
 
@@ -664,7 +664,7 @@ The Wits agent message parser is extended to include the image messages which ar
 \end{center}
 \end{figure}
 
-Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which also needs to be extended to include the handling of image messages.
+Low level control of the agent is abstracted by using magmaFatProxy-1.2.2, which is forked and extended to include the handling of image messages.
 
 \subsection{Preprocessing}
 
@@ -680,12 +680,12 @@ From the spherical coordinates of the ball that are given by the match server re
 \end{center}
 \end{figure}
 
-Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the temporal misalignment visually obvious. In these cases the data is dropped, however, it requires a manual process of inspecting ground truth bounding boxes as a way of detecting bad initializations was not found.
+Although the transformations can automatically be computed to get BBs for all ball containing images, using the simulator to produce perspective images for control purposes is outside of the typical usage of the simulator - it is found that in some agent initializations (approximately 1 in 5) that the synchronization of the produced images to the ground truth is between time steps and the temporal misalignment visually obvious. In these cases the data is dropped, however, it requires a manual process of inspecting the batches, as a way of detecting bad initializations was not found.
 
-Each object detector expects the dataset to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions respectively from the .json formatted data. A 60:20:20 training, validation, test split is used.
+Each object detector expects the dataset to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions, respectively, from the initial generated data. A 60:20:20 training, validation, test split is used.
 
 \subsection{Data Exploration}
-The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Occluded images are any where a percentage of the pixels of the ball are hidden.
+The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a break down of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Images are considered occluded if any percentage of the pixels of the ball are hidden.
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -701,7 +701,7 @@ Test			&513			&20\%			&68.8\%			&20.9\%			&10.3\%			&70.6\%			&50.9\%			&54.2\%	
 \label{tab:detection}
 \end{table*}
 
-With the data acquired using the target environment, it is thought that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball (since the agent looks for the ball). There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. 
+With the data acquired using the target environment, it is thought that the dataset is representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball, which is expected since the agents have a priority to search for the ball. There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, its clear that small bounding boxes are the majority of the cases, with large being very infrequent. 
 
 The ground truth BBs are plotted with some examples of the dataset in figure \ref{fig:detectimages}:
 
@@ -729,19 +729,19 @@ The baseline detectors, which have been chosen based on known prior usage in Rob
 
 \subsection{Viola Jones}
 
-The Viola Jones classifier (more generally known as the haar cascade classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference. A multi-scale implementation is utilized which, applies a scaling factor ($scaleFactor$) that reduces the image size to create an ``image pyramid'' to evaluate different object sizes with the same detector. 
+The Viola Jones classifier (more generally known as the Haar Cascade Classifier) is implemented in the OpenCV libraries. It can be trained, stored and loaded for performing inference. A multi-scale implementation is utilized which, applies a scaling factor ($scaleFactor$) that reduces the image size to create an ``image pyramid'' to evaluate different object sizes with the same detector. 
 
-In the following section, the steps taken to prepare the software environment and data are described. Following this the training process, which aims to maximize the quality of the inference is discussed. Finally, an ablation study is performed to maximize real-time performance of the detector.
+In the following section, the steps taken to prepare the software environment and data are described. Following this, the training process -- which aims to maximize the quality of the inference -- is discussed. Finally, an ablation study is performed to maximize real-time performance of the detector whilst preserving sufficient accuracy.
 
 \subsubsection{Software environment}
 
-It is found that OpenCV no longer supports the training of Viola Jones style detectors from version 4 onwards due to dropping support of the legacy C API (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation by \cite{vjdataset} is used.
+It is found that the latest OpenCV releases no longer supports the training of Viola Jones style detectors from version 4 onwards due to dropping support of the legacy C API (although, inference is still supported). Therefore it is chosen to roll back and build the OpenCV 3.4 release. The official documentation by \cite{vjdataset} is used.
 
 \subsubsection{Data preparation}
 
-In the spirit of the related works of \cite{robovj}, for ball detection, a pipeline is created where the camera image is edge filtered and a hand crafted threshold applied to create a crisp binary image as an input feature. 
+In the spirit of the related works of \cite{robovj}, for soccer ball detection, a pipeline is created where the camera image is edge filtered and a hand crafted threshold applied to create a crisp binary image as an input feature. 
 
-With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (vec-file). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation during rescaling).
+With the detection data prepared and structured accordingly, the $opencv\_createsamples$ application is used to create positive examples by cropping the objects using the ground truth bounding boxes and storing them in a binary format (named ``vec-file''). The size ($w\times h$) of the positive examples must be specified and must match the window size of the classifier to be trained. The \cite{vjdataset} recommendation is to use the size of the average object as the window dimensions - which in this case is $28\times 28$. The output is shown in figure \ref{fig:edgeball} (gray pixels caused by interpolation during rescaling).
 
 \begin{figure}[h!]
 \begin{center}
@@ -753,7 +753,7 @@ With the detection data prepared and structured accordingly, the $opencv\_create
 
 \subsubsection{Model training}
 
-The training of the detector is done as described by \cite{vjdet}. In this approach, rather than trying to perform an optimization of the number of stages, features per stage and threshold per stage -- which is considered to be a difficult problem -- a goal is chosen for the desired minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. Each additional layer reduces the false alarm rate but also the hit rate, layers of features are added until the goal is met.
+The training of the detector is done as per \cite{vjdet}. In this approach, rather than trying to perform a complete optimization of the number of stages, features per stage and threshold per stage -- which is considered to be difficult -- a goal is chosen for both the allowed minimum hit rate and the desired maximum false alarm rate for each stage of the classifier. Each additional layer reduces the false alarm rate but also the hit rate, layers of features are added until the goal is met or exit conditions reached.
 
 The hit rate defines the amount of positive object training data that must be correctly classified. A higher hit rate prevents overly confident features that can cause positives to be incorrectly classified. The overall hit rate is computed as:
 \begin{equation}
@@ -765,7 +765,7 @@ Overall\_falseAlarmRate = falseAlarmRate^{Num\_Stages}
 \end{equation}
 The number of features used is then increased until the target rates are met for this stage. Training further stages is usually stopped early if $acceptanceRatio$ (negative samples wrongly classified as positive) is reached, which prevents over-fitting of training data. In this study, a search is performed over $numStages$, and evaluated for the AP score against tested and validation sets, in order to ensure that the model is both sufficiently trained but also not over-fitting, for the actual targeted detection task.  
 
-In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, providing a conservative buffer of images to compensate for the cases falsely not detected by the classifier. A common choice for $numNeg$ is twice $numPos$. The remaining parameters are recommended values by \cite{vjdataset}.
+In line with \cite{robovj} $minHitRate = 0.999$ is chosen. A search for $falseAlarmRate$ is performed, which when coupled with $numStages$ allows for a variety of $Overall\_hitRate$ and $Overall\_falseAlarmRate$ combinations to be evaluated. $numPos$ is chosen to be 90\% the positive samples, providing a conservative buffer of images to compensate for cases falsely not detected. A common choice for $numNeg$ is twice $numPos$ \citep{numneg}. The remaining parameters are recommended values of \cite{vjdataset}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -823,7 +823,7 @@ In the following section the steps taken to prepare the software environment and
 
 \subsubsection{Model training}
 
-The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found hosted on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations -- such as photometric and geometric distortions as well as simulated object occlusion are applied. To train the network, a multipart loss is minimized. The classic YOLO objective function has the following high level form:
+The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found hosted on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations such as photometric and geometric distortions as well as simulated object occlusion are applied. To train the network, a multipart loss is minimized. The classic YOLO objective function has the following high level form:
 \begin{equation}
 L_{YOLO} =  L_{cls} + \lambda L_{reg} + \lambda' L_{confi} 
 \end{equation} 
@@ -860,7 +860,7 @@ The additional data point of the pretrained model is also included. Although thi
 Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
 
 \subsection{Naive latency evaluation}
-In order to justify the selection of a modern real-time object detection architecture, a naive approach is taken to simply evaluate pretrained models on the target device. In this approach, only the latency of the forward pass is considered and the accuracy of the detentions is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
+In order to justify the selection of a modern real-time object detection architecture, a naive approach is taken to simply evaluate pretrained models on the target device. In this approach, only the latency of the forward pass is considered and the accuracy of the detections is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
 
 The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach which may be a suitable alternative to NanoDet - therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is readily accessible in the pytorch library and is included due to its ease of access. 
 
@@ -918,7 +918,7 @@ A variety of the release NanoDet architectures - which have been shared by the a
 
 In general, it can be seen that as more epochs are performed, the loss scores are reduced. This indicates that the model is learning the training data and improving its ability to perform object detection. Further, it can be seen that as training epochs are performed the validation scores of each of the models increases. This indicates that the model is indeed learning the general structure of the data. After a number of epochs have been performed, the validation scores reaches a pleateu. This indicates that sufficient training iterations have been performed and that further training may lead to over-fitting of the training data. The best iteration of each model is chosen based on the validation AP scores. 
 
-Post training, a script is used to convert the model to an ONNX format. A crucial step not documented by \cite{nanodet} is to post-process the ONNX model with the ONNX runtime $remove\_initializer\_from\_input$ function. Without this, a significant degradation in inference speed occurs, preventing the detector to run in real-time. The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
+Post training, a script is used to convert the model to an ONNX format. A crucial step not documented by \cite{nanodet} is to post-process the ONNX model with the ONNX runtime $remove\_initializer\_from\_input$ function. Without this, a significant degradation in inference speed occurs, preventing the detector from running in real-time. The different NanoDet variations are evaluated for their inference speeds and their performances are plotted in figure \ref{fig:nanodet_compare}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -930,7 +930,7 @@ Post training, a script is used to convert the model to an ONNX format. A crucia
 
 The validation scores for NanoDet are the highest of any of the considered models, without even performing a search for hyper parameters. For this reason, the additional efforts of a search is not performed (beyond the included basic architecture variations) as the results are satisfactory and sufficient to prove the respective hypothesis. 
 
-Similar to the results of all models considered thus far - it is seen in general, that the higher resolution architectures ($416 \times 416$ vs. $320 \times 320$) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models -- which have a deeper backbone -- also perform inference slower, however, in this case they do not perform at a higher inference quality. A reason for this could be that more complex models are prone to overfitting the pretraining data as they are able to capture the complex characteristics that are only present in the pretraining data. The ``NanoDet-plus-m\_416'' instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
+Similar to the results of all models considered thus far - it is seen in general, that the higher resolution architectures ($416 \times 416$ vs. $320 \times 320$) perform inference at a higher accuracy, however, at a cost of inference speed. The $1.5\times$ models also perform inference slower (they have a deeper backbone), however, in this case they do not perform at a higher inference quality. A reason for this could be that more complex models are prone to overfitting the pretraining data as they are able to capture the complex characteristics that are only present in the pretraining data. The ``NanoDet-plus-m\_416'' instance is chosen as it provides the maximum performance at a speed that provides real-time inference.
 
 %Additionally due to an increased network complexity they may also be more sensitive to hyperparameters - since models of greater complexity have a greater tendancy to overfit and the chosen parameters here are optimised for the COCO different dataset.
 
@@ -940,7 +940,7 @@ In order to investigate model optimization for deployment, the chosen model is q
 
 The selected pretrained, trained and fine-tuned networks of the various object detection models are now compared relative to each other using the test dataset which has been isolated and remained unseen thus far. The dataset is decomposed into object sizes, scenario and occlusion for evaluation which helps to provide an insight into the performance of the detectors across various circumstances. 
 
-The object detection data is evaluated in three stages. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking portion of the research. Then, the dataset is extended to included match images (but not occluded images). It is thought that such a set would expose the model performance among a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. This provides the most realistic performance evaluation in a typical simulated soccer scenario. 
+The object detection data is evaluated in three stages. Firstly, the ``easiest'' data is used, which does not feature match environment images or occluded images. This is most representative of the tracking portion of the research. Then, the dataset is extended to included match images (but not occluded images). It is thought that such a set would expose the model performance to a more challenging and dynamic background which is reflective of a RoboCup soccer environment and more likely to result in false positives. Finally, occluded images are added in, which helps to provide an indication of the performance against complex images with only partial object information. This provides the most realistic performance evaluation in a typical simulated soccer scenario. 
 
 The results are plotted in figure \ref{fig:evaldetect}. Various conclusions can be drawn from these results, which are discussed below:
 
@@ -954,7 +954,7 @@ The results are plotted in figure \ref{fig:evaldetect}. Various conclusions can 
 
 \subsubsection{Performance against increasing difficulty}
 
-As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance as the ball is more difficult to identify among the agents. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to classify and regress accurately. Additionally, occluded images cause even further performance decline as it provides only partial information for inference. A contributing factor towards this is that challenge of accurately predicting the bounding box. In particular, object detection models tend to place boundaries bound around the visible part of the object, whereas for tracking the bounding box should also border the parts of the ball that are unseen in order to estimate distance. 
+As a whole - it is observed that the models perform worse on the datasets of increased complexity, which is expected. Match images cause a decline in performance as the ball is more difficult to identify among the agents. The distance of the ball also corresponds to decreased performance as smaller objects are more difficult to classify and regress accurately. Additionally, occluded images cause even further performance decline as it provides only partial information for inference. A contributing factor towards this is the challenge of accurately predicting the bounding box. In particular, object detection models tend to place boundaries bound around the visible part of the object, whereas for tracking the bounding box should also border the parts of the ball that are unseen in order to estimate distance. 
 
 \subsubsection{Traditional detection}
 
@@ -982,7 +982,7 @@ One of the interesting results that can be seen is that the pretrained detectors
 
 \subsubsection{YOLO v4 Tiny}
 
-The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in the related works, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An unfortunate result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. This is seen in figure \ref{fig:evalyolonano} where the boundary of the prediction slightly extends to include the agent behind the ball. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
+The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in Chapter \ref{section:balldetection}, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An unfortunate result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. This is seen in figure \ref{fig:evalyolonano} where the boundary of the prediction slightly extends to include the agent behind the ball. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
 
 \begin{figure}[h!]
     \centering
