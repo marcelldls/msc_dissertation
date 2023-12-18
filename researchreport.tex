@@ -22,6 +22,7 @@
 \usepackage{pgfgantt}
 \setnoclub[2]
 \setnowidow[2]
+\usepackage{graphicx}
 
 % Referencing
 % Provides \Vref and \vref to indicate where a reference is.
@@ -542,6 +543,8 @@ The object detection space has significantly changed over time, with the most su
 
 Attempting to apply more modern deep learning techniques to improve real-time ball localization, \cite{selfcnn} propose a novel CNN to localize multicolored, patterned balls for Robocup by formulating their approach as a regression problem. They develop an architecture that can process an entire image at once to avoid a sliding window approach by predicting Gaussians that correspond to probabilities of the ball location. They find their proposed model to be too large for their robot (over 2GB) but also find that reducing their model size leads to poor performance. \cite{selfcnn} conclude, \textit{``Thus, either faster processors for robots are necessary (to run the bigger nets) or low classification rates at medium to high distances have to be accepted''}. Although the design was not successful, the single shot strategy for real-time is widely adopted by state-of-the-art detectors such as YOLO. This might also be seen as a step toward the keypoint based approach.
 
+\pagebreak
+
 Basing their work on the then state-of-the-art single shot architecture, YOLO v3 Tiny, \cite{robo} propose a real-time object detector that is fine tuned for RoboCup ball detection for the Nao v5 platform. The maximum reported speed is only 13 FPS. Synthetic transfer learning is successfully applied, which involves pretraining the network on a fully synthetic dataset. 
 
 \cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLO v4 Tiny performs the best in terms of the AP@75 metric (scoring 0.549), as well as for the small and medium images, which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real-time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture.
@@ -606,7 +609,7 @@ In this phase, the training and performance of the Viola-Jones, Yolo v4 Tiny and
 
 \subsection{Dataset Generation}
 
-The Robocup simulator contains an image perceptor plugin that can be enabled to produce perspective images at 25Hz (generally considered real-time). In this manner actual gameplay can be used to create representative data. Although a ground truth ball position is available to be enabled, Fatproxy does not directly support the processing of the additional server message at this stage and will crash. Handling of this data needed to be added in order to enable extracting ground truths directly. With some changes to the source code, ground truth bounding boxes can be automatically computed using a coordinate transform from the perceptor to the camera location followed by a correction from the wide angle image, in order to describe the ball center in image coordinates. The distance of the ball is used to compute the relative ground truth bounding box size.
+The Robocup simulator has an image perceptor plugin that can be enabled to produce perspective images at 25Hz (real-time). In this manner actual gameplay can be used to create representative data. Although a ground truth ball position is available to be enabled, Fatproxy does not directly support the processing of the additional server message at this stage and will crash. Handling of this data needed to be added in order to enable extracting ground truths directly. With some changes to the source code, ground truth bounding boxes can be automatically computed using a coordinate transform from the perceptor to the camera location followed by a correction from the wide angle image, in order to describe the ball center in image coordinates. The distance of the ball is used to compute the relative ground truth bounding box size.
 
 An unoccupied test arena is used for the kick tracking but the inclusion of match images with details such as players, field markings and the goals in the background is prudent evaluate object detector performance in a match environment and to ensure robustness. Since the server provides an indication of whether a ball is in the vision of an agent, actual match footage that can be classified as including a ball can be generated and then included in the dataset. It is noted however that a check for occlusion is not programmed into the server so the ball could be completely hidden, therefore some manual work is done to remove such images and to separate occluded images. The dataset is then prepared according to the requirements of the given model.
 
@@ -849,7 +852,9 @@ In figure \ref{fig:yolov4tiny_train} it is seen that for each model, as the numb
 Also in figure \ref{fig:yolov4tiny_train} it can be noted that the $AP_{@[IoU=0.5]}$ score of the $480 \times 480$ resolution model achieves a near perfect validation result. This gives confidence that although the architecture has been prepared for the COCO dataset, it is capable of capturing the patterns within the data without the cost of a new and comprehensive search for hyperparameters. As the model resolution is decreased, the quality of the inference decreases. The models are also evaluated for inference speed, shown in figure \ref{fig:yolov4tiny_compare}. A reduced resolution allows faster inference. In order to achieve real-time inference, a significant drop in resolution from $480 \times 480$ down to $256 \times 256$ is required. This results in a drop in achievable inference quality, however, it does confirm that established modern CNN detectors can run in real-time on a mobile laptop CPU. 
 
 The additional data point of the pretrained model is also included. Although this model evaluates 80 COCO classes at $416 \times 416$, there is no significant difference in inference speed when compared to the trained model which only searches for the ball class. In principle this means that the detector can be extended to include limited additional classes such as the goal posts and other agents without significant time consequence.
+\vfill
 
+\pagebreak
 \section{Proposed detection}
 
 Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
@@ -857,7 +862,7 @@ Initially, a simple naive study is performed to justify the selection of the Nan
 \subsection{Naive latency evaluation}
 In order to justify the selection of a modern real-time object detection architecture, a naive approach is taken to simply evaluate pretrained models on the target device. In this approach, only the latency of the forward pass is considered and the accuracy of the detections is ignored. In this manner, a coarse approximation of the performance can be acquired. Further, the size of the model is also considered as a secondary factor.
 
-The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach that may be a suitable alternative to NanoDet -- therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is readily accessible in the pytorch library and is included due to its ease of access. 
+The models are gathered in the following manner. All detector models from the ONNX model zoo \cite{modelzoo} are used. NanoDet was found to be the most promising model, therefore more pretrained NanoDet models of different configurations were gathered and converted to ONNX format from the official repository for exploratory purposes. YOLOX \citep{yolox} is also a recent anchor free approach that may be a suitable alternative to NanoDet -- therefore a pretrained detector is taken from its official repository \citep{yoloxrepo} and also converted to the ONNX format. YOLOv5 is readily accessible in the PyTorch library and is included due to its ease of access. 
 
 In this experiment, a 15 second perspective sequence (375 frames at 25hz) of RoboCup gameplay is preloaded as an array of $m \times n \times c \times frames$. The average time to complete inference of all frames is recorded and plotted alongside model size in figure \ref{fig:modelspeedsize}. The detectors have been evaluated using onnxruntime 1.12.1 on a single core of an AMD Ryzen 5 4600H CPU, limited to single threaded execution using the session option $intra\_op\_num\_threads = 1$. 
 
@@ -869,21 +874,22 @@ In this experiment, a 15 second perspective sequence (375 frames at 25hz) of Rob
 \end{center}
 \end{figure}
 
-The faster models tend to have fewer mathematical operations, and therefore also have less weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models larger than 50mb are certainly difficult to accommodate and larger than ONNXruntime Linux binary itself ($\approx13mb$).
+The faster models tend to have fewer mathematical operations, and therefore also have fewer weights which results in smaller model sizes. Compared to the 1GB of RAM available on the Nao v5, the models larger than 50mb are certainly difficult to accommodate and larger than ONNXruntime Linux binary itself ($\approx13mb$).
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=9cm]{images/modelspeed.png}
-\caption{Pretrained model performance}
-\label{fig:modelspeed}
-\end{center}
-\end{figure}
+%\begin{figure}[h!]
+%\begin{center}
+%\includegraphics[width=9cm]{images/modelspeed.png}
+%\caption{Pretrained model performance}
+%\label{fig:modelspeed}
+%\end{center}
+%\end{figure}
 
-It is found that most of the detectors do not execute in real-time on this hardware. Although, this does not definitively mean that they cannot (after model tuning) but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in real-time for many of its configurations and therefore is a good choice to investigate further. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real-time to avoid latency issues. 
+It is found that most of the detectors do not execute in real-time, on average, on this hardware. Although, this does not definitively mean that they cannot (after model tuning) but rather demonstrates that one will likely sacrifice a significant amount of inference quality to achieve this. Therefore these are not ideal choices to pursue. It is found that NanoDet executes in real-time for many of its configurations and therefore is a good choice to investigate further.
+% The performance of the detectors is plotted in figure \label{fig:modelspeed}. The inference speed does fluctuate due to other processes which share the same computational resources. Therefore, for the best real-time results, one should aim to compute slightly faster than real-time to avoid latency issues. 
 
 \subsection{NanoDet}
 
-The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference in Python. The NanoDet repository can be found on Github with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus'' architecture which is the most recent and best performing architecture. A formal paper is not available.
+The NanoDet object detector is built using PyTorch which is a popular general purpose deep learning framework. Models can be trained, stored and loaded for performing inference in Python. The NanoDet repository can be found on Github with tested pretrained models for the COCO dataset which are shared by the authors \citep{nanodet}. Some variations of the model exist such as the ``Plus'' architecture which is the most recent and best performing architecture.
 
 %In the following section, the steps taken to prepare the software environment and data are described. The training and model selection process is reported which has been used to deliver a suitable detector.
 
@@ -953,38 +959,38 @@ As a whole -- it is observed that the models perform worse on the datasets of in
 
 \subsubsection{Traditional detection}
 
-Relatively, the VJ detector performs the worst of any of the detectors across the data. Despite the effort of searching for ideal parameters, performing tuning and the trouble of training, it does not outperform any trained detector. In fact, the pretrained detectors provide better inference quality without any training effort and framework complexity. With the ease of the modern frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. When a ball is correctly identified (as in figure \ref{fig:evalvjnano}), a further challenge appears to be the tightness of the fit of the bounding box due to the sliding window approach.
+Relatively, the VJ detector performs the worst of any of the detectors across the data. Despite the effort of searching for ideal parameters, performing tuning and the trouble of training, it does not outperform any trained detector. In fact, the pretrained detectors provide better inference quality without any training effort and framework complexity. With the ease of the modern frameworks and performance of the models versus the minimal support and bespoke OpenCV tooling needed for training the VJ detector, it is obvious why utilizing the older models for new applications has fallen out of favor. When a ball is correctly identified (as in figure \ref{fig:evalvjnanol}), a further challenge appears to be the tightness of the fit of the bounding box due to the sliding window approach.
 
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=5cm]{images/eval_vj.png}}\label{fig:evalvjnano}}
+    \subfloat{{\includegraphics[height=4cm, trim={7cm 2cm 1cm 6cm},clip]{images/eval_vj.png}}\label{fig:evalvjnanol}}
     \qquad
-    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet0.png}}}
-    \caption{Trained Viola-Jones (Left) and Trained NanoDet (Right)}
+    \subfloat{{\includegraphics[height=4cm, trim={7cm 2cm 1cm 6cm},clip]{images/eval_nanodet0.png}}\label{fig:evalvjnanor}}
+    \caption{Trained Viola-Jones (\ref{fig:evalvjnanol} cropped) \& Trained NanoDet (\ref{fig:evalvjnanor} cropped)}
 \end{figure}
 \vspace*{-0.5cm}
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodetpre.png}}\label{fig:evalnanonano}}
+    \subfloat{{\includegraphics[height=5cm, trim={4cm 6cm 1cm 1cm},clip]{images/eval_nanodetpre.png}}\label{fig:evalnanonanol}}
     \qquad
-    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet1.png}}}
-    \caption{Pretrained NanoDet (Left) and Trained NanoDet (Right)}
+    \subfloat{{\includegraphics[height=5cm, trim={4cm 6cm 1cm 1cm},clip]{images/eval_nanodet1.png}}\label{fig:evalnanonanor}}
+    \caption{Pretrained NanoDet (\ref{fig:evalnanonanol} cropped) \& Trained NanoDet (\ref{fig:evalnanonanor} cropped)}
 \end{figure}
 
 \subsubsection{Pretrained modern detection}
 
-One of the interesting results that can be seen is that the pretrained detectors chosen actually achieve a useful performance on the unseen and synthetic RoboCup ball tracking dataset -- although only for medium size objects (likely due to the COCO dataset under-representing small objects \citep{smallcoco}). This is not a generalization that one can necessarily rely on for all synthetic datasets, however, it is a useful result for expressing the domain adaptive property of the models and may be helpful for informing an initial selection of suitable algorithms that are susceptible to a task.
+One of the interesting results that can be seen in figure \ref{fig:evaldetect} is that the pretrained detectors chosen actually achieve a useful performance on the unseen and synthetic RoboCup ball tracking dataset -- although only for medium size objects (likely due to the COCO dataset under-representing small objects \citep{smallcoco}). This is not a generalization that one can necessarily rely on for all synthetic datasets, however, it is a useful result for expressing the domain adaptive property of the models and may be helpful for informing an initial selection of suitable algorithms that are susceptible to a task. In figure \ref{fig:evalnanonanol} a Nao head is misclassified as a ball and in figure \ref{fig:evalnanonanor} an improved result is seen after training.
 
 \subsubsection{YOLO v4 Tiny}
 
-The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in Chapter \ref{section:balldetection}, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An unfortunate result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. This is seen in figure \ref{fig:evalyolonano} where the boundary of the prediction slightly extends to include the agent behind the ball. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
+The YOLO v4 Tiny model shows significant improvements in performance and surpasses the VJ detector in all categories in terms of inference quality. Initially the pretrained model suffered from poor inference of small objects but after training a significant boost in performance was realized. However, in order to achieve a real-time performance the quality of inference had to be significantly reduced. This result corresponds to the results seen in Chapter \ref{section:balldetection}, where it was found that the YOLO v4 Tiny model does perform well in the task of RoboCup ball detection, however, these results do not carry over to real-time speeds. An unfortunate result is that the performance of the model against distance balls significantly drops in a match scenario. This reflects that the model has a tendency toward false positives, confusing the ball with the agents. This is seen in figure \ref{fig:evalyolonanol} where the boundary of the prediction slightly extends to include the agent behind the ball. Storage of the model weights is approximately 30mb which is larger than the binary of ONNX Runtime but still manageable with the given memory of a typical Nao RoboCup platform.
 
 \begin{figure}[h!]
     \centering
-    \subfloat{{\includegraphics[height=5cm]{images/eval_yolo.png}}\label{fig:evalyolonano}}
+    \subfloat{{\includegraphics[height=5cm, trim={3cm 5cm 3cm 1cm},clip]{images/eval_yolo.png}}\label{fig:evalyolonanol}}
     \qquad
-    \subfloat{{\includegraphics[height=5cm]{images/eval_nanodet2.png}}}
-    \caption{Trained YOLOv4 (Left) and Trained NanoDet (Right)}
+    \subfloat{{\includegraphics[height=5cm, trim={3cm 5cm 3cm 1cm},clip]{images/eval_nanodet2.png}}\label{fig:evalyolonanor}}
+    \caption{Trained YOLOv4 (\ref{fig:evalyolonanol} cropped) \& Trained NanoDet (\ref{fig:evalyolonanor} cropped)}
 \end{figure}
 
 \subsubsection{NanoDet}
