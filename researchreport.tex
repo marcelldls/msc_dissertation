@@ -162,7 +162,7 @@ The research report continues as follows. Firstly in the introductory chapters, 
 
 In this section, an overview is given of some of the underlying topics relevant to ball tracking. Firstly, the object tracking problem is considered (Chapter 2.1). It is found that a tracking-by-detection approach can be used to produce state-of-the-art results by taking advantage of the progress made in the popular object detection problem space. Further, the intuitive Kalman filtering algorithm is found to still be relevant in the modern tracking context and a recent approach to improve its results for complex systems by incorporating a neural-based step is discussed. Following on, the object detection problem is considered  (Chapter 2.2) and modern approaches are addressed. The RoboCup Soccer background of the research is introduced (Chapter 2.3).
 
-\section{Object tracking}
+\section{Object Tracking}
 
 Object tracking describes the problem of estimating the trajectory of an object as it moves around the scene. Object tracking can be divided into offline (also known as batch) and online problem spaces. In the offline problem a complete image sequence can be used, whereas in online problems only the images of the previous time steps are available  \citep{track0}. Real-time tracking is online by definition. Some of the challenges include object occlusion, objects going out of frame, complex object motion, background clutter, dynamic backgrounds, imaging noise, motion blurring, illumination changes, object deformation, multiple instances, monocular vision and real-time processing requirements \citep{tradtrack0}.
 
@@ -307,11 +307,11 @@ RMSE = \sqrt{\frac{1}{M}\sum^{M}_{i=1}\epsilon_{i}^{2}}
 where $\epsilon_{i}$ is the error for the $i$th sample which is the difference between the predicted and ground truth state. RMSE is often used as a statistical design criterion for noisy systems as it prescribes a soft bound based on probability (for true Gaussian noise it is by definition that 99.7\% of samples will occur within three standard deviations).
 
 \newpage
-\section{Object detection}
+\section{Object Detection}
 
 Object detection is one of the oldest and most fundamental computer vision problems. Within this scope are facial recognition, pedestrian recognition and multi-class classification which have historically received significant attention in various competitions and the establishment of various datasets such as Caltech pedestrians \citep{peddetect}, PascalVOC \citep{vocdataset} and Microsoft COCO \citep{coco}.
 
-\subsection{Traditional Object detection}
+\subsection{Traditional object detection}
 
 With the most successful approaches being based on discriminative models -- a traditional object detector can be considered in general to have the following components:  Region selection, feature extraction and classification \citep{deepreview}:
 
@@ -351,7 +351,7 @@ In order to classify each window, there are a significant number of Haar-like fe
 The speed of processing an image is therefore impacted by the complexity of the image (complex backgrounds can slow it down). Using fewer stages and features can result in faster computing times. Faster speeds can also be achieved by increasing the step sizes and scaling factor. Models that are under-trained tend to focus on background areas which can lead to impracticable inference times. 
 
 \newpage
-\subsection{Modern Object detection}
+\subsection{Modern object detection}
 
 Before the dramatic growth and change of focus towards modern computer vision techniques, traditional object detectors were reaching saturation. \cite{rcnn} writes: \textit{``Object detection performance, as measured on the canonical PASCAL VOC dataset, has plateaued in the last few years. The best-performing methods are complex ensemble systems that typically combine multiple low-level image features with high-level context''}.
 
@@ -419,7 +419,7 @@ In the ``FCOS-style'' key-point approach which NanoDet is based on, each object 
 
 After passing the input image through the convolutional backbone for feature extraction, NanoDet utilizes a modified lightweight Path Aggregation network (PAN) \citep{pan, nanodet} neck before passing the output to its detection head. PAN is an incremental improvement of a Feature Pyramid Network \citep{fpn} which is a popular technique in the object detection space. In a feature pyramid network, the output feature maps taken from various shallow and deeper levels from the backbone network (representing spacial and semantic information respectively) are utilized by the model to better detect objects across a range of scales. This is a similar concept to the idea of an image pyramid which is popular with traditional approaches, however, it naturally leverages the pyramidal hierarchy of the backbone without the additional computational overhead.
 
-\subsection{Performance Measures}
+\subsection{Performance measures}
 
 In order to evaluate object detection algorithms, it is important to choose a measure that represents the desired performance in a comparable manner (not algorithm specific). In the context of classification, a tempting approach is to evaluate the accuracy:
 \begin{equation}
@@ -464,7 +464,7 @@ In practice, a trade off exists between the real-time performance and accuracy a
 
 Deep learning models in particular tend to be large in both memory and computational demands relative to the capacity of embedded computers, that are often used in robotics applications, which are typically spatially and power constrained. \cite{quantization} write, \textit{``This creates a problem for realizing pervasive deep learning, which requires real-time inference, with low energy consumption and high accuracy, in resource-constrained environments''}. Apart from selecting efficient network architectures, quantization offers possible means to reduce the memory consumption and computational costs of a model which can result in improved real-time performance. The aim of quantization is to represent the weights and activations of the model with reduced precision without a significant impact on accuracy. 
 
-\subsection{Neural Network development and deployment}
+\subsection{Neural network development and deployment}
 
 A variety of software tools have been developed in order to abstract the low-level implementation details of neural networks from high-level model architecture for the convenience of the researcher. New deep learning frameworks have often coincided with leaps in network performance such as Caffe (Berkeley AI) \citep{caffe} -- utilised for the development of R-CNN \citep{rcnn} -- as well as Darknet -- used for the development of YOLO \citep{yolo}. Popular contemporary frameworks such as Tensor Flow \citep{tensorflow} and PyTorch \citep{pytorch} facilitate the development of a variety of model architectures such as CNN, RNN, and fully connected networks as well as providing support for CPU and GPU accelerated training and inference. These frameworks are maintained, open source and have the vast resources of tech giants that support the current rapid growth of machine learning technologies.
 
@@ -503,7 +503,7 @@ There are various leagues which each emphasize different challenges that need to
 
 In RoboCup soccer, the position of the ball is crucial for determining appropriate agent behavior. At a close observation range the agent may need to kick the ball, in this case large errors will result in a miss-directed kick or perhaps a complete miss. At middle ranges the agent may attempt to block an opposition passing option and should position itself accordingly. At long ranges the agent may need to know what region of the field the ball is in so that an appropriate behavior is chosen. 
 
-\subsection{RoboCup Soccer Simulator}
+\subsection{RoboCup soccer simulator}
 
 3DSSL runs on a simulator known as the RoboCup Soccer Simulator Server (RCSSServer3d) which is developed using plugins to a generic physical multi-agent simulation platform, SimSpark. In the architecture of SimSpark, agents receive sensor feedback from ``perceptors'' and take actions using ``effectors'' \citep{simspark}. In 3DSSL, a vision perceptor returns prepossessed visual data, in spherical coordinates, to each agent every two simulation cycles (40ms). Therefore in 3DSSL, computer vision is not currently within the scope of the challenge. The capabilities do however exist within the simulator to provide an image perceptor that produces rendered simulated camera images by enabling a plugin. The existing RAIL lab domain knowledge and infrastructure can therefore be utilised (and developed) to investigate perception algorithms that may be ported to a physical league. Some of this infrastructure includes ``Fat-proxy'' which is used to abstract agent actions from low-level effector commands.
 
@@ -532,11 +532,11 @@ In RoboCup soccer, the position of the ball is crucial for determining appropria
 %\subsection{Fat Proxy}
 %Fat proxy is a sub league of the RoboCup Soccer simulation league which focuses on high-level behavior by providing a common set of low-level skills such as walking and kicking. The developers \cite{fatproxy} state, \textit{``To have simplified access to the simspark simulation, the Fat Proxy takes over all motor control of the simulated Nao robots. Agents control the robot with high-level dash and kick commands. Anything else like getting up or focusing the head is done by the Fat Proxy''}. The tooling for this is useful as it can be used to isolate higher level behaviors from the low-level skills of the robot.
 
-\chapter{Related work}
+\chapter{Related Work}
 
 In this section, a selection of published works that are related to ball detection  (Chapter 3.1) and tracking (Chapter 3.2) in RoboCup are considered. This overview lists some important approaches and results whilst keeping in mind the historical context of traditional versus modern techniques by arranging them chronologically. It is shown that recent approaches take advantage of fine tuning state-of-the-art CNN object detector architectures for transferring to their own problem domain as well as Kalman filtering for tracking.
 
-\section{Ball detection}
+\section{Ball Detection}
 \label{section:balldetection}
 
 The object detection space has significantly changed over time, with the most successful detectors being deep learning based. Using what is now considered a traditional approach, \cite{robovj} implement a Viola-Jones based object detector that performs real-time ball detection with a focus on mobile robots in a Robocup soccer environment. They perform an edge detection preprocessing step which allows them to achieve a satisfactory color-independent result.
@@ -549,7 +549,7 @@ Basing their work on the then state-of-the-art single shot architecture, YOLO v3
 
 \cite{robocupdataset} evaluate several CNN models on an embedded RoboCup robotic system. They find that, for their RoboCup dataset, YOLO v4 Tiny performs the best in terms of the AP@75 metric (scoring 0.549), as well as for the small and medium images, which points towards this model being the best for accurate ball detection. However, the detector fails to execute at real-time speed on their Small Size League (SSL) platform, hence, the selection of the Mobile SSD architecture.
 
-\section{Ball tracking}
+\section{Ball Tracking}
 \label{section:balltracking}
 
 In the ball tracking problem space, Kalman filtering has been successful and remains particularly popular. The approach of fusing measurements with a dynamic physics model allows noise attenuation as well as substep estimation for problems such as a parabolic trajectory or rolling with friction.
@@ -574,7 +574,7 @@ Hybrid approaches to state estimation which fuse intuitive model based approache
 
 Modern object detection has significantly improved upon traditional approaches, with contemporary models promising state-of-the-art detection with real-time performance. Tracking-by-detection is a paradigm that takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be used to outperform established RoboCup approaches such as an anchor based method (Yolo v4 Tiny) as well as the traditional Viola-Jones detector for RoboCup soccer ball detection -- measured by the quality of inference using AP scores, at a real-time speed. 
 
-\section{Research Aims and Questions}
+\section{Research Aims And Questions}
 
 The first aim of the research is to prepare a suitable real-time object detector trained on ball localisation. A traditional architecture (Viola-Jones) as well as a more modern anchor based detector (YOLO v4 Tiny) serve as a benchmark against a recent keypoint based approach (NanoDet). To motivate the selection of NanoDet, a variety of pretrained detector models which use different approaches is compared on latency and memory usage. Inference speed is evaluated on a laptop CPU, which is a mobile and physically constrained compute device (that is readily obtainable) and bears closer resemblance to a robotic platform than does a GPU enabled computing cluster. An AMD Ryzen 5 4600H is available. 
 
@@ -603,11 +603,11 @@ The principal questions which arise are:
 
 The methods used to investigate the proposed research topic can be separated into two distinct phases where the former focuses on object detection (Chapter 5.1) and the latter on tracking-by-detection (Chapter 5.2) using the result. In-line with the approach taken in previous research (Chapters \ref{section:balldetection} and \ref{section:balltracking}) the focus of the investigation is from the perspective of the kicker, and tested against a set of randomized rolling and lofted kicks in a control RoboCup soccer environment. 
 
-\section{Phase one: Object detector investigation}
+\section{Phase One: Object Detector Investigation}
 
 In this phase, the training and performance of the Viola-Jones, Yolo v4 Tiny and NanoDet object detectors are considered. To justify the selection of NanoDet, an initial comparison of a variety of popular pretrained detectors is evaluated on inference speed and memory consumption. The chosen object detectors are then fine-tuned on a representative dataset, generated using the RoboCup simulator, and evaluated in order to determine which is the most promising as measured by AP, model size and latency. The AP score is evaluated on large, medium and small object sizes (as distinguished by the COCO guidelines) as well as against occlusion and background complexity. For the optimum architecture, the impact of model quantization is investigated.
 
-\subsection{Dataset Generation}
+\subsection{Dataset generation}
 
 The Robocup simulator has an image perceptor plugin that can be enabled to produce perspective images at 25Hz (real-time). In this manner actual gameplay can be used to create representative data. Although a ground truth ball position is available to be enabled, Fatproxy does not directly support the processing of the additional server message at this stage and will crash. Handling of this data needed to be added in order to enable extracting ground truths directly. With some changes to the source code, ground truth bounding boxes can be automatically computed using a coordinate transform from the perceptor to the camera location followed by a correction from the wide angle image, in order to describe the ball center in image coordinates. The distance of the ball is used to compute the relative ground truth bounding box size.
 
@@ -629,11 +629,11 @@ Models are all translated to a neutral ONNX format which serves two purposes her
 
 %The available CPU is an AMD Ryzen 5 4600H which is a common entry level mobile gaming laptop processor, released in 2020. This acts as a compute constrained device which one may find on a mobile robotics platform.
 
-\section{Phase two: Object tracking investigation}
+\section{Phase Two: Object Tracking Investigation}
 
 In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection. An EKF with a simple RoboCup world model (similar to the related work) is implemented as a baseline tracker. A tracking dataset is then generated using the RoboCup simulator is used to train and optimize the neural assisted Kalman tracking framework. The trackers performances are then compared on a test dataset with RMSE as a performance measure.
 
-\subsection{Dataset Generation}
+\subsection{Dataset generation}
 
 To generate a tracking dataset, a series of randomized kicks are performed in order to capture image and ground truth position data that describes various trajectories. Kicks are performed from random locations on the training pitch in order to capture a variety of scenes. The tracking dataset is produced by applying the object detector for inference which can be transformed into coordinates relative to the robot frame of reference. The simulator default sampling rate of 50hz is applied for the ground truth. This rate is faster than the camera, which means that intermediate estimations (those without correction) are evaluated.
 
@@ -644,9 +644,9 @@ The neural assisted Kalman tracking is based on the KalmanNet architecture. By a
 
 The tracking performance of the trackers is evaluated and compared using the RMSE performance measure on the test dataset. The minimum real-time performance target is to process images at atleast every 0.04 seconds (25 FPS).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Object detection investigation}
+\chapter{Object Detection Investigation}
 
-\section{Detection dataset}
+\section{Detection Dataset}
 This dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Half the images are acquired in a simulated match, the remainder are collected in a practice environment.
 
 \subsection{Software environment}
@@ -682,7 +682,7 @@ Although the transformations can automatically be computed to get BBs for all ba
 
 Each object detector expects the dataset to be presented in a certain structure with annotations in a specified format in order to facilitate dataloading. NanoDet utilizes the COCO format \citep{cocodataset} which is commonly used by recent detectors, whereas the VJ detector expects a bespoke format \citep{vjdataset} and YOLO uses a ``Darknet'' format. Scripts are made to automate these conversions, respectively, from the initial generated data. A 60:20:20 training, validation and test split is used.
 
-\subsection{Data Exploration}
+\subsection{Data exploration}
 The dataset is interrogated in order to understand and sanity check the acquired data and the randomly sorted splits. Table \ref{tab:detection} shows a breakdown of various image properties. The size of the object is classified according to \cite{cocoeval}, which declares small objects as those less than $32\times32$ pixels and large as greater than $64\times64$ pixels. Images are considered occluded if any of the pixels of the ball are hidden.
 
 \begin{table*}[h!]
@@ -721,7 +721,7 @@ The bounding box characteristics are plotted in figure \ref{fig:detectplot}. It 
 \end{center}
 \end{figure}
 
-\section{Baseline detection}
+\section{Baseline Detection}
 
 The baseline detectors, which have been chosen based on known prior usage in RoboCup as seen in the related works, are now investigated.
 
@@ -855,7 +855,7 @@ The additional data point of the pretrained model is also included. Although thi
 \vfill
 
 \pagebreak
-\section{Proposed detection}
+\section{Proposed Detection}
 
 Initially, a simple naive study is performed to justify the selection of the NanoDet object detector. Then, the detector is trained in order to find the most suitable configuration.
 
@@ -937,7 +937,7 @@ Similar to the results of all models considered thus far -- it is seen in genera
 
 In order to investigate model optimization for deployment, the chosen model is quantized from a float32 to a float16 representation -- which gives a resulting model size reduction from 5.5mb to 3.2mb. A negligible loss of inference quality is realized but a significant reduction in speed has occurred. The reason for this appears to be that float16 operations are not well supported by all hardware (x86 CPUs) and thus require conversion to a float32 representation which adds an overhead. Since the model is already of acceptable size compared to the size of the ONNX Runtime binary, the quantized model is not utilized and further quantization is not considered worthwhile.
 
-\section{Evaluation of detection}
+\section{Evaluation Of Detection}
 
 The selected pretrained, trained and fine-tuned networks of the various object detection models are now compared relative to each other using the test dataset which has been isolated and remained unseen thus far. The dataset is decomposed into object sizes, scenario and occlusion for evaluation which helps to provide an insight into the performance of the detectors across various circumstances. 
 
@@ -998,9 +998,9 @@ The YOLO v4 Tiny model shows significant improvements in performance and surpass
 The NanoDet model shows itself to be the best network across all scenarios by outperforming all other architectures at real-time speeds. This is true across each dataset characteristic and by a significant margin. A key insight that can be observed is that the pretrained Nanodet is the only pretrained model which has a useful performance for identifying the small size balls (long range) before fine tuning. This is interesting since the pretrained YOLO v4 Tiny model has also been trained for optimum performance against COCO but has negligible comprehension before training. Further, for the easiest scenario, the trained NanoDet scores a near perfect result which is impressive. This model also has the smallest memory footprint, only utilizing 5mb of storage capacity. For limited capacity machines this allows the memory to be used for other tasks, helping to improve the overall performance of the robotic platform. Therefore, for a ball detection system that may be used in a match scenario or for the proposed tracking, NanoDet is chosen. The key-point based NanoDet outperforms the baseline detectors -- which proves the object detector hypothesis.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Object tracking investigation}
+\chapter{Object Tracking Investigation}
 
-\section{Tracking dataset}
+\section{Tracking Dataset}
 As before, the dataset is generated using various open source programs in the RoboCup soccer ecosystem as well as the Wits agent with a bespoke behavior. Each kick is randomized and then captured in a practice environment as a sequence of images (with metadata) at 25hz with respective ground-truth positions at 50Hz.
 
 \subsection{Software environment}
@@ -1052,7 +1052,7 @@ The ground truth ball trajectories are plotted in figure \ref{fig:plotkicks} -- 
 \end{center}
 \end{figure}
 
-\section{Baseline tracking}
+\section{Baseline Tracking}
 
 The baseline trackers, which have been chosen based on traditional methods popular in RoboCup as seen identified in the related works, are now investigated.
 
@@ -1122,7 +1122,7 @@ For lofted kicks, it is firstly noted that the trajectory follows a parabolic pa
 
 The distance measurement at long range is the limiting factor for the overall performance of the system -- in figure \ref{fig:farball} it is understandably so since the ball becomes tiny, therefore any changes in distance are difficult to perceive. However, early detections are reliable, therefore applying a tracking algorithm has the potential to improve the tracking of the ball trajectory -- which is now investigated.
 
-\subsection{Standard Kalman Filtering}
+\subsection{Standard Kalman filtering}
 
 Initially, a simplistic approach is taken by assuming the process (the ground motions of the ball) can be described by Newton's equations of motion -- as a constant velocity model in equation \ref{eqn:newton} below. This dynamics model can then be expressed as a linear set of recursive equations as follows in equation \ref{eqn:firstorder}:
 
@@ -1171,7 +1171,7 @@ $\Phi$ is the spectral density of the white noise -- which is often difficult to
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/fok_ground_short.png}
-\caption{Short ground kick -- First order Kalman Filter search}
+\caption{Short ground kick -- First order Kalman filter search}
 \label{fig:fokgroundshort}
 \end{center}
 \end{figure}
@@ -1179,7 +1179,7 @@ $\Phi$ is the spectral density of the white noise -- which is often difficult to
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=12cm]{images/fok_ground_long.png}
-\caption{Long ground kick -- First order Kalman Filter search}
+\caption{Long ground kick -- First order Kalman filter search}
 \label{fig:fokgroundlong}
 \end{center}
 \end{figure}
@@ -1187,7 +1187,7 @@ $\Phi$ is the spectral density of the white noise -- which is often difficult to
 %\begin{figure}[h!]
 %\begin{center}
 %\includegraphics[width=12cm]{images/fok_loft_short.png}
-%\caption{Short lofted kick -- First order Kalman Filter search}
+%\caption{Short lofted kick -- First order Kalman filter search}
 %\label{fig:fokloftshort}
 %\end{center}
 %\end{figure}
@@ -1195,7 +1195,7 @@ $\Phi$ is the spectral density of the white noise -- which is often difficult to
 %\begin{figure}[h!]
 %\begin{center}
 %\includegraphics[width=12cm]{images/fok_loft_long.png}
-%\caption{Long lofted kick -- First order Kalman Filter search}
+%\caption{Long lofted kick -- First order Kalman filter search}
 %\label{fig:fokloftlong}
 %\end{center}
 %\end{figure}
@@ -1207,14 +1207,14 @@ The ultimate steady state of the Kalman gain depends on the balance of the magni
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=14cm]{images/fok_error.png}
-\caption{First order Kalman Filter error}
+\caption{First order Kalman filter error}
 \label{fig:fokerror}
 \end{center}
 \end{figure}
 
 The tracking error has been plotted in figure \ref{fig:fokerror}. Although the filter can be tuned in order to achieve some noise attenuation, the Kalman filter assumes Gaussian noise with a zero mean and therefore is not able to capture the heavily non-linear characteristics of the distance measurement. Therefore, the standard Kalman filter is not able to learn and compensate for the large non-linearity which in this case dominates the error significantly more than the position jitter. It can be seen in figure \ref{fig:fokerror} that for such a complex case, the application of a standard first order Kalman filter, across a variety of $\Phi$, is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
-\subsection{Extended Kalman Filtering}
+\subsection{Extended Kalman filtering}
 
 A more sophisticated model describing the ground motion of the ball, which has been successful in the RoboCup domain, is described by \cite{kalmanmodel} where it was first applied to their team (CMUnited) to win the RoboCup-97 small-robot competition. As per \cite{kalmanmodel}, the rolling resistance of a ball can be expressed by a constant discounting factor $\lambda$ which is applied each time step, resulting in a reducing velocity. In this model the unknown factor is defined as a state variable. This dynamics model can then be expressed as a non-linear set of recursive equations as follows in equation \ref{eqn:dragorder} -- which can be applied in an Extended Kalman filter:
 
@@ -1280,7 +1280,7 @@ The EKF operates in a similar fashion to the standard Kalman filter. Initially t
 Although a more sophisticated approach, in figure \ref{fig:ekferror} the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. The EKF is not an optimal tracker for this case and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
 \newpage
-\section{Proposed tracking}
+\section{Proposed Tracking}
 
 For the tracking cases considered it is apparent that the performance is sub optimal. Neural Kalman filtering is an approach to Kalman filtering that can be used when the underlying state space model is non-linear and accurate knowledge of it is unknown. In this section the application of neural Kalman filtering to the tracking problem is investigated.
 
@@ -1390,7 +1390,7 @@ For the object detection task, initially a detection dataset needed to be crafte
 
 The object tracking task was then considered. Initially a tracking dataset needed to be generated using the RoboCup simulation environment. The results of the object detector task were then applied in a tracking pipeline. It was found that the detector was effective at detection but was range limited in distance, which introduces significant complexity for tracking the trajectory of a kicked ball. Following this, the benchmark linear and extended Kalman filtering trackers were then implemented and configured using the training and validation datasets. The KalmanNet model was then cloned and the architecture was adapted to suit before using the training and validation sets to find optimized model parameters. The traditional and modern trackers were then compared, where it was found that a neural network assisted approach to Kalman filtering can outperform the traditional EKF method at tracking the trajectories of a kicked RoboCup soccer ball as measured by RMSE at real-time, using a tracking-by-detection framework -- therefore proving the object tracking hypothesis. Further, it was shown that all the trackers investigated can meet real-time performance requirements.
 
-\section{Further work}
+\section{Further Work}
 
 In this subsection some potential areas for further investigation are discussed which follow the observations and results of the research. 
 
