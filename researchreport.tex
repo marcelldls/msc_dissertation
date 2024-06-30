@@ -570,7 +570,7 @@ In RoboCup soccer most of the decision-making involves the position of the ball 
 
 \section{Research Hypothesis}
 
-Hybrid approaches to state estimation which fuse intuitive model based approaches with measured data are a promising technique for state estimation. It is hypothesized that a neural network assisted approach to Kalman filtering can outperform the traditional EKF method at tracking the trajectories of a kicked RoboCup soccer ball as measured by RMSE at real-time, using a tracking-by-detection framework.
+Hybrid approaches to state estimation which fuse intuitive model based approaches with measured data are a promising technique. It is hypothesized that a neural network assisted approach can outperform the traditional EKF method at tracking the trajectories of a kicked RoboCup soccer ball as measured by RMSE for real-time inference speeds, using a tracking-by-detection framework.
 
 Modern object detection has significantly improved upon traditional approaches, with contemporary models promising state-of-the-art detection with real-time performance. Tracking-by-detection is a paradigm that takes advantage of this technological leap and can be paired with the popular Kalman filter for real-time robotics applications. It is hypothesized that a more recent key-point based modern object detection approach (NanoDet) can be used to outperform established RoboCup approaches such as an anchor based method (Yolo v4 Tiny) as well as the traditional Viola-Jones detector for RoboCup soccer ball detection -- measured by the quality of inference using AP scores, at a real-time speed. 
 
