@@ -237,12 +237,12 @@ z_t=h(x_{t})+{\upsilon}_t
 \end{equation}
 Systems with nonlinear state transition or measurement mappings can be linearized at each time step, using the Taylor series expansion, and used in the standard equations to obtain the Extended Kalman Filter (EKF) \citep{trackbook}. The resulting matrices can each be computed as the Jacobian matrix (first-order partial derivatives):
 \begin{equation}
-F_t = \frac{\partial f(\mu_{t-1}, u_{t})}{\partial x_{t-1}}
+F_t = \frac{\partial f(x_{t-1}, u_{t})}{\partial x_{t-1}}
 \end{equation}
 \begin{equation} 
-H_t = \frac{\partial h(\mu_{t})}{\partial x_t} 
+H_t = \frac{\partial h(x_{t})}{\partial x_t} 
 \end{equation}
-where $\mu$ refers to the state about which the linearization occurs. The EKF is non-optimal however remains powerful and popularly used.
+The EKF is non-optimal however remains a powerful and popular tracking algorithm.
 
 \subsubsection{SORT algorithm}
 
