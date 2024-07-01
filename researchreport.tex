@@ -1016,7 +1016,7 @@ In order to conserve memory, the tracking sequence images are taken from their .
 
 \subsection{Data exploration}
 
-The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a breakdown of various sequence properties. Kicks that have a peak height above the height of the diameter of the ball are deemed to be lofted. As seen in figure \ref{fig:plotkicks}, lofted kicks have a trajectory that is dominated by bouncing behavior compared to ground kicks which roll.
+The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a breakdown of various sequence properties. Kicks that have a peak height above the height of the diameter of the ball are deemed to be lofted. As seen in figure \ref{fig:plotkicks}, lofted kicks have a trajectory that is dominated by bouncing behavior compared to ground kicks which roll. 
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -1032,7 +1032,7 @@ Test			&74				&20\%			&297.9			&20.0\%			&80.0\%			\\\hline
 \label{tab:tracking}
 \end{table*}
 
-It can be seen in table \ref{tab:tracking} that the properties of the tracking data are consistent between the datasets. A bias towards lofted kicks is evident.
+It is seen in table \ref{tab:tracking} that the properties of the tracking data are consistent between the datasets. A bias towards lofted kicks is evident. The distances are plotted in figure \ref{fig:rawerror}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1080,7 +1080,7 @@ Near zero distance (before the Fatproxy kick causes the ball to beam) the positi
 \end{center}
 \end{figure}
 
-A short and long ground based kick is interrogated in figures \ref{fig:rawgroundshort} and \ref{fig:rawgroundlong}:
+A short and long ground based kick are analyzed respectively in figures \ref{fig:rawgroundshort} and \ref{fig:rawgroundlong}:
 
 \begin{figure}[h!]
 \begin{center}
@@ -1100,7 +1100,7 @@ A short and long ground based kick is interrogated in figures \ref{fig:rawground
 
 In these kicks the following is noted. Firstly, considering the ground truth trajectory for a kick along the ground, the height of the ball remains zero as expected. The distance covered by the ball per unit of time decreases in a non-linear manner after the kick takes place, due to rolling friction. Secondly, considering the measurements of the trajectory, there is noise introduced by the detector and transformation which can be observed in the time domain where it is apparent that the cyclic nature of the agent motion results in error in the perceived ball height. The correctness of the height has a dependency on the placement of the bounding box, which appears to be comparable to the perfect object detector. Until 4m the inference of distance appears to be effective, although noisy. Beyond this distance, inference of the ball position appears to be problematic. Since the accuracy of the distance is dependent on the size of the bounding box, it seems that a limit exists. The object detector is impressive within its reliable range.
 
-A short and long lofted kick is interrogated in figures \ref{fig:rawloftshort} and \ref{fig:rawloftlong}:
+A short and long lofted kick are analyzed respectively in figures \ref{fig:rawloftshort} and \ref{fig:rawloftlong}:
 
 \begin{figure}[h!]
 \begin{center}
@@ -1131,19 +1131,19 @@ x_k=v\Delta t + x_{k-1}
 \label{eqn:newton}
 \end{equation}
 \begin{equation} 
-x_k
+\boldsymbol{x}_k
 =
-F(t)x_{k-1}
+F(t)\boldsymbol{x}_{k-1}
 =
 \begin{bmatrix}
     1 & \Delta t \\
     0 & 1 
 \end{bmatrix}
-x_{k-1}
+\boldsymbol{x}_{k-1}
 \label{eqn:firstorder}
 \end{equation}
 
-Applying the constant velocity model in the prediction step of a Kalman filter results in what is known as a ``first order'' Kalman filter, where a zero order filter assumes a constant position. The measurement noise $R$ must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model $Q$ assumes zero-mean white noise of a Gaussian nature, originating as fluctuations in the velocity. A continuous velocity noise model $Q_c$ (equation \ref{eqn:cnoise}) can be discretized for the desired time step and propagated through the system dynamics model $F$ using equation \ref{eqn:dnoise}. \citep{kalmanpy}
+Applying the constant velocity model in the prediction step of a Kalman filter results in what is known as a ``first order'' Kalman filter, where a zero order filter assumes a constant position. The measurement noise $R$ must be assumed to be of Gaussian nature and is quantified by comparing it to the error of all the measurements taken to the respective ground truths. The process noise model $Q$ assumes zero-mean white noise of a Gaussian nature, originating as fluctuations in the velocity. A continuous velocity noise model $Q_c$ (equation \ref{eqn:cnoise}) can be discretized for the desired time step and propagated through the system dynamics model $F$ using equation \ref{eqn:dnoise} \citep{kalmanpy}.
 
 \begin{equation} 
 Q_c
