@@ -631,7 +631,7 @@ Models are all translated to a neutral ONNX format which serves two purposes her
 
 \section{Phase Two: Object Tracking Investigation}
 
-In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection. An EKF with a simple RoboCup world model (similar to \cite{kalmanmodel} and  \cite{3dparabola}) is implemented as a baseline tracker. A tracking dataset is generated using the RoboCup simulator and used to train and optimize neural assisted Kalman tracking. The tracking performances are then compared on a test dataset with RMSE as a performance measure.
+In the next phase of the project, the tracking problem is considered by using the detector from phase one for tracking-by-detection, applied in a typical configuration as depicted by figure \ref{fig:tracker}. An EKF with a simple RoboCup world model (similar to \cite{kalmanmodel} and  \cite{3dparabola}) is implemented as a baseline tracker. A tracking dataset is generated using the RoboCup simulator and used to train and optimize neural assisted Kalman tracking. The tracking performances are then compared on a test dataset with RMSE as a performance measure.
 
 \subsection{Dataset generation}
 
@@ -701,7 +701,7 @@ Test			&513			&20\%			&68.8\%			&20.9\%			&10.3\%			&70.6\%			&50.9\%			&54.2\%	
 
 With the data acquired using the target environment, the dataset is considered representative. It is seen that the properties are consistent through each split. The majority of the images have a visible ball, which is expected since the agents have a priority to search for the ball. There are a non-negligible number of occluded ball images since a match environment features many obstructing players. Further, it is clear that small bounding boxes are the majority of the cases, with large being very infrequent. 
 
-The ground truth BBs are plotted with some examples of the dataset in figure \ref{fig:detectimages}:
+In figure \ref{fig:detectimages} some examples of the headings used in table \ref{tab:detection} are portrayed:
 
 \begin{figure}[h!]
 \begin{center}
@@ -821,7 +821,7 @@ In the following section the steps taken to prepare the software environment and
 
 \subsubsection{Model training}
 
-The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations such as photometric and geometric distortions as well as simulated object occlusion are applied. To train the network, a multipart loss is minimized. The classic YOLO objective function has the following high-level form:
+The release configuration for YOLO v4 Tiny was utilized for model training which uses the CSPDarknet53 backbone (pretrained on ImageNet). Links to these can be found on the Github repository \citep{yolov4repo}. As part of the ``bag-of-freebies'' training approach which can boost accuracy without an increase of the inference cost, a set of augmentations such as photometric and geometric distortions as well as simulated object occlusion are applied. In order to train the network, a multipart loss is minimized \citep{yolov4}. The classic YOLO objective function has the following high-level form:
 \begin{equation}
 L_{YOLO} =  L_{cls} + \lambda L_{reg} + \lambda' L_{confi} 
 \end{equation} 
