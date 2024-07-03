@@ -1,5 +1,5 @@
 file=researchreport
-ref=d0e79a
+ref=6f58d0c
 
 all:
 	pdflatex $(file).tex
