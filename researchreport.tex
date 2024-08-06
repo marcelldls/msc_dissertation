@@ -1016,7 +1016,7 @@ In order to conserve memory, the tracking sequence images are taken from their .
 
 \subsection{Data exploration}
 
-The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a breakdown of various sequence properties. Kicks that have a peak height above the height of the diameter of the ball are deemed to be lofted. As seen in figure \ref{fig:plotkicks}, lofted kicks have a trajectory that is dominated by bouncing behavior compared to ground kicks which roll. 
+The dataset is interrogated in order to understand and sanity check the acquired data. Table \ref{tab:tracking} shows a breakdown of various sequence properties. Kicks that have a peak height above the height of the diameter of the ball are deemed to be lofted, with the distribution of these kicks plotted in figure \ref{fig:trackplot}. As seen in figure \ref{fig:plotkicks}, lofted kicks have a trajectory dominated by bouncing behavior compared to ground kicks which roll. 
 
 \begin{table*}[h!]
 \fontsize{9.5pt}{12pt}\selectfont
@@ -1036,22 +1036,31 @@ It is seen in table \ref{tab:tracking} that the properties of the tracking data 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/plotkicks.png}
-\caption{Tracking dataset ground-truths}
-\label{fig:plotkicks}
-\end{center}
-\end{figure}
-
-The ground truth ball trajectories are plotted in figure \ref{fig:plotkicks} -- which show a spectrum of different kicks have been captured. Two peculiar behaviors of the simulator's handling of the ball are noticed in the tracking data. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified by comparing the rendered images to the logging and indeed seems to be the case although it is not understood why the simulation has this behavior -- since it is run with synchronized execution. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position -- which is caused by the server that does not execute a true kick, but rather instantaneously places the ball by the feet of the agent and then applies a velocity rather than performing a realistic kick, described by \cite{fatproxy}. This behavior only affects a minority of time-steps and is therefore accepted.
-
-\begin{figure}[h!]
-\begin{center}
 \includegraphics[width=16cm]{images/trackingplot.png}
 \caption{Tracking dataset statistics}
 \label{fig:trackplot}
 \end{center}
 \end{figure}
 
+The ground truth ball trajectories are plotted together in figure \ref{fig:plotkicks} -- which show a spectrum of different kicks which have been captured. Two peculiar behaviors of the simulator's handling of the ball are noticed in the tracking data - a cherry picked example is plotted in figure  \ref{fig:cherry}. Firstly, it is noted that at times the ball passes slightly through the ground of the pitch when it bounces. This is verified by comparing the rendered images to the logging and indeed seems to be the case although it is not understood why the simulation has this behavior -- since it is run with synchronized execution. Secondly, the initial ball trajectory has a ``kink'' resulting from a slight non-physical change in position -- which is caused by the server that does not execute a true kick, but rather instantaneously places the ball by the feet of the agent and then applies a velocity rather than performing a realistic kick, described by \cite{fatproxy}. This behavior only affects a minority of time-steps and is therefore accepted.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=16cm]{images/plotkicks.png}
+\caption{Tracking dataset ground-truths}
+\label{fig:plotkicks}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=14cm]{images/plotkicks-cherry.png}
+\caption{Tracking dataset - Cherry picked to show error}
+\label{fig:cherry}
+\end{center}
+\end{figure}
+
+\newpage
 \section{Baseline Tracking}
 
 The baseline trackers, which have been chosen based on traditional methods popular in RoboCup as seen identified in the related works, are now investigated.
@@ -1062,7 +1071,7 @@ Initially, the raw detections of the tracking dataset are to be studied alongsid
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/raw_error.png}
+\includegraphics[width=16cm]{images/raw_error.png}
 \caption{Basic tracking error}
 \label{fig:rawerror}
 \end{center}
@@ -1074,7 +1083,7 @@ Near zero distance (before the Fatproxy kick causes the ball to beam) the positi
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=8.5cm]{images/5mball.jpeg}
+\includegraphics[width=10cm]{images/5mball.jpeg}
 \caption{A ball at 5m distance}
 \label{fig:farball}
 \end{center}
@@ -1084,7 +1093,7 @@ A short and long ground based kick are analyzed respectively in figures \ref{fig
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/raw_ground_short.png}
+\includegraphics[width=13cm]{images/raw_ground_short.png}
 \caption{Short ground kick -- Raw detections}
 \label{fig:rawgroundshort}
 \end{center}
@@ -1092,7 +1101,7 @@ A short and long ground based kick are analyzed respectively in figures \ref{fig
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/raw_ground_long.png}
+\includegraphics[width=13cm]{images/raw_ground_long.png}
 \caption{Long ground kick -- Raw detections}
 \label{fig:rawgroundlong}
 \end{center}
@@ -1104,7 +1113,7 @@ A short and long lofted kick are analyzed respectively in figures \ref{fig:rawlo
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=14cm]{images/raw_loft_short.png}
+\includegraphics[width=13cm]{images/raw_loft_short.png}
 \caption{Short lofted kick -- Raw detections}
 \label{fig:rawloftshort}
 \end{center}
@@ -1237,7 +1246,7 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/ekf_ground_short.png}
+\includegraphics[width=14cm]{images/ekf_ground_short.png}
 \caption{Short ground kick -- Extended Kalman Filter}
 \label{fig:ekfgroundshort}
 \end{center}
@@ -1245,7 +1254,7 @@ The same measurement noise $R$ is applied, as for the first order Kalman filter,
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=11cm]{images/ekf_ground_long.png}
+\includegraphics[width=14cm]{images/ekf_ground_long.png}
 \caption{Long ground kick -- Extended Kalman Filter}
 \label{fig:ekfgroundlong}
 \end{center}
@@ -1271,12 +1280,13 @@ The EKF operates in a similar fashion to the standard Kalman filter. Initially t
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=12cm]{images/ekf_error.png}
+\includegraphics[width=14cm]{images/ekf_error.png}
 \caption{Extended Kalman Filter error}
 \label{fig:ekferror}
 \end{center}
 \end{figure}
 
+\newpage
 Although a more sophisticated approach, in figure \ref{fig:ekferror} the EKF still suffers from some of the same simplistic assumptions as used for the first order Kalman filter. The EKF is not an optimal tracker for this case and therefore is either detrimental or causes negligible improvement to the performance compared to no tracking being used.
 
 \newpage
